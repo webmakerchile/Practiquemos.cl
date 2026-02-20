@@ -22,10 +22,20 @@ function RootLayoutNav() {
   return (
     <Stack screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
       <Stack.Screen name="index" />
+      <Stack.Screen name="login" />
+      <Stack.Screen name="register" />
       <Stack.Screen name="exam" />
       <Stack.Screen name="results" />
       <Stack.Screen name="plans" />
       <Stack.Screen name="history" />
+      <Stack.Screen name="temario" />
+      <Stack.Screen name="temario-detail" />
+      <Stack.Screen name="mi-curso" />
+      <Stack.Screen name="favoritos" />
+      <Stack.Screen name="admin" />
+      <Stack.Screen name="contacto" />
+      <Stack.Screen name="nosotros" />
+      <Stack.Screen name="perfil" />
     </Stack>
   );
 }
@@ -52,7 +62,7 @@ export default function RootLayout() {
         <GestureHandlerRootView style={{ flex: 1 }}>
           <KeyboardProvider>
             <UserProvider>
-              <StatusBar style="dark" />
+              <StatusBar style="light" />
               <RootLayoutNav />
             </UserProvider>
           </KeyboardProvider>

@@ -1,450 +1,303 @@
-import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  Pressable,
-  Platform,
-  Dimensions,
-} from 'react-native';
-import { router } from 'expo-router';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, Pressable, Platform, Modal } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons, MaterialCommunityIcons, Feather } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
-import Animated, {
-  FadeInDown,
-  FadeInUp,
-} from 'react-native-reanimated';
 import Colors from '@/constants/colors';
 import { useUser } from '@/lib/UserContext';
+import { licenseTypes } from '@/lib/mockDatabase';
 import MascotaCopiloto from '@/components/MascotaCopiloto';
 
-const { width } = Dimensions.get('window');
+interface MenuItemProps {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  onPress: () => void;
+  badge?: string;
+  badgeColor?: string;
+  locked?: boolean;
+}
+
+function MenuItem({ icon, title, description, onPress, badge, badgeColor, locked }: MenuItemProps) {
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [styles.menuItem, pressed && styles.menuItemPressed]}
+    >
+      <View style={styles.menuIcon}>{icon}</View>
+      <View style={styles.menuContent}>
+        <View style={styles.menuTitleRow}>
+          <Text style={styles.menuTitle}>{title}</Text>
+          {badge && (
+            <View style={[styles.badge, { backgroundColor: badgeColor || Colors.success }]}>
+              <Text style={styles.badgeText}>{badge}</Text>
+            </View>
+          )}
+          {locked && (
+            <Ionicons name="lock-closed" size={14} color={Colors.textMuted} />
+          )}
+        </View>
+        <Text style={styles.menuDescription}>{description}</Text>
+      </View>
+      <Ionicons name="chevron-forward" size={20} color={Colors.textMuted} />
+    </Pressable>
+  );
+}
 
 export default function HomeScreen() {
+  const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { isPremium, canTakeExam, examHistory, plan } = useUser();
-  const webTopInset = Platform.OS === 'web' ? 67 : 0;
-  const webBottomInset = Platform.OS === 'web' ? 34 : 0;
+  const { user, isLoggedIn, isPremium, canTakeExam, licenseType, setLicenseType, isAdmin } = useUser();
+  const [showLicensePicker, setShowLicensePicker] = useState(false);
+  const [showDrawer, setShowDrawer] = useState(false);
 
-  const handleStartExam = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    if (!canTakeExam) {
-      router.push('/plans');
-      return;
-    }
-    router.push('/exam');
+  const currentLicense = licenseTypes.find(l => l.id === licenseType) || licenseTypes[0];
+  const webTopInset = Platform.OS === 'web' ? 67 : 0;
+
+  const startExam = (mode: string) => {
+    router.push({ pathname: '/exam', params: { mode, licenseType } });
   };
 
-  const lastExam = examHistory.length > 0 ? examHistory[0] : null;
-  const bestScore = examHistory.length > 0
-    ? Math.max(...examHistory.map(e => Math.round(e.score * 100)))
-    : 0;
-
   return (
-    <View style={styles.root}>
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={[
-          styles.scrollContent,
-          {
-            paddingTop: (insets.top || webTopInset) + 16,
-            paddingBottom: (insets.bottom || webBottomInset) + 24,
-          },
-        ]}
-        showsVerticalScrollIndicator={false}
+    <View style={styles.container}>
+      <LinearGradient
+        colors={[Colors.primary, Colors.primaryLight]}
+        style={[styles.header, { paddingTop: (insets.top || webTopInset) + 8 }]}
       >
-        <Animated.View entering={FadeInDown.duration(600).delay(100)}>
-          <LinearGradient
-            colors={[Colors.primary, Colors.primaryLight]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.heroCard}
-          >
-            <View style={styles.heroContent}>
-              <View style={styles.heroChip}>
-                <MaterialCommunityIcons name="steering" size={14} color={Colors.accent} />
-                <Text style={styles.heroChipText}>Examen Chile 2026</Text>
-              </View>
-
-              <Text style={styles.heroTitle}>
-                Practiquemos juntos{'\n'}hasta que apruebes
-              </Text>
-              <Text style={styles.heroSubtitle}>
-                No manejas solo, practicas con tu copiloto
-              </Text>
-
-              <Pressable
-                onPress={handleStartExam}
-                style={({ pressed }) => [
-                  styles.heroButton,
-                  { opacity: pressed ? 0.9 : 1, transform: [{ scale: pressed ? 0.97 : 1 }] },
-                ]}
-              >
-                <Ionicons name="play" size={20} color={Colors.primary} />
-                <Text style={styles.heroButtonText}>
-                  {canTakeExam ? 'Comenzar ensayo' : 'Ver planes'}
-                </Text>
+        <View style={styles.headerRow}>
+          <Pressable onPress={() => setShowDrawer(true)} hitSlop={10}>
+            <Ionicons name="menu" size={28} color="#fff" />
+          </Pressable>
+          <Pressable onPress={() => setShowLicensePicker(true)} style={styles.licenseSelector}>
+            <Text style={styles.licenseName}>{currentLicense.name}</Text>
+            <Ionicons name="chevron-down" size={18} color="#fff" />
+          </Pressable>
+          <Pressable onPress={() => router.push(isLoggedIn ? '/perfil' : '/login')} hitSlop={10}>
+            <Ionicons name="person-circle-outline" size={28} color="#fff" />
+          </Pressable>
+        </View>
+        <View style={styles.welcomeSection}>
+          <Text style={styles.welcomeTitle}>
+            {isLoggedIn ? `Hola, ${user?.fullName || user?.username}` : 'Bienvenid@ a Practiquemos'}
+          </Text>
+          {!isLoggedIn && (
+            <View style={styles.authLinks}>
+              <Pressable onPress={() => router.push('/login')}>
+                <Text style={styles.authLink}>Inicia Sesion</Text>
+              </Pressable>
+              <Text style={styles.authSeparator}> o </Text>
+              <Pressable onPress={() => router.push('/register')}>
+                <Text style={styles.authLink}>Registrate Gratis</Text>
               </Pressable>
             </View>
-
-            <View style={styles.heroDecor}>
-              <View style={[styles.circle, styles.circle1]} />
-              <View style={[styles.circle, styles.circle2]} />
-            </View>
-          </LinearGradient>
-        </Animated.View>
-
-        <Animated.View entering={FadeInDown.duration(600).delay(200)}>
-          <MascotaCopiloto
-            state={lastExam?.passed ? 'correct' : 'idle'}
-            message={
-              lastExam
-                ? lastExam.passed
-                  ? 'Vas excelente, sigue asi'
-                  : 'Sigamos practicando juntos, cada intento te acerca más'
-                : 'Hola, soy tu copiloto. Vamos a estudiar juntos'
-            }
-            compact
-          />
-        </Animated.View>
-
-        {examHistory.length > 0 && (
-          <Animated.View entering={FadeInDown.duration(600).delay(300)} style={styles.statsRow}>
-            <View style={styles.statCard}>
-              <View style={[styles.statIcon, { backgroundColor: Colors.primaryLight + '15' }]}>
-                <Ionicons name="document-text" size={20} color={Colors.primary} />
-              </View>
-              <Text style={styles.statValue}>{examHistory.length}</Text>
-              <Text style={styles.statLabel}>Ensayos</Text>
-            </View>
-            <View style={styles.statCard}>
-              <View style={[styles.statIcon, { backgroundColor: Colors.success + '15' }]}>
-                <Ionicons name="trophy" size={20} color={Colors.success} />
-              </View>
-              <Text style={styles.statValue}>{bestScore}%</Text>
-              <Text style={styles.statLabel}>Mejor nota</Text>
-            </View>
-            <View style={styles.statCard}>
-              <View style={[styles.statIcon, { backgroundColor: Colors.accent + '15' }]}>
-                <Ionicons name="checkmark-circle" size={20} color={Colors.accent} />
-              </View>
-              <Text style={styles.statValue}>
-                {examHistory.filter(e => e.passed).length}
-              </Text>
-              <Text style={styles.statLabel}>Aprobados</Text>
-            </View>
-          </Animated.View>
-        )}
-
-        <Animated.View entering={FadeInDown.duration(600).delay(400)} style={styles.section}>
-          <Text style={styles.sectionTitle}>Prepárate</Text>
-
-          <Pressable
-            onPress={handleStartExam}
-            style={({ pressed }) => [
-              styles.actionCard,
-              { opacity: pressed ? 0.95 : 1, transform: [{ scale: pressed ? 0.98 : 1 }] },
-            ]}
-          >
-            <View style={[styles.actionIcon, { backgroundColor: Colors.primary + '12' }]}>
-              <Ionicons name="reader" size={24} color={Colors.primary} />
-            </View>
-            <View style={styles.actionContent}>
-              <Text style={styles.actionTitle}>Ensayo completo</Text>
-              <Text style={styles.actionDesc}>35 preguntas, 45 min</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color={Colors.textMuted} />
-          </Pressable>
-
-          {examHistory.length > 0 && (
-            <Pressable
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                router.push('/history');
-              }}
-              style={({ pressed }) => [
-                styles.actionCard,
-                { opacity: pressed ? 0.95 : 1, transform: [{ scale: pressed ? 0.98 : 1 }] },
-              ]}
-            >
-              <View style={[styles.actionIcon, { backgroundColor: Colors.success + '12' }]}>
-                <Feather name="bar-chart-2" size={24} color={Colors.success} />
-              </View>
-              <View style={styles.actionContent}>
-                <Text style={styles.actionTitle}>Mi progreso</Text>
-                <Text style={styles.actionDesc}>{examHistory.length} ensayos realizados</Text>
-              </View>
-              <Ionicons name="chevron-forward" size={20} color={Colors.textMuted} />
-            </Pressable>
           )}
+        </View>
+      </LinearGradient>
 
-          <Pressable
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              router.push('/plans');
-            }}
-            style={({ pressed }) => [
-              styles.actionCard,
-              { opacity: pressed ? 0.95 : 1, transform: [{ scale: pressed ? 0.98 : 1 }] },
-            ]}
-          >
-            <View style={[styles.actionIcon, { backgroundColor: Colors.accent + '12' }]}>
-              <Ionicons name="star" size={24} color={Colors.accent} />
-            </View>
-            <View style={styles.actionContent}>
-              <Text style={styles.actionTitle}>
-                {isPremium ? 'Mi plan Premium' : 'Planes'}
-              </Text>
-              <Text style={styles.actionDesc}>
-                {isPremium ? 'Acceso total activo' : 'Desbloquea todo el contenido'}
-              </Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color={Colors.textMuted} />
-          </Pressable>
-        </Animated.View>
+      <ScrollView style={styles.menuList} contentContainerStyle={[styles.menuListContent, { paddingBottom: (Platform.OS === 'web' ? 34 : insets.bottom) + 20 }]}>
+        <MascotaCopiloto state="idle" message="Preparemos juntos tu examen de conducir" compact />
 
-        <Animated.View entering={FadeInDown.duration(600).delay(500)} style={styles.section}>
-          <Text style={styles.sectionTitle}>Patrocinadores</Text>
-          <View style={styles.sponsorCard}>
-            <View style={styles.sponsorIcon}>
-              <MaterialCommunityIcons name="school" size={28} color={Colors.primary} />
-            </View>
-            <View style={styles.sponsorContent}>
-              <Text style={styles.sponsorName}>Escuela de Conductores CAPCHILE</Text>
-              <Text style={styles.sponsorDesc}>Formando conductores responsables</Text>
-            </View>
+        <MenuItem
+          icon={<MaterialCommunityIcons name="school" size={28} color={Colors.primary} />}
+          title="Mi Curso"
+          description="Almacena todos tus avances para que sepas cuando estas preparad@ para el examen teorico."
+          onPress={() => isLoggedIn ? router.push('/mi-curso') : router.push('/login')}
+          locked={!isLoggedIn}
+        />
+        <MenuItem
+          icon={<MaterialCommunityIcons name="shuffle-variant" size={28} color={Colors.primary} />}
+          title="Test Aleatorio Diario"
+          description="Test de conducir generado de forma aleatoria con preguntas del examen oficial y sus explicaciones."
+          onPress={() => startExam('daily')}
+          badge={!isLoggedIn ? 'Sin Registro' : undefined}
+          badgeColor={Colors.success}
+        />
+        <MenuItem
+          icon={<Ionicons name="book-outline" size={28} color={Colors.primary} />}
+          title="Temario y Libros"
+          description="Resumen y manual del Libro de la Conduccion en Chile. Todo el contenido para aprobar el examen."
+          onPress={() => router.push('/temario')}
+        />
+        <MenuItem
+          icon={<MaterialCommunityIcons name="brain" size={28} color={Colors.accent} />}
+          title="Test Inteligente"
+          description="Mediante un algoritmo, te mostrara las preguntas mas convenientes para agilizar tu aprendizaje."
+          onPress={() => isPremium ? startExam('smart') : router.push('/plans')}
+          locked={!isPremium}
+        />
+        <MenuItem
+          icon={<Ionicons name="happy-outline" size={28} color={Colors.success} />}
+          title="Test Facil"
+          description="El test con las preguntas mas FACILES del examen."
+          onPress={() => startExam('easy')}
+        />
+        <MenuItem
+          icon={<Ionicons name="flame-outline" size={28} color="#dc2626" />}
+          title="Test Dificil"
+          description="El test con las preguntas mas DIFICILES del examen."
+          onPress={() => startExam('hard')}
+        />
+        <MenuItem
+          icon={<Ionicons name="layers-outline" size={28} color={Colors.primary} />}
+          title="Test por Categoria"
+          description="Practica preguntas organizadas por tema: Ley de Transito, Señalizacion, Mecanica y mas."
+          onPress={() => startExam('category')}
+        />
+        <MenuItem
+          icon={<Ionicons name="star-outline" size={28} color={Colors.accent} />}
+          title="Mis Favoritos"
+          description="Repasa las preguntas que has marcado como favoritas para reforzar tu estudio."
+          onPress={() => isLoggedIn ? router.push('/favoritos') : router.push('/login')}
+          locked={!isLoggedIn}
+        />
+        <MenuItem
+          icon={<Ionicons name="diamond-outline" size={28} color="#7c3aed" />}
+          title="Packs Premium"
+          description="Acceso ilimitado a todos los examenes, explicaciones detalladas y estadisticas avanzadas."
+          onPress={() => router.push('/plans')}
+        />
+        <MenuItem
+          icon={<Ionicons name="time-outline" size={28} color={Colors.primary} />}
+          title="Mi Historial"
+          description="Revisa todos tus examenes anteriores y tu progreso a lo largo del tiempo."
+          onPress={() => isLoggedIn ? router.push('/history') : router.push('/login')}
+          locked={!isLoggedIn}
+        />
+        <MenuItem
+          icon={<Ionicons name="mail-outline" size={28} color={Colors.success} />}
+          title="Contacto"
+          description="Si tienes alguna duda, incidencia o quieres compartir tus preguntas del examen."
+          onPress={() => router.push('/contacto')}
+        />
+        <MenuItem
+          icon={<Ionicons name="information-circle-outline" size={28} color={Colors.primary} />}
+          title="Quienes Somos"
+          description="Nuestra mision es ayudar a obtener la licencia de conducir a todas las personas."
+          onPress={() => router.push('/nosotros')}
+        />
+        {isAdmin && (
+          <MenuItem
+            icon={<Ionicons name="settings-outline" size={28} color="#dc2626" />}
+            title="Panel Administrador"
+            description="Gestionar usuarios, planes y configuracion del sistema."
+            onPress={() => router.push('/admin')}
+            badge="Admin"
+            badgeColor="#dc2626"
+          />
+        )}
+      </ScrollView>
+
+      <Modal visible={showLicensePicker} transparent animationType="fade">
+        <Pressable style={styles.modalOverlay} onPress={() => setShowLicensePicker(false)}>
+          <View style={styles.licenseModal}>
+            <Text style={styles.licenseModalTitle}>SELECCIONA TU LICENCIA</Text>
+            {licenseTypes.map(lt => (
+              <Pressable
+                key={lt.id}
+                onPress={() => { setLicenseType(lt.id); setShowLicensePicker(false); }}
+                style={[styles.licenseOption, licenseType === lt.id && styles.licenseOptionActive]}
+              >
+                <Text style={[styles.licenseOptionText, licenseType === lt.id && styles.licenseOptionTextActive]}>{lt.name}</Text>
+                <Text style={styles.licenseOptionDesc}>{lt.description}</Text>
+              </Pressable>
+            ))}
           </View>
-        </Animated.View>
+        </Pressable>
+      </Modal>
 
-        <Animated.View entering={FadeInUp.duration(600).delay(600)}>
-          <View style={styles.planBanner}>
-            <Text style={styles.planBannerLabel}>
-              {isPremium ? 'Plan Premium activo' : 'Plan Gratuito: 1 ensayo de demo'}
-            </Text>
-            {!isPremium && (
-              <Text style={styles.planBannerCta}>
-                {canTakeExam ? 'Ensayo disponible' : 'Actualiza para más ensayos'}
-              </Text>
+      <Modal visible={showDrawer} transparent animationType="slide">
+        <View style={styles.drawerOverlay}>
+          <View style={[styles.drawer, { paddingTop: (insets.top || webTopInset) + 16 }]}>
+            <View style={styles.drawerHeader}>
+              {isLoggedIn ? (
+                <View>
+                  <Text style={styles.drawerUser}>{user?.fullName || user?.username}</Text>
+                  <Text style={styles.drawerPlan}>{isPremium ? 'Plan Premium' : 'Plan Gratuito'}</Text>
+                </View>
+              ) : (
+                <View>
+                  <Pressable onPress={() => { setShowDrawer(false); router.push('/login'); }}>
+                    <View style={styles.drawerLoginBtn}>
+                      <Text style={styles.drawerLoginText}>Login</Text>
+                    </View>
+                  </Pressable>
+                  <Pressable onPress={() => { setShowDrawer(false); router.push('/register'); }}>
+                    <Text style={styles.drawerRegisterText}>No tienes cuenta? Registro</Text>
+                  </Pressable>
+                </View>
+              )}
+              <Pressable onPress={() => setShowDrawer(false)} hitSlop={10}>
+                <Ionicons name="close" size={28} color={Colors.text} />
+              </Pressable>
+            </View>
+            <View style={styles.drawerDivider} />
+            {[
+              { icon: 'home-outline' as const, label: 'Home', route: '/' },
+              ...(isLoggedIn ? [{ icon: 'person-outline' as const, label: 'Mi Perfil', route: '/perfil' }] : []),
+              { icon: 'book-outline' as const, label: 'Temario', route: '/temario' },
+              { icon: 'diamond-outline' as const, label: 'Planes', route: '/plans' },
+              { icon: 'mail-outline' as const, label: 'Contacto', route: '/contacto' },
+            ].map(item => (
+              <Pressable key={item.label} style={styles.drawerItem} onPress={() => { setShowDrawer(false); router.push(item.route as any); }}>
+                <Ionicons name={item.icon} size={22} color={Colors.text} />
+                <Text style={styles.drawerItemText}>{item.label}</Text>
+              </Pressable>
+            ))}
+            {isAdmin && (
+              <Pressable style={styles.drawerItem} onPress={() => { setShowDrawer(false); router.push('/admin'); }}>
+                <Ionicons name="settings-outline" size={22} color="#dc2626" />
+                <Text style={[styles.drawerItemText, { color: '#dc2626' }]}>Administrador</Text>
+              </Pressable>
             )}
           </View>
-        </Animated.View>
-      </ScrollView>
+          <Pressable style={styles.drawerBackdrop} onPress={() => setShowDrawer(false)} />
+        </View>
+      </Modal>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  scroll: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 20,
-    gap: 16,
-  },
-  heroCard: {
-    borderRadius: 24,
-    overflow: 'hidden',
-    position: 'relative',
-  },
-  heroContent: {
-    padding: 24,
-    gap: 12,
-    zIndex: 1,
-  },
-  heroChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    alignSelf: 'flex-start',
-  },
-  heroChipText: {
-    color: '#fff',
-    fontSize: 12,
-    fontFamily: 'Nunito_700Bold',
-  },
-  heroTitle: {
-    fontSize: 26,
-    fontFamily: 'Nunito_800ExtraBold',
-    color: '#fff',
-    lineHeight: 32,
-  },
-  heroSubtitle: {
-    fontSize: 15,
-    fontFamily: 'Nunito_400Regular',
-    color: 'rgba(255,255,255,0.85)',
-    lineHeight: 22,
-  },
-  heroButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    backgroundColor: '#fff',
-    paddingHorizontal: 24,
-    paddingVertical: 14,
-    borderRadius: 16,
-    alignSelf: 'flex-start',
-    marginTop: 4,
-  },
-  heroButtonText: {
-    fontSize: 16,
-    fontFamily: 'Nunito_700Bold',
-    color: Colors.primary,
-  },
-  heroDecor: {
-    position: 'absolute',
-    right: -20,
-    top: -20,
-    width: 200,
-    height: 200,
-  },
-  circle: {
-    position: 'absolute',
-    borderRadius: 100,
-    backgroundColor: 'rgba(255,255,255,0.08)',
-  },
-  circle1: {
-    width: 160,
-    height: 160,
-    right: -20,
-    top: -20,
-  },
-  circle2: {
-    width: 100,
-    height: 100,
-    right: 20,
-    top: 80,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  statCard: {
-    flex: 1,
-    backgroundColor: Colors.surface,
-    borderRadius: 16,
-    padding: 14,
-    alignItems: 'center',
-    gap: 6,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  statIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  statValue: {
-    fontSize: 20,
-    fontFamily: 'Nunito_800ExtraBold',
-    color: Colors.text,
-  },
-  statLabel: {
-    fontSize: 11,
-    fontFamily: 'Nunito_600SemiBold',
-    color: Colors.textSecondary,
-  },
-  section: {
-    gap: 10,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontFamily: 'Nunito_700Bold',
-    color: Colors.text,
-    marginBottom: 2,
-  },
-  actionCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.surface,
-    borderRadius: 16,
-    padding: 16,
-    gap: 14,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  actionIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  actionContent: {
-    flex: 1,
-    gap: 2,
-  },
-  actionTitle: {
-    fontSize: 16,
-    fontFamily: 'Nunito_700Bold',
-    color: Colors.text,
-  },
-  actionDesc: {
-    fontSize: 13,
-    fontFamily: 'Nunito_400Regular',
-    color: Colors.textSecondary,
-  },
-  sponsorCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.surface,
-    borderRadius: 16,
-    padding: 16,
-    gap: 14,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  sponsorIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
-    backgroundColor: Colors.primary + '10',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  sponsorContent: {
-    flex: 1,
-    gap: 2,
-  },
-  sponsorName: {
-    fontSize: 15,
-    fontFamily: 'Nunito_700Bold',
-    color: Colors.text,
-  },
-  sponsorDesc: {
-    fontSize: 13,
-    fontFamily: 'Nunito_400Regular',
-    color: Colors.textSecondary,
-  },
-  planBanner: {
-    backgroundColor: Colors.accentSoft,
-    borderRadius: 14,
-    padding: 14,
-    alignItems: 'center',
-    gap: 4,
-    borderWidth: 1,
-    borderColor: Colors.accent + '30',
-  },
-  planBannerLabel: {
-    fontSize: 13,
-    fontFamily: 'Nunito_700Bold',
-    color: Colors.text,
-  },
-  planBannerCta: {
-    fontSize: 12,
-    fontFamily: 'Nunito_400Regular',
-    color: Colors.textSecondary,
-  },
+  container: { flex: 1, backgroundColor: Colors.background },
+  header: { backgroundColor: Colors.primary, paddingBottom: 20, paddingHorizontal: 16 },
+  headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
+  licenseSelector: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: 'rgba(255,255,255,0.2)', paddingHorizontal: 16, paddingVertical: 6, borderRadius: 20 },
+  licenseName: { color: '#fff', fontSize: 16, fontFamily: 'Nunito_700Bold' },
+  welcomeSection: { alignItems: 'center' },
+  welcomeTitle: { color: '#fff', fontSize: 22, fontFamily: 'Nunito_800ExtraBold', textAlign: 'center' },
+  authLinks: { flexDirection: 'row', alignItems: 'center', marginTop: 4 },
+  authLink: { color: Colors.accent, fontSize: 14, fontFamily: 'Nunito_700Bold', textDecorationLine: 'underline' },
+  authSeparator: { color: 'rgba(255,255,255,0.7)', fontSize: 14, fontFamily: 'Nunito_400Regular' },
+  menuList: { flex: 1 },
+  menuListContent: { paddingTop: 8 },
+  menuItem: { flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.surface, marginHorizontal: 12, marginVertical: 5, padding: 16, borderRadius: 14, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4, elevation: 2 },
+  menuItemPressed: { opacity: 0.7, transform: [{ scale: 0.98 }] },
+  menuIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: Colors.surfaceSecondary, justifyContent: 'center', alignItems: 'center', marginRight: 12 },
+  menuContent: { flex: 1, marginRight: 8 },
+  menuTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 3 },
+  menuTitle: { fontSize: 16, fontFamily: 'Nunito_700Bold', color: Colors.text },
+  menuDescription: { fontSize: 13, fontFamily: 'Nunito_400Regular', color: Colors.textSecondary, lineHeight: 18 },
+  badge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10 },
+  badgeText: { color: '#fff', fontSize: 10, fontFamily: 'Nunito_700Bold' },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },
+  licenseModal: { backgroundColor: '#1e293b', borderRadius: 20, padding: 20, width: '85%', maxWidth: 340 },
+  licenseModalTitle: { color: '#fff', fontSize: 14, fontFamily: 'Nunito_700Bold', marginBottom: 16, textAlign: 'center', letterSpacing: 1 },
+  licenseOption: { paddingVertical: 14, paddingHorizontal: 16, borderRadius: 12, marginBottom: 4 },
+  licenseOptionActive: { backgroundColor: Colors.primary },
+  licenseOptionText: { color: '#fff', fontSize: 17, fontFamily: 'Nunito_700Bold' },
+  licenseOptionTextActive: { color: '#fff' },
+  licenseOptionDesc: { color: 'rgba(255,255,255,0.6)', fontSize: 12, fontFamily: 'Nunito_400Regular', marginTop: 2 },
+  drawerOverlay: { flex: 1, flexDirection: 'row' },
+  drawer: { width: '75%', maxWidth: 300, backgroundColor: Colors.surface, paddingHorizontal: 16, paddingBottom: 40, shadowColor: '#000', shadowOffset: { width: 2, height: 0 }, shadowOpacity: 0.2, shadowRadius: 10, elevation: 10 },
+  drawerBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)' },
+  drawerHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 },
+  drawerUser: { fontSize: 18, fontFamily: 'Nunito_700Bold', color: Colors.text },
+  drawerPlan: { fontSize: 13, fontFamily: 'Nunito_400Regular', color: Colors.textSecondary },
+  drawerLoginBtn: { backgroundColor: Colors.primary, paddingHorizontal: 24, paddingVertical: 8, borderRadius: 20, marginBottom: 6 },
+  drawerLoginText: { color: '#fff', fontSize: 15, fontFamily: 'Nunito_700Bold', textAlign: 'center' },
+  drawerRegisterText: { color: Colors.primary, fontSize: 13, fontFamily: 'Nunito_400Regular', textAlign: 'center' },
+  drawerDivider: { height: 1, backgroundColor: Colors.border, marginBottom: 12 },
+  drawerItem: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 14 },
+  drawerItemText: { fontSize: 16, fontFamily: 'Nunito_600SemiBold', color: Colors.text },
 });

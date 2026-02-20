@@ -1,592 +1,431 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Pressable,
-  Platform,
-  Modal,
-  ScrollView,
-  Alert,
-} from 'react-native';
-import { router } from 'expo-router';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { View, Text, StyleSheet, ScrollView, Pressable, Platform, Modal, Alert } from 'react-native';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons, Feather } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
-import Animated, {
-  FadeIn,
-  FadeInDown,
-  SlideInRight,
-  SlideInLeft,
-} from 'react-native-reanimated';
 import Colors from '@/constants/colors';
-import { useUser, ExamResult } from '@/lib/UserContext';
-import { getRandomExam, EXAM_CONFIG, Question } from '@/lib/mockDatabase';
+import { useUser } from '@/lib/UserContext';
+import { apiRequest } from '@/lib/query-client';
 import MascotaCopiloto from '@/components/MascotaCopiloto';
+import {
+  Question, getRandomExam, getEasyExam, getHardExam, getCategoryExam,
+  getQuestionsByLicense, categorias, EXAM_CONFIG,
+} from '@/lib/mockDatabase';
 
-function formatTime(seconds: number): string {
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
-}
+type MascotaState = 'idle' | 'correct' | 'incorrect' | 'celebrate' | 'encourage';
 
 export default function ExamScreen() {
+  const router = useRouter();
+  const params = useLocalSearchParams<{ mode: string; licenseType: string; category?: string }>();
   const insets = useSafeAreaInsets();
-  const { isPremium, canTakeExam, incrementFreeExams, addExamResult } = useUser();
-  const webTopInset = Platform.OS === 'web' ? 67 : 0;
-  const webBottomInset = Platform.OS === 'web' ? 34 : 0;
+  const { isLoggedIn, incrementFreeExams, licenseType: userLicense } = useUser();
 
-  const [questions] = useState<Question[]>(() => getRandomExam(EXAM_CONFIG.questionsPerExam));
+  const mode = params.mode || 'daily';
+  const lt = params.licenseType || userLicense || 'clase_b';
+  const webTopInset = Platform.OS === 'web' ? 67 : 0;
+
+  const [showCategoryPicker, setShowCategoryPicker] = useState(mode === 'category' && !params.category);
+  const [selectedCategory, setSelectedCategory] = useState(params.category || '');
+  const [questions, setQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, number>>({});
-  const [timeLeft, setTimeLeft] = useState(EXAM_CONFIG.timeLimit);
-  const [showFeedback, setShowFeedback] = useState(false);
-  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showExplanation, setShowExplanation] = useState(false);
-  const [slideDirection, setSlideDirection] = useState<'right' | 'left'>('right');
-  const [questionKey, setQuestionKey] = useState(0);
+  const [learningMode, setLearningMode] = useState(true);
+  const [timeLeft, setTimeLeft] = useState(EXAM_CONFIG.timeLimit);
+  const [showTimer, setShowTimer] = useState(true);
+  const [showQuestionGrid, setShowQuestionGrid] = useState(false);
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [favorites, setFavorites] = useState<Set<number>>(new Set());
+  const [examFinished, setExamFinished] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const question = questions[currentIndex];
-  const isAnswered = answers[question.id] !== undefined;
-  const isCorrect = answers[question.id] === question.respuestaCorrecta;
+  useEffect(() => {
+    let qs: Question[] = [];
+    if (mode === 'easy') qs = getEasyExam(35, lt);
+    else if (mode === 'hard') qs = getHardExam(35, lt);
+    else if (mode === 'category' && selectedCategory) qs = getCategoryExam(selectedCategory, lt);
+    else if (mode === 'smart') {
+      const all = getQuestionsByLicense(lt);
+      qs = [...all].sort(() => Math.random() - 0.5).slice(0, 35);
+    }
+    else qs = getRandomExam(35, lt);
+    if (qs.length > 0) setQuestions(qs);
+  }, [mode, lt, selectedCategory]);
 
   useEffect(() => {
+    if (questions.length === 0 || examFinished) return;
     timerRef.current = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
-          if (timerRef.current) clearInterval(timerRef.current);
+          clearInterval(timerRef.current!);
           finishExam();
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, []);
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [questions, examFinished]);
 
-  const finishExam = useCallback(() => {
-    if (timerRef.current) clearInterval(timerRef.current);
-
-    let correct = 0;
-    const categoryBreakdown: Record<string, { correct: number; total: number }> = {};
-
-    questions.forEach(q => {
-      const cat = q.categoria;
-      if (!categoryBreakdown[cat]) categoryBreakdown[cat] = { correct: 0, total: 0 };
-      categoryBreakdown[cat].total++;
-
-      if (answers[q.id] === q.respuestaCorrecta) {
-        correct++;
-        categoryBreakdown[cat].correct++;
-      }
-    });
-
-    const score = correct / questions.length;
-    const passed = score >= EXAM_CONFIG.passingScore;
-
-    const result: ExamResult = {
-      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-      date: Date.now(),
-      totalQuestions: questions.length,
-      correctAnswers: correct,
-      score,
-      passed,
-      categoryBreakdown,
-    };
-
-    addExamResult(result);
-    if (!isPremium) incrementFreeExams();
-
-    router.replace({
-      pathname: '/results',
-      params: {
-        correct: correct.toString(),
-        total: questions.length.toString(),
-        score: (score * 100).toFixed(0),
-        passed: passed ? '1' : '0',
-        breakdown: JSON.stringify(categoryBreakdown),
-      },
-    });
-  }, [answers, questions, isPremium]);
+  const currentQuestion = questions[currentIndex];
 
   const handleAnswer = (optionIndex: number) => {
-    if (isAnswered) return;
+    if (answers[currentIndex] !== undefined) return;
+    setAnswers(prev => ({ ...prev, [currentIndex]: optionIndex }));
+    if (learningMode) setShowExplanation(true);
 
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setSelectedAnswer(optionIndex);
-    setAnswers(prev => ({ ...prev, [question.id]: optionIndex }));
-    setShowFeedback(true);
+    if (isLoggedIn && currentQuestion) {
+      const correct = optionIndex === currentQuestion.respuestaCorrecta;
+      apiRequest('POST', '/api/progress', { licenseType: lt, category: currentQuestion.categoria, correct }).catch(() => {});
+    }
   };
 
   const goNext = () => {
+    setShowExplanation(false);
     if (currentIndex < questions.length - 1) {
-      setSlideDirection('right');
-      setShowFeedback(false);
-      setSelectedAnswer(null);
-      setShowExplanation(false);
-      setCurrentIndex(prev => prev + 1);
-      setQuestionKey(prev => prev + 1);
-    }
-  };
-
-  const goPrev = () => {
-    if (currentIndex > 0) {
-      setSlideDirection('left');
-      setShowFeedback(false);
-      setSelectedAnswer(null);
-      setShowExplanation(false);
-      setCurrentIndex(prev => prev - 1);
-      setQuestionKey(prev => prev + 1);
-    }
-  };
-
-  const handleFinish = () => {
-    const unanswered = questions.length - Object.keys(answers).length;
-    if (unanswered > 0) {
-      Alert.alert(
-        'Terminar ensayo',
-        `Tienes ${unanswered} preguntas sin responder. ¿Deseas terminar de todas formas?`,
-        [
-          { text: 'Seguir practicando', style: 'cancel' },
-          { text: 'Terminar', onPress: finishExam },
-        ]
-      );
+      setCurrentIndex(currentIndex + 1);
     } else {
       finishExam();
     }
   };
 
-  const handleExit = () => {
-    Alert.alert(
-      'Salir del ensayo',
-      '¿Seguro que quieres salir? Perderás tu progreso actual.',
-      [
-        { text: 'Continuar ensayo', style: 'cancel' },
-        { text: 'Salir', style: 'destructive', onPress: () => router.back() },
-      ]
+  const goPrev = () => {
+    setShowExplanation(false);
+    if (currentIndex > 0) setCurrentIndex(currentIndex - 1);
+  };
+
+  const jumpTo = (idx: number) => {
+    setShowExplanation(false);
+    setCurrentIndex(idx);
+    setShowQuestionGrid(false);
+  };
+
+  const finishExam = useCallback(() => {
+    if (examFinished) return;
+    setExamFinished(true);
+    if (timerRef.current) clearInterval(timerRef.current);
+
+    let correct = 0;
+    const categoryBreakdown: Record<string, { correct: number; total: number }> = {};
+    questions.forEach((q, idx) => {
+      if (!categoryBreakdown[q.categoria]) categoryBreakdown[q.categoria] = { correct: 0, total: 0 };
+      categoryBreakdown[q.categoria].total++;
+      if (answers[idx] === q.respuestaCorrecta) {
+        correct++;
+        categoryBreakdown[q.categoria].correct++;
+      }
+    });
+    const score = Math.round((correct / questions.length) * 100);
+    const passed = score >= EXAM_CONFIG.passingScore * 100;
+    const timeSpent = EXAM_CONFIG.timeLimit - timeLeft;
+
+    if (isLoggedIn) {
+      apiRequest('POST', '/api/exam-results', {
+        examMode: mode,
+        licenseType: lt,
+        totalQuestions: questions.length,
+        correctAnswers: correct,
+        score,
+        passed,
+        timeSpent,
+        categoryBreakdown,
+      }).catch(() => {});
+    } else {
+      incrementFreeExams();
+    }
+
+    router.replace({
+      pathname: '/results',
+      params: {
+        score: score.toString(),
+        correct: correct.toString(),
+        total: questions.length.toString(),
+        passed: passed ? 'true' : 'false',
+        mode,
+        timeSpent: timeSpent.toString(),
+        categoryBreakdown: JSON.stringify(categoryBreakdown),
+      },
+    });
+  }, [examFinished, questions, answers, timeLeft, mode, lt, isLoggedIn]);
+
+  const toggleFavorite = async (questionId: number) => {
+    if (!isLoggedIn) return;
+    const newFavs = new Set(favorites);
+    if (newFavs.has(questionId)) {
+      newFavs.delete(questionId);
+      apiRequest('DELETE', `/api/favorites/${questionId}/${lt}`).catch(() => {});
+    } else {
+      newFavs.add(questionId);
+      apiRequest('POST', '/api/favorites', { questionId, licenseType: lt }).catch(() => {});
+    }
+    setFavorites(newFavs);
+  };
+
+  const formatTime = (s: number) => {
+    const min = Math.floor(s / 60);
+    const sec = s % 60;
+    return `${min}:${sec.toString().padStart(2, '0')}`;
+  };
+
+  const getMascotaState = (): MascotaState => {
+    if (answers[currentIndex] === undefined) return 'idle';
+    return answers[currentIndex] === currentQuestion?.respuestaCorrecta ? 'correct' : 'incorrect';
+  };
+
+  const answeredCount = Object.keys(answers).length;
+
+  const modeTitle = useMemo(() => {
+    if (mode === 'daily') return 'Test del dia';
+    if (mode === 'easy') return 'Test Facil';
+    if (mode === 'hard') return 'Test Dificil';
+    if (mode === 'smart') return 'Test Inteligente';
+    if (mode === 'category') return selectedCategory || 'Por Categoria';
+    return 'Examen';
+  }, [mode, selectedCategory]);
+
+  if (showCategoryPicker) {
+    return (
+      <View style={styles.container}>
+        <View style={[styles.header, { paddingTop: (insets.top || webTopInset) + 12 }]}>
+          <Pressable onPress={() => router.back()} hitSlop={10}>
+            <Ionicons name="arrow-back" size={24} color="#fff" />
+          </Pressable>
+          <Text style={styles.headerTitle}>Selecciona Categoria</Text>
+          <View style={{ width: 24 }} />
+        </View>
+        <ScrollView contentContainerStyle={{ padding: 16 }}>
+          {categorias.map(cat => (
+            <Pressable key={cat} onPress={() => { setSelectedCategory(cat); setShowCategoryPicker(false); }}
+              style={({ pressed }) => [styles.categoryBtn, pressed && { opacity: 0.7 }]}>
+              <Text style={styles.categoryBtnText}>{cat}</Text>
+              <Ionicons name="chevron-forward" size={20} color={Colors.textMuted} />
+            </Pressable>
+          ))}
+        </ScrollView>
+      </View>
     );
-  };
+  }
 
-  const progress = Object.keys(answers).length / questions.length;
-  const timeWarning = timeLeft < 300;
-
-  const getOptionStyle = (index: number) => {
-    if (!isAnswered) {
-      return selectedAnswer === index ? styles.optionSelected : styles.optionDefault;
-    }
-    if (index === question.respuestaCorrecta) {
-      return styles.optionCorrect;
-    }
-    if (index === answers[question.id] && index !== question.respuestaCorrecta) {
-      return styles.optionIncorrect;
-    }
-    return styles.optionDefault;
-  };
-
-  const getOptionTextStyle = (index: number) => {
-    if (!isAnswered) return styles.optionTextDefault;
-    if (index === question.respuestaCorrecta) return styles.optionTextCorrect;
-    if (index === answers[question.id] && index !== question.respuestaCorrecta) return styles.optionTextIncorrect;
-    return styles.optionTextDefault;
-  };
-
-  const getOptionIcon = (index: number) => {
-    if (!isAnswered) return null;
-    if (index === question.respuestaCorrecta) {
-      return <Ionicons name="checkmark-circle" size={22} color={Colors.success} />;
-    }
-    if (index === answers[question.id] && index !== question.respuestaCorrecta) {
-      return <Ionicons name="close-circle" size={22} color={Colors.warning} />;
-    }
-    return null;
-  };
+  if (questions.length === 0) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Text style={styles.loadingText}>Cargando preguntas...</Text>
+      </View>
+    );
+  }
 
   return (
-    <View style={[styles.root, { paddingTop: (insets.top || webTopInset) }]}>
-      <View style={styles.header}>
-        <Pressable onPress={handleExit} style={styles.headerBtn}>
-          <Ionicons name="close" size={24} color={Colors.textSecondary} />
+    <View style={styles.container}>
+      <View style={[styles.header, { paddingTop: (insets.top || webTopInset) + 8 }]}>
+        <Pressable onPress={() => setShowExitConfirm(true)} hitSlop={10}>
+          <Ionicons name="menu" size={24} color="#fff" />
         </Pressable>
-
-        <View style={styles.headerCenter}>
-          <View style={styles.progressBarBg}>
-            <View style={[styles.progressBarFill, { width: `${progress * 100}%` }]} />
-          </View>
-          <Text style={styles.progressText}>
-            {currentIndex + 1}/{questions.length}
-          </Text>
-        </View>
-
-        <View style={[styles.timerChip, timeWarning && styles.timerWarning]}>
-          <Ionicons name="time-outline" size={14} color={timeWarning ? Colors.warning : Colors.textSecondary} />
-          <Text style={[styles.timerText, timeWarning && styles.timerTextWarning]}>
-            {formatTime(timeLeft)}
-          </Text>
-        </View>
+        <Text style={styles.headerTitle}>{modeTitle}</Text>
+        <View style={{ width: 24 }} />
       </View>
 
-      <ScrollView
-        style={styles.content}
-        contentContainerStyle={styles.contentInner}
-        showsVerticalScrollIndicator={false}
-      >
-        <Animated.View
-          key={questionKey}
-          entering={slideDirection === 'right' ? SlideInRight.duration(300) : SlideInLeft.duration(300)}
-        >
-          <View style={styles.categoryChip}>
-            <Ionicons name="folder-outline" size={12} color={Colors.primary} />
-            <Text style={styles.categoryText}>{question.categoria}</Text>
+      {showTimer && (
+        <View style={styles.timerRow}>
+          <View style={styles.timerBadge}>
+            <Ionicons name="time" size={16} color="#dc2626" />
+            <Text style={styles.timerText}>{formatTime(timeLeft)} MINUTOS</Text>
           </View>
+          <Pressable onPress={() => setShowTimer(false)} hitSlop={10}>
+            <Ionicons name="close" size={18} color={Colors.textMuted} />
+          </Pressable>
+        </View>
+      )}
 
-          <Text style={styles.questionText}>{question.pregunta}</Text>
+      <View style={styles.learningToggle}>
+        <Pressable onPress={() => setLearningMode(!learningMode)} style={styles.learningBtn}>
+          <Ionicons name={learningMode ? 'book' : 'book-outline'} size={18} color={learningMode ? Colors.primary : Colors.textMuted} />
+          <Text style={[styles.learningText, learningMode && { color: Colors.primary }]}>Modo Aprendizaje</Text>
+        </Pressable>
+        <Text style={styles.examMeta}>{questions.length} Total Preguntas</Text>
+        <Text style={styles.examMeta}>Minimo para aprobar: {Math.ceil(questions.length * EXAM_CONFIG.passingScore)} puntos</Text>
+      </View>
 
-          <View style={styles.optionsContainer}>
-            {question.opciones.map((opcion, index) => (
-              <Pressable
-                key={index}
-                onPress={() => handleAnswer(index)}
-                disabled={isAnswered}
-                style={({ pressed }) => [
-                  styles.option,
-                  getOptionStyle(index),
-                  !isAnswered && pressed && styles.optionPressed,
-                ]}
-              >
-                <View style={styles.optionLetter}>
-                  <Text style={[styles.optionLetterText, isAnswered && index === question.respuestaCorrecta && { color: Colors.success }]}>
-                    {String.fromCharCode(65 + index)}
-                  </Text>
-                </View>
-                <Text style={[styles.optionText, getOptionTextStyle(index)]}>
-                  {opcion}
-                </Text>
-                {getOptionIcon(index)}
-              </Pressable>
-            ))}
+      <ScrollView style={styles.questionScroll} contentContainerStyle={{ paddingBottom: 120 }}>
+        <View style={styles.questionHeader}>
+          <View style={styles.questionBadge}>
+            <Text style={styles.questionBadgeText}>Pregunta {currentIndex + 1} de {questions.length}</Text>
           </View>
-
-          {question.urlAudio !== null && (
-            <Pressable style={styles.audioButton}>
-              <Ionicons name="volume-medium" size={18} color={Colors.primary} />
-              <Text style={styles.audioButtonText}>Escuchemos juntos la explicación</Text>
+          {isLoggedIn && (
+            <Pressable onPress={() => toggleFavorite(currentQuestion.id)} hitSlop={10}>
+              <Ionicons name={favorites.has(currentQuestion.id) ? 'star' : 'star-outline'} size={24} color={Colors.accent} />
             </Pressable>
           )}
-        </Animated.View>
+        </View>
 
-        {showFeedback && isAnswered && (
-          <Animated.View entering={FadeInDown.duration(400)}>
-            <MascotaCopiloto
-              state={isCorrect ? 'correct' : 'incorrect'}
-              onExplanationPress={isCorrect ? undefined : () => setShowExplanation(true)}
-              compact
-            />
-          </Animated.View>
+        <Text style={styles.questionText}>{currentQuestion.pregunta}</Text>
+
+        <View style={styles.optionsList}>
+          {currentQuestion.opciones.map((opt, idx) => {
+            const answered = answers[currentIndex] !== undefined;
+            const isSelected = answers[currentIndex] === idx;
+            const isCorrect = idx === currentQuestion.respuestaCorrecta;
+            let optStyle = styles.option;
+            let textColor = Colors.text;
+            if (answered && learningMode) {
+              if (isCorrect) { optStyle = styles.optionCorrect; textColor = '#166534'; }
+              else if (isSelected && !isCorrect) { optStyle = styles.optionWrong; textColor = '#991b1b'; }
+            } else if (isSelected) {
+              optStyle = styles.optionSelected;
+              textColor = '#fff';
+            }
+
+            return (
+              <Pressable key={idx} onPress={() => handleAnswer(idx)} disabled={answered}
+                style={({ pressed }) => [optStyle, pressed && !answered && { opacity: 0.7 }]}>
+                <Text style={[styles.optionLabel, { color: textColor }]}>{String.fromCharCode(65 + idx)}.</Text>
+                <Text style={[styles.optionText, { color: textColor }]}>{opt}</Text>
+                {answered && learningMode && isCorrect && <Ionicons name="checkmark-circle" size={22} color={Colors.success} />}
+                {answered && learningMode && isSelected && !isCorrect && <Ionicons name="close-circle" size={22} color="#dc2626" />}
+              </Pressable>
+            );
+          })}
+        </View>
+
+        {answers[currentIndex] !== undefined && learningMode && (
+          <MascotaCopiloto
+            state={getMascotaState()}
+            onExplanationPress={() => setShowExplanation(true)}
+            compact
+          />
         )}
 
-        {(showExplanation || (showFeedback && isCorrect)) && (
-          <Animated.View entering={FadeIn.duration(300)} style={styles.explanationCard}>
-            <View style={styles.explanationHeader}>
-              <Ionicons name="bulb-outline" size={18} color={Colors.accent} />
-              <Text style={styles.explanationTitle}>Explicación</Text>
-            </View>
-            <Text style={styles.explanationText}>{question.explicacionTexto}</Text>
-          </Animated.View>
+        {showExplanation && learningMode && (
+          <View style={styles.explanationBox}>
+            <Text style={styles.explanationTitle}>Explicacion</Text>
+            <Text style={styles.explanationText}>{currentQuestion.explicacionTexto}</Text>
+          </View>
         )}
       </ScrollView>
 
-      <View style={[styles.footer, { paddingBottom: (insets.bottom || webBottomInset) + 12 }]}>
-        <Pressable
-          onPress={goPrev}
-          disabled={currentIndex === 0}
-          style={({ pressed }) => [
-            styles.navButton,
-            currentIndex === 0 && styles.navButtonDisabled,
-            { opacity: pressed && currentIndex > 0 ? 0.8 : 1 },
-          ]}
-        >
-          <Ionicons name="chevron-back" size={20} color={currentIndex === 0 ? Colors.textMuted : Colors.text} />
-          <Text style={[styles.navButtonText, currentIndex === 0 && styles.navButtonTextDisabled]}>Atrás</Text>
+      <View style={[styles.navBar, { paddingBottom: Platform.OS === 'web' ? 34 : (insets.bottom || 10) }]}>
+        <Pressable onPress={goPrev} disabled={currentIndex === 0} style={[styles.navBtn, currentIndex === 0 && { opacity: 0.4 }]}>
+          <Ionicons name="arrow-back" size={22} color="#fff" />
         </Pressable>
 
-        {currentIndex === questions.length - 1 || Object.keys(answers).length === questions.length ? (
-          <Pressable
-            onPress={handleFinish}
-            style={({ pressed }) => [
-              styles.finishButton,
-              { opacity: pressed ? 0.9 : 1, transform: [{ scale: pressed ? 0.97 : 1 }] },
-            ]}
-          >
-            <Ionicons name="checkmark-done" size={20} color="#fff" />
-            <Text style={styles.finishButtonText}>Terminar</Text>
+        <Pressable onPress={() => setShowQuestionGrid(true)} style={styles.gridBtn}>
+          <Ionicons name="grid" size={18} color="#fff" />
+          <Text style={styles.gridText}>Indice de preguntas ({answeredCount}/{questions.length})</Text>
+          <Ionicons name="chevron-up" size={18} color="#fff" />
+        </Pressable>
+
+        {currentIndex === questions.length - 1 ? (
+          <Pressable onPress={finishExam} style={[styles.navBtn, { backgroundColor: Colors.success }]}>
+            <Ionicons name="checkmark" size={22} color="#fff" />
           </Pressable>
         ) : (
-          <Pressable
-            onPress={goNext}
-            style={({ pressed }) => [
-              styles.nextButton,
-              { opacity: pressed ? 0.9 : 1, transform: [{ scale: pressed ? 0.97 : 1 }] },
-            ]}
-          >
-            <Text style={styles.nextButtonText}>Siguiente</Text>
-            <Ionicons name="chevron-forward" size={20} color="#fff" />
+          <Pressable onPress={goNext} style={styles.navBtn}>
+            <Ionicons name="arrow-forward" size={22} color="#fff" />
           </Pressable>
         )}
       </View>
+
+      <Modal visible={showQuestionGrid} transparent animationType="slide">
+        <View style={styles.gridOverlay}>
+          <Pressable style={styles.gridBackdrop} onPress={() => setShowQuestionGrid(false)} />
+          <View style={[styles.gridContainer, { paddingBottom: Platform.OS === 'web' ? 34 : (insets.bottom || 10) }]}>
+            <Pressable onPress={() => setShowQuestionGrid(false)} style={styles.gridHeader}>
+              <Ionicons name="grid" size={18} color="#fff" />
+              <Text style={styles.gridHeaderText}>Indice de preguntas ({answeredCount}/{questions.length})</Text>
+              <Ionicons name="chevron-down" size={18} color="#fff" />
+            </Pressable>
+            <View style={styles.gridContent}>
+              {questions.map((_, idx) => {
+                const answered = answers[idx] !== undefined;
+                const isCorrect = answered && learningMode && answers[idx] === questions[idx].respuestaCorrecta;
+                const isWrong = answered && learningMode && answers[idx] !== questions[idx].respuestaCorrecta;
+                const isCurrent = idx === currentIndex;
+                return (
+                  <Pressable key={idx} onPress={() => jumpTo(idx)}
+                    style={[styles.gridCell, isCurrent && styles.gridCellCurrent,
+                      isCorrect && styles.gridCellCorrect, isWrong && styles.gridCellWrong,
+                      answered && !learningMode && styles.gridCellAnswered]}>
+                    <Text style={[styles.gridCellText, (isCurrent || isCorrect || isWrong || answered) && { color: '#fff' }]}>{idx + 1}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal visible={showExitConfirm} transparent animationType="fade">
+        <View style={styles.exitOverlay}>
+          <View style={styles.exitModal}>
+            <Pressable style={styles.exitClose} onPress={() => setShowExitConfirm(false)}>
+              <Ionicons name="close" size={24} color={Colors.text} />
+            </Pressable>
+            <View style={styles.exitWarningCircle}>
+              <Ionicons name="warning" size={36} color={Colors.accent} />
+            </View>
+            <Text style={styles.exitTitle}>Abandonar el examen?</Text>
+            <Text style={styles.exitDesc}>Estas realizando un examen. Tu progreso no se guardara hasta completar el examen.</Text>
+            <Pressable onPress={() => { setShowExitConfirm(false); router.back(); }} style={styles.exitBtn}>
+              <Ionicons name="log-out-outline" size={20} color="#fff" />
+              <Text style={styles.exitBtnText}>Salir del Examen</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    gap: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-    backgroundColor: Colors.surface,
-  },
-  headerBtn: {
-    width: 36,
-    height: 36,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  headerCenter: {
-    flex: 1,
-    gap: 4,
-  },
-  progressBarBg: {
-    height: 6,
-    backgroundColor: Colors.surfaceSecondary,
-    borderRadius: 3,
-    overflow: 'hidden',
-  },
-  progressBarFill: {
-    height: '100%',
-    backgroundColor: Colors.primary,
-    borderRadius: 3,
-  },
-  progressText: {
-    fontSize: 11,
-    fontFamily: 'Nunito_600SemiBold',
-    color: Colors.textSecondary,
-    textAlign: 'center',
-  },
-  timerChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: Colors.surfaceSecondary,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 12,
-  },
-  timerWarning: {
-    backgroundColor: Colors.warningLight,
-  },
-  timerText: {
-    fontSize: 13,
-    fontFamily: 'Nunito_700Bold',
-    color: Colors.textSecondary,
-  },
-  timerTextWarning: {
-    color: Colors.warning,
-  },
-  content: {
-    flex: 1,
-  },
-  contentInner: {
-    padding: 20,
-    gap: 16,
-  },
-  categoryChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: Colors.primary + '10',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-    alignSelf: 'flex-start',
-    marginBottom: 8,
-  },
-  categoryText: {
-    fontSize: 12,
-    fontFamily: 'Nunito_700Bold',
-    color: Colors.primary,
-  },
-  questionText: {
-    fontSize: 18,
-    fontFamily: 'Nunito_700Bold',
-    color: Colors.text,
-    lineHeight: 26,
-    marginBottom: 16,
-  },
-  optionsContainer: {
-    gap: 10,
-  },
-  option: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    borderRadius: 14,
-    borderWidth: 1.5,
-    gap: 12,
-  },
-  optionDefault: {
-    backgroundColor: Colors.surface,
-    borderColor: Colors.border,
-  },
-  optionSelected: {
-    backgroundColor: Colors.primary + '08',
-    borderColor: Colors.primary + '40',
-  },
-  optionPressed: {
-    backgroundColor: Colors.surfaceSecondary,
-  },
-  optionCorrect: {
-    backgroundColor: Colors.successLight,
-    borderColor: Colors.success + '50',
-  },
-  optionIncorrect: {
-    backgroundColor: Colors.warningLight,
-    borderColor: Colors.warning + '50',
-  },
-  optionLetter: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
-    backgroundColor: Colors.surfaceSecondary,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  optionLetterText: {
-    fontSize: 13,
-    fontFamily: 'Nunito_700Bold',
-    color: Colors.textSecondary,
-  },
-  optionText: {
-    flex: 1,
-    fontSize: 15,
-    lineHeight: 22,
-    fontFamily: 'Nunito_600SemiBold',
-  },
-  optionTextDefault: {
-    color: Colors.text,
-  },
-  optionTextCorrect: {
-    color: Colors.success,
-  },
-  optionTextIncorrect: {
-    color: Colors.warningText,
-  },
-  audioButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    backgroundColor: Colors.primary + '08',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 12,
-    marginTop: 8,
-    alignSelf: 'flex-start',
-  },
-  audioButtonText: {
-    fontSize: 13,
-    fontFamily: 'Nunito_600SemiBold',
-    color: Colors.primary,
-  },
-  explanationCard: {
-    backgroundColor: Colors.accentSoft,
-    borderRadius: 14,
-    padding: 16,
-    gap: 8,
-    borderWidth: 1,
-    borderColor: Colors.accent + '25',
-  },
-  explanationHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  explanationTitle: {
-    fontSize: 14,
-    fontFamily: 'Nunito_700Bold',
-    color: Colors.text,
-  },
-  explanationText: {
-    fontSize: 14,
-    fontFamily: 'Nunito_400Regular',
-    color: Colors.textSecondary,
-    lineHeight: 22,
-  },
-  footer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    backgroundColor: Colors.surface,
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
-    gap: 12,
-  },
-  navButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    backgroundColor: Colors.surfaceSecondary,
-  },
-  navButtonDisabled: {
-    opacity: 0.5,
-  },
-  navButtonText: {
-    fontSize: 14,
-    fontFamily: 'Nunito_600SemiBold',
-    color: Colors.text,
-  },
-  navButtonTextDisabled: {
-    color: Colors.textMuted,
-  },
-  nextButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: Colors.primary,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 12,
-  },
-  nextButtonText: {
-    fontSize: 14,
-    fontFamily: 'Nunito_700Bold',
-    color: '#fff',
-  },
-  finishButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: Colors.success,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 12,
-  },
-  finishButtonText: {
-    fontSize: 14,
-    fontFamily: 'Nunito_700Bold',
-    color: '#fff',
-  },
+  container: { flex: 1, backgroundColor: Colors.background },
+  header: { backgroundColor: Colors.primary, paddingBottom: 12, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  headerTitle: { color: '#fff', fontSize: 18, fontFamily: 'Nunito_700Bold' },
+  timerRow: { flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 6, gap: 8 },
+  timerBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#fef2f2', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 16 },
+  timerText: { color: '#dc2626', fontSize: 13, fontFamily: 'Nunito_700Bold' },
+  learningToggle: { paddingHorizontal: 16, paddingVertical: 8, alignItems: 'center' },
+  learningBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
+  learningText: { fontSize: 14, fontFamily: 'Nunito_600SemiBold', color: Colors.textMuted },
+  examMeta: { fontSize: 13, fontFamily: 'Nunito_400Regular', color: Colors.textSecondary },
+  questionScroll: { flex: 1 },
+  questionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 12 },
+  questionBadge: { backgroundColor: Colors.primary, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20 },
+  questionBadgeText: { color: '#fff', fontSize: 13, fontFamily: 'Nunito_700Bold' },
+  questionText: { fontSize: 17, fontFamily: 'Nunito_600SemiBold', color: Colors.text, paddingHorizontal: 16, paddingVertical: 16, lineHeight: 26 },
+  optionsList: { paddingHorizontal: 16, gap: 8 },
+  option: { flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.surface, padding: 16, borderRadius: 12, borderWidth: 1, borderColor: Colors.border, gap: 10 },
+  optionSelected: { flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.primary, padding: 16, borderRadius: 12, borderWidth: 1, borderColor: Colors.primary, gap: 10 },
+  optionCorrect: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#dcfce7', padding: 16, borderRadius: 12, borderWidth: 1, borderColor: Colors.success, gap: 10 },
+  optionWrong: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fef2f2', padding: 16, borderRadius: 12, borderWidth: 1, borderColor: '#dc2626', gap: 10 },
+  optionLabel: { fontSize: 15, fontFamily: 'Nunito_700Bold', minWidth: 22 },
+  optionText: { flex: 1, fontSize: 15, fontFamily: 'Nunito_400Regular', lineHeight: 22 },
+  explanationBox: { marginHorizontal: 16, marginTop: 12, backgroundColor: '#f0f9ff', borderRadius: 12, padding: 16, borderWidth: 1, borderColor: '#bae6fd' },
+  explanationTitle: { fontSize: 15, fontFamily: 'Nunito_700Bold', color: Colors.primary, marginBottom: 6 },
+  explanationText: { fontSize: 14, fontFamily: 'Nunito_400Regular', color: Colors.text, lineHeight: 22 },
+  navBar: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingTop: 8, backgroundColor: Colors.surface, borderTopWidth: 1, borderTopColor: Colors.border, gap: 8 },
+  navBtn: { backgroundColor: Colors.primary, width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center' },
+  gridBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#6366f1', paddingVertical: 10, borderRadius: 22, gap: 6 },
+  gridText: { color: '#fff', fontSize: 13, fontFamily: 'Nunito_700Bold' },
+  gridOverlay: { flex: 1, justifyContent: 'flex-end' },
+  gridBackdrop: { flex: 1 },
+  gridContainer: { backgroundColor: Colors.surface, borderTopLeftRadius: 20, borderTopRightRadius: 20, shadowColor: '#000', shadowOffset: { width: 0, height: -4 }, shadowOpacity: 0.1, shadowRadius: 10, elevation: 10 },
+  gridHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#6366f1', paddingVertical: 12, borderTopLeftRadius: 20, borderTopRightRadius: 20, gap: 6 },
+  gridHeaderText: { color: '#fff', fontSize: 14, fontFamily: 'Nunito_700Bold' },
+  gridContent: { flexDirection: 'row', flexWrap: 'wrap', padding: 16, gap: 8 },
+  gridCell: { width: 44, height: 44, borderRadius: 8, backgroundColor: Colors.surfaceSecondary, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: Colors.border },
+  gridCellCurrent: { backgroundColor: Colors.primary, borderColor: Colors.primary },
+  gridCellCorrect: { backgroundColor: Colors.success, borderColor: Colors.success },
+  gridCellWrong: { backgroundColor: '#dc2626', borderColor: '#dc2626' },
+  gridCellAnswered: { backgroundColor: Colors.primaryLight, borderColor: Colors.primaryLight },
+  gridCellText: { fontSize: 15, fontFamily: 'Nunito_700Bold', color: Colors.text },
+  exitOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 20 },
+  exitModal: { backgroundColor: Colors.surface, borderRadius: 20, padding: 24, width: '100%', maxWidth: 340, alignItems: 'center' },
+  exitClose: { position: 'absolute' as const, top: 12, right: 12 },
+  exitWarningCircle: { width: 64, height: 64, borderRadius: 32, backgroundColor: Colors.accentSoft, justifyContent: 'center', alignItems: 'center', marginBottom: 16 },
+  exitTitle: { fontSize: 18, fontFamily: 'Nunito_700Bold', color: Colors.text, marginBottom: 8 },
+  exitDesc: { fontSize: 14, fontFamily: 'Nunito_400Regular', color: Colors.textSecondary, textAlign: 'center', marginBottom: 20, lineHeight: 22 },
+  exitBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#dc2626', paddingVertical: 14, paddingHorizontal: 28, borderRadius: 14 },
+  exitBtnText: { color: '#fff', fontSize: 16, fontFamily: 'Nunito_700Bold' },
+  categoryBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: Colors.surface, padding: 16, borderRadius: 12, marginBottom: 8, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 3, elevation: 2 },
+  categoryBtnText: { fontSize: 16, fontFamily: 'Nunito_600SemiBold', color: Colors.text },
+  loadingText: { fontSize: 16, fontFamily: 'Nunito_400Regular', color: Colors.textMuted },
 });

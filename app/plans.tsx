@@ -1,375 +1,108 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  Pressable,
-  Platform,
-  Alert,
-} from 'react-native';
-import { router } from 'expo-router';
+import { View, Text, StyleSheet, ScrollView, Pressable, Platform, Alert } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
-import Animated, { FadeInDown } from 'react-native-reanimated';
 import Colors from '@/constants/colors';
 import { useUser } from '@/lib/UserContext';
 
-const plans = [
-  {
-    id: 'free' as const,
-    name: 'Gratuito',
-    price: '$0',
-    period: '',
-    features: [
-      '1 ensayo completo de demo',
-      'Feedback del copiloto',
-      'Explicaciones básicas',
-    ],
-    icon: 'gift-outline' as const,
-    color: Colors.textSecondary,
-  },
-  {
-    id: 'premium_10' as const,
-    name: 'Premium 10 días',
-    price: '$2.990',
-    period: '/10 días',
-    features: [
-      'Ensayos ilimitados',
-      'Base de datos completa (800+ preguntas)',
-      'Audios de explicación',
-      'Revisión de errores detallada',
-      'Estadísticas avanzadas',
-    ],
-    icon: 'star' as const,
-    color: Colors.accent,
-    popular: false,
-  },
-  {
-    id: 'premium_30' as const,
-    name: 'Premium 30 días',
-    price: '$4.990',
-    period: '/30 días',
-    features: [
-      'Todo lo del plan de 10 días',
-      'Mejor relación precio/día',
-      'Acceso por 30 días completos',
-      'Soporte prioritario',
-    ],
-    icon: 'trophy' as const,
-    color: Colors.primary,
-    popular: true,
-  },
-];
-
 export default function PlansScreen() {
+  const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { plan: currentPlan, isPremium, setPlan } = useUser();
+  const { isPremium, user } = useUser();
   const webTopInset = Platform.OS === 'web' ? 67 : 0;
-  const webBottomInset = Platform.OS === 'web' ? 34 : 0;
 
-  const handleSelectPlan = (planId: 'free' | 'premium_10' | 'premium_30') => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    if (planId === 'free') return;
-
-    Alert.alert(
-      'Activar plan',
-      `¿Deseas activar el plan ${planId === 'premium_10' ? 'Premium 10 días' : 'Premium 30 días'}? (Demo - se activará gratis para prueba)`,
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Activar',
-          onPress: () => {
-            setPlan(planId);
-            Alert.alert('Plan activado', 'Tu plan Premium ha sido activado exitosamente.');
-          },
-        },
-      ]
-    );
-  };
+  const features = [
+    { icon: 'infinite-outline' as const, text: 'Examenes ilimitados' },
+    { icon: 'book-outline' as const, text: 'Explicaciones detalladas' },
+    { icon: 'analytics-outline' as const, text: 'Estadisticas avanzadas' },
+    { icon: 'brain' as const, text: 'Test Inteligente con IA', lib: 'MaterialCommunityIcons' },
+    { icon: 'star-outline' as const, text: 'Favoritos ilimitados' },
+    { icon: 'layers-outline' as const, text: 'Todas las categorias' },
+  ];
 
   return (
-    <View style={styles.root}>
-      <View style={[styles.header, { paddingTop: (insets.top || webTopInset) + 8 }]}>
-        <Pressable onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="chevron-back" size={24} color={Colors.text} />
+    <View style={styles.container}>
+      <LinearGradient colors={['#7c3aed', '#5b21b6']} style={[styles.header, { paddingTop: (insets.top || webTopInset) + 12 }]}>
+        <Pressable onPress={() => router.back()} hitSlop={10}>
+          <Ionicons name="arrow-back" size={24} color="#fff" />
         </Pressable>
-        <Text style={styles.headerTitle}>Planes</Text>
-        <View style={{ width: 36 }} />
-      </View>
+        <Text style={styles.headerTitle}>Packs Premium</Text>
+        <View style={{ width: 24 }} />
+      </LinearGradient>
 
-      <ScrollView
-        contentContainerStyle={[
-          styles.content,
-          { paddingBottom: (insets.bottom || webBottomInset) + 24 },
-        ]}
-        showsVerticalScrollIndicator={false}
-      >
-        <Animated.View entering={FadeInDown.duration(500)}>
-          <Text style={styles.title}>Elige tu plan</Text>
-          <Text style={styles.subtitle}>
-            Accede a todo el contenido para prepararte con confianza
-          </Text>
-        </Animated.View>
-
-        {plans.map((p, index) => {
-          const isCurrentPlan = p.id === currentPlan || (p.id === 'free' && !isPremium && currentPlan === 'free');
-          const isPremiumPlan = p.id !== 'free';
-
-          return (
-            <Animated.View
-              key={p.id}
-              entering={FadeInDown.duration(500).delay(150 + index * 100)}
-            >
-              <Pressable
-                onPress={() => handleSelectPlan(p.id)}
-                disabled={isCurrentPlan}
-                style={({ pressed }) => [
-                  styles.planCard,
-                  p.popular && styles.planCardPopular,
-                  isCurrentPlan && styles.planCardActive,
-                  { opacity: pressed ? 0.95 : 1, transform: [{ scale: pressed ? 0.98 : 1 }] },
-                ]}
-              >
-                {p.popular && (
-                  <View style={styles.popularBadge}>
-                    <Text style={styles.popularText}>Más popular</Text>
-                  </View>
-                )}
-
-                <View style={styles.planHeader}>
-                  <View style={[styles.planIcon, { backgroundColor: p.color + '15' }]}>
-                    <Ionicons name={p.icon} size={22} color={p.color} />
-                  </View>
-                  <View style={styles.planInfo}>
-                    <Text style={styles.planName}>{p.name}</Text>
-                    <View style={styles.priceRow}>
-                      <Text style={styles.planPrice}>{p.price}</Text>
-                      {p.period ? <Text style={styles.planPeriod}>{p.period}</Text> : null}
-                    </View>
-                  </View>
-                  {isCurrentPlan && (
-                    <View style={styles.activeBadge}>
-                      <Ionicons name="checkmark-circle" size={16} color={Colors.success} />
-                      <Text style={styles.activeText}>Activo</Text>
-                    </View>
-                  )}
-                </View>
-
-                <View style={styles.featuresList}>
-                  {p.features.map((feature, i) => (
-                    <View key={i} style={styles.featureRow}>
-                      <Ionicons
-                        name="checkmark"
-                        size={16}
-                        color={isPremiumPlan ? Colors.success : Colors.textMuted}
-                      />
-                      <Text style={styles.featureText}>{feature}</Text>
-                    </View>
-                  ))}
-                </View>
-
-                {isPremiumPlan && !isCurrentPlan && (
-                  <LinearGradient
-                    colors={p.popular ? [Colors.primary, Colors.primaryLight] : [Colors.accent, '#fbbf24']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                    style={styles.planButton}
-                  >
-                    <Text style={styles.planButtonText}>Elegir plan</Text>
-                  </LinearGradient>
-                )}
-              </Pressable>
-            </Animated.View>
-          );
-        })}
-
-        <Animated.View entering={FadeInDown.duration(500).delay(600)}>
-          <View style={styles.guaranteeCard}>
-            <MaterialCommunityIcons name="shield-check" size={24} color={Colors.success} />
-            <View style={styles.guaranteeContent}>
-              <Text style={styles.guaranteeName}>Pago 100% seguro</Text>
-              <Text style={styles.guaranteeDesc}>
-                Si no apruebas, te extendemos el acceso sin costo
-              </Text>
-            </View>
+      <ScrollView contentContainerStyle={[styles.content, { paddingBottom: (Platform.OS === 'web' ? 34 : insets.bottom) + 20 }]}>
+        {isPremium && (
+          <View style={styles.activeCard}>
+            <Ionicons name="checkmark-circle" size={24} color={Colors.success} />
+            <Text style={styles.activeText}>Tu plan Premium esta activo</Text>
           </View>
-        </Animated.View>
+        )}
+
+        <Text style={styles.subtitle}>Acceso completo a todos los recursos</Text>
+
+        <View style={styles.featuresList}>
+          {features.map((f, i) => (
+            <View key={i} style={styles.featureRow}>
+              <Ionicons name={f.icon as any} size={22} color="#7c3aed" />
+              <Text style={styles.featureText}>{f.text}</Text>
+            </View>
+          ))}
+        </View>
+
+        <View style={styles.planCard}>
+          <View style={styles.planBadge}><Text style={styles.planBadgeText}>Mas Popular</Text></View>
+          <Text style={styles.planName}>Premium 30 Dias</Text>
+          <Text style={styles.planPrice}>$4.990 CLP</Text>
+          <Text style={styles.planPeriod}>30 dias de acceso completo</Text>
+          <Pressable style={({ pressed }) => [styles.planBtn, pressed && { opacity: 0.8 }]}
+            onPress={() => Alert.alert('Pago', 'Contacta al administrador para activar tu plan Premium.')}>
+            <Text style={styles.planBtnText}>Obtener Premium</Text>
+          </Pressable>
+        </View>
+
+        <View style={styles.planCardAlt}>
+          <Text style={styles.planName}>Premium 10 Dias</Text>
+          <Text style={styles.planPrice}>$2.990 CLP</Text>
+          <Text style={styles.planPeriod}>10 dias de acceso completo</Text>
+          <Pressable style={({ pressed }) => [styles.planBtnAlt, pressed && { opacity: 0.8 }]}
+            onPress={() => Alert.alert('Pago', 'Contacta al administrador para activar tu plan Premium.')}>
+            <Text style={styles.planBtnAltText}>Obtener Premium</Text>
+          </Pressable>
+        </View>
+
+        <View style={styles.freeCard}>
+          <Text style={styles.planName}>Plan Gratuito</Text>
+          <Text style={styles.planPrice}>Gratis</Text>
+          <Text style={styles.planPeriod}>1 test diario gratuito</Text>
+        </View>
       </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-    backgroundColor: Colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-  },
-  backBtn: {
-    width: 36,
-    height: 36,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  headerTitle: {
-    fontSize: 17,
-    fontFamily: 'Nunito_700Bold',
-    color: Colors.text,
-  },
-  content: {
-    padding: 20,
-    gap: 14,
-  },
-  title: {
-    fontSize: 24,
-    fontFamily: 'Nunito_800ExtraBold',
-    color: Colors.text,
-  },
-  subtitle: {
-    fontSize: 15,
-    fontFamily: 'Nunito_400Regular',
-    color: Colors.textSecondary,
-    lineHeight: 22,
-    marginBottom: 4,
-  },
-  planCard: {
-    backgroundColor: Colors.surface,
-    borderRadius: 18,
-    padding: 18,
-    gap: 14,
-    borderWidth: 1.5,
-    borderColor: Colors.border,
-  },
-  planCardPopular: {
-    borderColor: Colors.primary,
-    borderWidth: 2,
-  },
-  planCardActive: {
-    borderColor: Colors.success + '60',
-    backgroundColor: Colors.successLight,
-  },
-  popularBadge: {
-    position: 'absolute',
-    top: -10,
-    right: 16,
-    backgroundColor: Colors.primary,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 10,
-  },
-  popularText: {
-    color: '#fff',
-    fontSize: 11,
-    fontFamily: 'Nunito_700Bold',
-  },
-  planHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  planIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  planInfo: {
-    flex: 1,
-    gap: 2,
-  },
-  planName: {
-    fontSize: 16,
-    fontFamily: 'Nunito_700Bold',
-    color: Colors.text,
-  },
-  priceRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    gap: 2,
-  },
-  planPrice: {
-    fontSize: 22,
-    fontFamily: 'Nunito_800ExtraBold',
-    color: Colors.text,
-  },
-  planPeriod: {
-    fontSize: 13,
-    fontFamily: 'Nunito_400Regular',
-    color: Colors.textSecondary,
-  },
-  activeBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: Colors.success + '15',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 10,
-  },
-  activeText: {
-    fontSize: 12,
-    fontFamily: 'Nunito_700Bold',
-    color: Colors.success,
-  },
-  featuresList: {
-    gap: 8,
-  },
-  featureRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  featureText: {
-    fontSize: 14,
-    fontFamily: 'Nunito_400Regular',
-    color: Colors.textSecondary,
-    flex: 1,
-  },
-  planButton: {
-    paddingVertical: 14,
-    borderRadius: 14,
-    alignItems: 'center',
-  },
-  planButtonText: {
-    fontSize: 15,
-    fontFamily: 'Nunito_700Bold',
-    color: '#fff',
-  },
-  guaranteeCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    backgroundColor: Colors.successLight,
-    borderRadius: 14,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: Colors.success + '20',
-  },
-  guaranteeContent: {
-    flex: 1,
-    gap: 2,
-  },
-  guaranteeName: {
-    fontSize: 14,
-    fontFamily: 'Nunito_700Bold',
-    color: Colors.text,
-  },
-  guaranteeDesc: {
-    fontSize: 13,
-    fontFamily: 'Nunito_400Regular',
-    color: Colors.textSecondary,
-  },
+  container: { flex: 1, backgroundColor: Colors.background },
+  header: { paddingBottom: 16, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  headerTitle: { color: '#fff', fontSize: 20, fontFamily: 'Nunito_700Bold' },
+  content: { padding: 16 },
+  activeCard: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#dcfce7', borderRadius: 12, padding: 14, marginBottom: 16 },
+  activeText: { fontSize: 15, fontFamily: 'Nunito_700Bold', color: '#166534' },
+  subtitle: { fontSize: 18, fontFamily: 'Nunito_700Bold', color: Colors.text, marginBottom: 16 },
+  featuresList: { marginBottom: 24, gap: 10 },
+  featureRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  featureText: { fontSize: 15, fontFamily: 'Nunito_600SemiBold', color: Colors.text },
+  planCard: { backgroundColor: Colors.surface, borderRadius: 16, padding: 20, marginBottom: 12, borderWidth: 2, borderColor: '#7c3aed', alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 6, elevation: 3 },
+  planBadge: { backgroundColor: '#7c3aed', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12, marginBottom: 10 },
+  planBadgeText: { color: '#fff', fontSize: 12, fontFamily: 'Nunito_700Bold' },
+  planName: { fontSize: 18, fontFamily: 'Nunito_700Bold', color: Colors.text },
+  planPrice: { fontSize: 28, fontFamily: 'Nunito_800ExtraBold', color: '#7c3aed', marginTop: 4 },
+  planPeriod: { fontSize: 14, fontFamily: 'Nunito_400Regular', color: Colors.textSecondary, marginBottom: 16 },
+  planBtn: { backgroundColor: '#7c3aed', paddingVertical: 14, paddingHorizontal: 40, borderRadius: 14, width: '100%', alignItems: 'center' },
+  planBtnText: { color: '#fff', fontSize: 16, fontFamily: 'Nunito_700Bold' },
+  planCardAlt: { backgroundColor: Colors.surface, borderRadius: 16, padding: 20, marginBottom: 12, alignItems: 'center', borderWidth: 1, borderColor: Colors.border },
+  planBtnAlt: { backgroundColor: Colors.surfaceSecondary, paddingVertical: 14, paddingHorizontal: 40, borderRadius: 14, width: '100%', alignItems: 'center', borderWidth: 1, borderColor: Colors.border },
+  planBtnAltText: { color: Colors.text, fontSize: 16, fontFamily: 'Nunito_700Bold' },
+  freeCard: { backgroundColor: Colors.surfaceSecondary, borderRadius: 16, padding: 20, alignItems: 'center' },
 });

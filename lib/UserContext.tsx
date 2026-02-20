@@ -1,18 +1,25 @@
-import React, { createContext, useContext, useState, useEffect, useMemo, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { apiRequest, setToken, loadToken, getToken } from '@/lib/query-client';
 
 export type PlanType = 'free' | 'premium_10' | 'premium_30';
 
-interface UserState {
+export interface UserData {
+  id: string;
+  username: string;
+  role: string;
   plan: PlanType;
-  freeExamsUsed: number;
-  examHistory: ExamResult[];
-  premiumExpiry: number | null;
+  fullName: string | null;
+  email: string | null;
+  licenseType: string;
+  planExpiry: string | null;
 }
 
 export interface ExamResult {
   id: string;
   date: number;
+  examMode: string;
+  licenseType: string;
   totalQuestions: number;
   correctAnswers: number;
   score: number;
@@ -21,88 +28,136 @@ export interface ExamResult {
 }
 
 interface UserContextValue {
-  plan: PlanType;
-  freeExamsUsed: number;
-  examHistory: ExamResult[];
+  user: UserData | null;
+  isLoggedIn: boolean;
+  isAdmin: boolean;
   isPremium: boolean;
   canTakeExam: boolean;
-  setPlan: (plan: PlanType) => void;
+  freeExamsUsed: number;
+  licenseType: string;
+  loading: boolean;
+  login: (username: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  register: (username: string, password: string, fullName?: string, email?: string) => Promise<{ success: boolean; error?: string }>;
+  logout: () => Promise<void>;
+  setLicenseType: (type: string) => void;
   incrementFreeExams: () => void;
-  addExamResult: (result: ExamResult) => void;
-  clearHistory: () => void;
+  refreshUser: () => Promise<void>;
 }
 
 const UserContext = createContext<UserContextValue | null>(null);
 
-const STORAGE_KEY = '@practiquemos_user';
-
 export function UserProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<UserState>({
-    plan: 'free',
-    freeExamsUsed: 0,
-    examHistory: [],
-    premiumExpiry: null,
-  });
-  const [loaded, setLoaded] = useState(false);
+  const [user, setUser] = useState<UserData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [freeExamsUsed, setFreeExamsUsed] = useState(0);
+  const [licenseType, setLicenseTypeState] = useState('clase_b');
 
   useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY).then(data => {
-      if (data) {
-        const parsed = JSON.parse(data) as UserState;
-        if (parsed.premiumExpiry && Date.now() > parsed.premiumExpiry) {
-          parsed.plan = 'free';
-          parsed.premiumExpiry = null;
+    async function init() {
+      await loadToken();
+      const savedLicense = await AsyncStorage.getItem('@practiquemos_license');
+      if (savedLicense) setLicenseTypeState(savedLicense);
+      const savedFree = await AsyncStorage.getItem('@practiquemos_free_exams');
+      if (savedFree) setFreeExamsUsed(parseInt(savedFree, 10));
+
+      const token = getToken();
+      if (token) {
+        try {
+          const res = await apiRequest('GET', '/api/auth/me');
+          const userData = await res.json();
+          setUser(userData);
+          if (userData.licenseType) setLicenseTypeState(userData.licenseType);
+        } catch {
+          await setToken(null);
         }
-        setState(parsed);
       }
-      setLoaded(true);
+      setLoading(false);
+    }
+    init();
+  }, []);
+
+  const login = useCallback(async (username: string, password: string) => {
+    try {
+      const res = await apiRequest('POST', '/api/auth/login', { username, password });
+      const data = await res.json();
+      await setToken(data.token);
+      setUser(data.user);
+      if (data.user.licenseType) {
+        setLicenseTypeState(data.user.licenseType);
+      }
+      return { success: true };
+    } catch (err: any) {
+      const msg = err.message?.includes('401') ? 'Usuario o contraseña incorrectos' : 'Error al iniciar sesión';
+      return { success: false, error: msg };
+    }
+  }, []);
+
+  const register = useCallback(async (username: string, password: string, fullName?: string, email?: string) => {
+    try {
+      const res = await apiRequest('POST', '/api/auth/register', { username, password, fullName, email });
+      const data = await res.json();
+      await setToken(data.token);
+      setUser(data.user);
+      return { success: true };
+    } catch (err: any) {
+      const msg = err.message?.includes('400') ? 'El usuario ya existe' : 'Error al registrarse';
+      return { success: false, error: msg };
+    }
+  }, []);
+
+  const logout = useCallback(async () => {
+    try { await apiRequest('POST', '/api/auth/logout'); } catch {}
+    await setToken(null);
+    setUser(null);
+  }, []);
+
+  const setLicenseType = useCallback((type: string) => {
+    setLicenseTypeState(type);
+    AsyncStorage.setItem('@practiquemos_license', type);
+    if (user) {
+      apiRequest('PUT', '/api/auth/profile', { licenseType: type }).catch(() => {});
+    }
+  }, [user]);
+
+  const incrementFreeExams = useCallback(() => {
+    setFreeExamsUsed(prev => {
+      const next = prev + 1;
+      AsyncStorage.setItem('@practiquemos_free_exams', next.toString());
+      return next;
     });
   }, []);
 
-  useEffect(() => {
-    if (loaded) {
-      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    }
-  }, [state, loaded]);
+  const refreshUser = useCallback(async () => {
+    try {
+      const res = await apiRequest('GET', '/api/auth/me');
+      const userData = await res.json();
+      setUser(userData);
+    } catch {}
+  }, []);
 
-  const isPremium = state.plan !== 'free' && (state.premiumExpiry === null || Date.now() < (state.premiumExpiry || 0));
-  const canTakeExam = isPremium || state.freeExamsUsed < 1;
-
-  const setPlan = (plan: PlanType) => {
-    let premiumExpiry: number | null = null;
-    if (plan === 'premium_10') {
-      premiumExpiry = Date.now() + 10 * 24 * 60 * 60 * 1000;
-    } else if (plan === 'premium_30') {
-      premiumExpiry = Date.now() + 30 * 24 * 60 * 60 * 1000;
-    }
-    setState(prev => ({ ...prev, plan, premiumExpiry }));
-  };
-
-  const incrementFreeExams = () => {
-    setState(prev => ({ ...prev, freeExamsUsed: prev.freeExamsUsed + 1 }));
-  };
-
-  const addExamResult = (result: ExamResult) => {
-    setState(prev => ({ ...prev, examHistory: [result, ...prev.examHistory] }));
-  };
-
-  const clearHistory = () => {
-    setState(prev => ({ ...prev, examHistory: [] }));
-  };
+  const isLoggedIn = !!user;
+  const isAdmin = user?.role === 'admin';
+  const isPremium = user?.plan !== 'free' && !!user?.plan;
+  const canTakeExam = isPremium || freeExamsUsed < 1;
 
   const value = useMemo(() => ({
-    plan: state.plan,
-    freeExamsUsed: state.freeExamsUsed,
-    examHistory: state.examHistory,
+    user,
+    isLoggedIn,
+    isAdmin,
     isPremium,
     canTakeExam,
-    setPlan,
+    freeExamsUsed,
+    licenseType,
+    loading,
+    login,
+    register,
+    logout,
+    setLicenseType,
     incrementFreeExams,
-    addExamResult,
-    clearHistory,
-  }), [state, isPremium, canTakeExam]);
+    refreshUser,
+  }), [user, isLoggedIn, isAdmin, isPremium, canTakeExam, freeExamsUsed, licenseType, loading, login, register, logout, setLicenseType, incrementFreeExams, refreshUser]);
 
-  if (!loaded) return null;
+  if (loading) return null;
 
   return (
     <UserContext.Provider value={value}>
