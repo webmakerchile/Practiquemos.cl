@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, ScrollView, Pressable, Platform, Modal, Image }
 import { useRouter } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
 import Colors from '@/constants/colors';
 import { useUser } from '@/lib/UserContext';
 import { licenseTypes } from '@/lib/mockDatabase';
@@ -61,16 +60,13 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <LinearGradient
-        colors={[Colors.primary, Colors.primaryLight]}
-        style={[styles.header, { paddingTop: (insets.top || webTopInset) + 8 }]}
-      >
+      <View style={[styles.header, { paddingTop: (insets.top || webTopInset) + 8 }]}>
         <View style={styles.headerActions}>
           <Pressable onPress={() => setShowDrawer(true)} hitSlop={12} style={styles.headerBtn}>
-            <Ionicons name="menu" size={24} color="rgba(255,255,255,0.9)" />
+            <Ionicons name="menu" size={24} color={Colors.text} />
           </Pressable>
           <Pressable onPress={() => router.push(isLoggedIn ? '/perfil' : '/login')} hitSlop={12} style={styles.headerBtn}>
-            <Ionicons name="person-circle-outline" size={26} color="rgba(255,255,255,0.9)" />
+            <Ionicons name="person-circle-outline" size={26} color={Colors.primary} />
           </Pressable>
         </View>
 
@@ -89,9 +85,9 @@ export default function HomeScreen() {
             </Text>
           )}
           <Pressable onPress={() => setShowLicensePicker(true)} style={styles.licenseSelector}>
-            <Ionicons name="car-outline" size={15} color="rgba(255,255,255,0.85)" />
+            <Ionicons name="car-outline" size={15} color={Colors.primary} />
             <Text style={styles.licenseName}>{currentLicense.name} — {currentLicense.description}</Text>
-            <Ionicons name="chevron-down" size={15} color="rgba(255,255,255,0.85)" />
+            <Ionicons name="chevron-down" size={15} color={Colors.primary} />
           </Pressable>
           {!isLoggedIn && (
             <View style={styles.authLinks}>
@@ -105,7 +101,7 @@ export default function HomeScreen() {
             </View>
           )}
         </View>
-      </LinearGradient>
+      </View>
 
       <ScrollView style={styles.menuList} contentContainerStyle={[styles.menuListContent, { paddingBottom: (Platform.OS === 'web' ? 34 : insets.bottom) + 20 }]}>
         <MascotaCopiloto state="idle" message="Preparemos juntos tu examen de conducir" compact />
@@ -272,18 +268,18 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
-  header: { backgroundColor: Colors.primary, paddingBottom: 20, paddingHorizontal: 16 },
+  header: { backgroundColor: '#fff', paddingBottom: 16, paddingHorizontal: 16, borderBottomWidth: 1, borderBottomColor: Colors.border, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6, elevation: 3 },
   headerActions: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
   headerBtn: { padding: 4 },
   logoSection: { alignItems: 'center', paddingVertical: 8 },
   logoImg: { height: 110, width: '100%', maxWidth: 380 },
-  licenseSelector: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: 'rgba(255,255,255,0.15)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, marginTop: 6 },
-  licenseName: { color: 'rgba(255,255,255,0.9)', fontSize: 13, fontFamily: 'Nunito_600SemiBold', flexShrink: 1 },
+  licenseSelector: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: Colors.primaryLight + '30', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, marginTop: 6, borderWidth: 1, borderColor: Colors.primary + '30' },
+  licenseName: { color: Colors.primary, fontSize: 13, fontFamily: 'Nunito_600SemiBold', flexShrink: 1 },
   welcomeSection: { alignItems: 'center' },
-  welcomeTitle: { color: '#fff', fontSize: 22, fontFamily: 'Nunito_800ExtraBold', textAlign: 'center' },
-  authLinks: { flexDirection: 'row', alignItems: 'center', marginTop: 4 },
+  welcomeTitle: { color: Colors.text, fontSize: 20, fontFamily: 'Nunito_800ExtraBold', textAlign: 'center', marginBottom: 2 },
+  authLinks: { flexDirection: 'row', alignItems: 'center', marginTop: 6 },
   authLink: { color: Colors.accent, fontSize: 14, fontFamily: 'Nunito_700Bold', textDecorationLine: 'underline' },
-  authSeparator: { color: 'rgba(255,255,255,0.7)', fontSize: 14, fontFamily: 'Nunito_400Regular' },
+  authSeparator: { color: Colors.textMuted, fontSize: 14, fontFamily: 'Nunito_400Regular' },
   menuList: { flex: 1 },
   menuListContent: { paddingTop: 8 },
   menuItem: { flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.surface, marginHorizontal: 12, marginVertical: 5, padding: 16, borderRadius: 14, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4, elevation: 2 },
