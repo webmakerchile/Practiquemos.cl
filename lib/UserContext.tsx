@@ -64,10 +64,13 @@ export function UserProvider({ children }: { children: ReactNode }) {
         const token = getToken();
         if (token) {
           try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 4000);
-            const res = await apiRequest('GET', '/api/auth/me', undefined, controller.signal);
-            clearTimeout(timeoutId);
+            const timeoutPromise = new Promise<never>((_, reject) =>
+              setTimeout(() => reject(new Error('timeout')), 4000)
+            );
+            const res = await Promise.race([
+              apiRequest('GET', '/api/auth/me'),
+              timeoutPromise,
+            ]);
             const userData = await res.json();
             setUser(userData);
             if (userData.licenseType) setLicenseTypeState(userData.licenseType);
