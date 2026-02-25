@@ -54,24 +54,31 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     async function init() {
-      await loadToken();
-      const savedLicense = await AsyncStorage.getItem('@practiquemos_license');
-      if (savedLicense) setLicenseTypeState(savedLicense);
-      const savedFree = await AsyncStorage.getItem('@practiquemos_free_exams');
-      if (savedFree) setFreeExamsUsed(parseInt(savedFree, 10));
+      try {
+        await loadToken();
+        const savedLicense = await AsyncStorage.getItem('@practiquemos_license');
+        if (savedLicense) setLicenseTypeState(savedLicense);
+        const savedFree = await AsyncStorage.getItem('@practiquemos_free_exams');
+        if (savedFree) setFreeExamsUsed(parseInt(savedFree, 10));
 
-      const token = getToken();
-      if (token) {
-        try {
-          const res = await apiRequest('GET', '/api/auth/me');
-          const userData = await res.json();
-          setUser(userData);
-          if (userData.licenseType) setLicenseTypeState(userData.licenseType);
-        } catch {
-          await setToken(null);
+        const token = getToken();
+        if (token) {
+          try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 4000);
+            const res = await apiRequest('GET', '/api/auth/me', undefined, controller.signal);
+            clearTimeout(timeoutId);
+            const userData = await res.json();
+            setUser(userData);
+            if (userData.licenseType) setLicenseTypeState(userData.licenseType);
+          } catch {
+            await setToken(null);
+          }
         }
+      } catch {
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
     init();
   }, []);
