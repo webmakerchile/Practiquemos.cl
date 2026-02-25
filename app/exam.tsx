@@ -134,6 +134,27 @@ export default function ExamScreen() {
     });
   };
 
+  const handleSpeakExplanation = async () => {
+    if (isSpeaking) {
+      Speech.stop();
+      setIsSpeaking(false);
+      return;
+    }
+    if (!currentQuestion?.explicacionTexto) return;
+    setIsSpeaking(true);
+    const correctLetter = String.fromCharCode(65 + currentQuestion.respuestaCorrecta);
+    const correctOption = currentQuestion.opciones[currentQuestion.respuestaCorrecta];
+    const text = `La respuesta correcta es la opción ${correctLetter}: ${correctOption}. ${currentQuestion.explicacionTexto}`;
+    Speech.speak(text, {
+      language: 'es-419',
+      rate: 0.9,
+      pitch: 1.0,
+      onDone: () => setIsSpeaking(false),
+      onStopped: () => setIsSpeaking(false),
+      onError: () => setIsSpeaking(false),
+    });
+  };
+
   const handleAnswer = (optionIndex: number) => {
     if (answers[currentIndex] !== undefined) return;
     setAnswers(prev => ({ ...prev, [currentIndex]: optionIndex }));
@@ -457,9 +478,25 @@ export default function ExamScreen() {
 
         {showExplanation && learningMode && (
           <Animated.View entering={FadeIn.duration(250)} style={styles.explanationBox}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-              <Ionicons name="information-circle" size={18} color={Colors.primary} />
-              <Text style={styles.explanationTitle}>Explicación</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <Ionicons name="information-circle" size={18} color={Colors.primary} />
+                <Text style={styles.explanationTitle}>Explicación</Text>
+              </View>
+              <Pressable
+                onPress={handleSpeakExplanation}
+                hitSlop={10}
+                style={[styles.explanationSpeakBtn, isSpeaking && styles.explanationSpeakBtnActive]}
+              >
+                <Ionicons
+                  name={isSpeaking ? 'volume-high' : 'volume-medium-outline'}
+                  size={16}
+                  color={isSpeaking ? '#fff' : Colors.primary}
+                />
+                <Text style={[styles.explanationSpeakText, isSpeaking && { color: '#fff' }]}>
+                  {isSpeaking ? 'Detener' : 'Escuchar'}
+                </Text>
+              </Pressable>
             </View>
             <Text style={styles.explanationText}>{currentQuestion.explicacionTexto}</Text>
           </Animated.View>
@@ -692,6 +729,26 @@ const styles = StyleSheet.create({
   },
   explanationTitle: { fontSize: 14, fontFamily: 'Nunito_700Bold', color: Colors.primary },
   explanationText: { fontSize: 14, fontFamily: 'Nunito_400Regular', color: Colors.text, lineHeight: 22 },
+  explanationSpeakBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#eff6ff',
+    borderRadius: 14,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderWidth: 1,
+    borderColor: '#bfdbfe',
+  },
+  explanationSpeakBtnActive: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+  },
+  explanationSpeakText: {
+    fontSize: 12,
+    fontFamily: 'Nunito_600SemiBold',
+    color: Colors.primary,
+  },
   navBar: {
     flexDirection: 'row',
     alignItems: 'center',
