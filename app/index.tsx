@@ -65,27 +65,33 @@ export default function HomeScreen() {
         colors={[Colors.primary, Colors.primaryLight]}
         style={[styles.header, { paddingTop: (insets.top || webTopInset) + 8 }]}
       >
-        <View style={styles.headerRow}>
-          <Pressable onPress={() => setShowDrawer(true)} hitSlop={10}>
-            <Ionicons name="menu" size={28} color="#fff" />
+        <View style={styles.headerActions}>
+          <Pressable onPress={() => setShowDrawer(true)} hitSlop={12} style={styles.headerBtn}>
+            <Ionicons name="menu" size={24} color="rgba(255,255,255,0.9)" />
           </Pressable>
+          <Pressable onPress={() => router.push(isLoggedIn ? '/perfil' : '/login')} hitSlop={12} style={styles.headerBtn}>
+            <Ionicons name="person-circle-outline" size={26} color="rgba(255,255,255,0.9)" />
+          </Pressable>
+        </View>
+
+        <View style={styles.logoSection}>
           <Image
             source={require('../assets/images/logo-texto.png')}
             style={styles.logoImg}
             resizeMode="contain"
           />
-          <Pressable onPress={() => router.push(isLoggedIn ? '/perfil' : '/login')} hitSlop={10}>
-            <Ionicons name="person-circle-outline" size={30} color="#fff" />
-          </Pressable>
         </View>
+
         <View style={styles.welcomeSection}>
-          <Text style={styles.welcomeTitle}>
-            {isLoggedIn ? `¡Hola, ${user?.fullName?.split(' ')[0] || user?.username}! 👋` : '¡Bienvenid@ a Practiquemos!'}
-          </Text>
+          {isLoggedIn && (
+            <Text style={styles.welcomeTitle}>
+              ¡Hola, {user?.fullName?.split(' ')[0] || user?.username}! 👋
+            </Text>
+          )}
           <Pressable onPress={() => setShowLicensePicker(true)} style={styles.licenseSelector}>
-            <Ionicons name="car-outline" size={16} color="rgba(255,255,255,0.85)" />
+            <Ionicons name="car-outline" size={15} color="rgba(255,255,255,0.85)" />
             <Text style={styles.licenseName}>{currentLicense.name} — {currentLicense.description}</Text>
-            <Ionicons name="chevron-down" size={16} color="rgba(255,255,255,0.85)" />
+            <Ionicons name="chevron-down" size={15} color="rgba(255,255,255,0.85)" />
           </Pressable>
           {!isLoggedIn && (
             <View style={styles.authLinks}>
@@ -267,8 +273,10 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
   header: { backgroundColor: Colors.primary, paddingBottom: 20, paddingHorizontal: 16 },
-  headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 },
-  logoImg: { height: 36, width: 160 },
+  headerActions: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
+  headerBtn: { padding: 4 },
+  logoSection: { alignItems: 'center', paddingVertical: 8 },
+  logoImg: { height: 72, width: '100%', maxWidth: 340 },
   licenseSelector: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: 'rgba(255,255,255,0.15)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, marginTop: 6 },
   licenseName: { color: 'rgba(255,255,255,0.9)', fontSize: 13, fontFamily: 'Nunito_600SemiBold', flexShrink: 1 },
   welcomeSection: { alignItems: 'center' },
