@@ -70,7 +70,7 @@ export default function HomeScreen() {
             <Ionicons name="menu" size={28} color="#fff" />
           </Pressable>
           <Image
-            source={require('../assets/images/logo-completo.png')}
+            source={require('../assets/images/logo-texto.png')}
             style={styles.logoImg}
             resizeMode="contain"
           />
