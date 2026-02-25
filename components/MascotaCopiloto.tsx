@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { View, Text, StyleSheet, Pressable, Image } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -32,31 +32,67 @@ interface MascotaCopilotoProps {
   compact?: boolean;
   onSpeakPress?: () => void;
   isSpeaking?: boolean;
+  questionIndex?: number;
 }
+
+const thinkingMessages = [
+  'Piénsalo bien antes de responder 🤔',
+  'Tómate tu tiempo, sin apuros ⏳',
+  'Lee todas las opciones con calma 📋',
+  'Confía en lo que has estudiado 📚',
+  '¡Tú puedes con esta! 💪',
+  'Recuerda lo que aprendiste 🧠',
+  'Analiza cada opción antes de elegir 🔍',
+  'No te apures, piensa con calma 🌟',
+  'Imagina que estás en la calle, ¿qué harías? 🚗',
+  'La respuesta correcta siempre tiene lógica ✨',
+  'Descarta las opciones que no tienen sentido 🎯',
+  'Vas bien, sigue concentrado 🐾',
+];
+
+const correctMessages = [
+  '¡Excelente! ¡Eso es! 🎉',
+  '¡Muy bien! ¡Sigue así! ⭐',
+  '¡Perfecto! ¡Eres un crack! 🏆',
+  '¡Correcto! ¡Así se hace! 🎯',
+  '¡Genial! ¡Vas muy bien! 🚀',
+  '¡Bravo! ¡Lo sabías! 👏',
+  '¡Impecable! Sigamos así 💯',
+  '¡Eso! La práctica hace al maestro 🌟',
+];
+
+const incorrectMessages = [
+  'Tranquilo, cada error nos enseña 📖',
+  'No te preocupes, aprendamos juntos 🤝',
+  'Revisa la explicación, ¡lo tendrás! 💡',
+  'Así se aprende, de los errores 🌱',
+  'La próxima la aciertas, ¡seguro! 🙌',
+];
 
 const mascotaMessages: Record<MascotaState, string[]> = {
   idle: ['¡Estoy contigo, sigamos practicando! 🐾', '¡Tú puedes lograrlo! 💪'],
-  correct: [
-    '¡Excelente! ¡Eso es! 🎉',
-    '¡Muy bien! ¡Sigue así! ⭐',
-    '¡Perfecto! ¡Eres un crack! 🏆',
-    '¡Correcto! ¡Así se hace! 🎯',
-    '¡Genial! ¡Vas muy bien! 🚀',
-  ],
-  incorrect: [
-    'Tranquilo, cada error nos enseña 📖',
-    'No te preocupes, aprendamos juntos 🤝',
-    'Revisa la explicación, ¡lo tendrás! 💡',
-  ],
+  correct: correctMessages,
+  incorrect: incorrectMessages,
   celebrate: ['¡FELICITACIONES! ¡Aprobaste! 🎊🏆🎉', '¡Increíble resultado! ¡Orgulloso de ti! ⭐'],
   encourage: ['¡Aún puedes mejorar! ¡Repasemos! 💪', '¡No te rindas! ¡Inténtalo de nuevo! 🔥'],
   speaking: ['Escucha la pregunta con atención 🎧', 'Te estoy leyendo la pregunta... 🗣️'],
-  thinking: ['Piénsalo bien antes de responder 🤔', 'Tómate tu tiempo, sin apuros ⏳'],
+  thinking: thinkingMessages,
 };
 
-function getRandomMessage(state: MascotaState): string {
+function getProgressiveMessage(state: MascotaState, questionIndex: number, timerTick: number): string {
   const msgs = mascotaMessages[state];
-  return msgs[Math.floor(Math.random() * msgs.length)];
+  if (state === 'thinking' || state === 'idle') {
+    const baseIndex = questionIndex % msgs.length;
+    const offset = timerTick % msgs.length;
+    return msgs[(baseIndex + offset) % msgs.length];
+  }
+  if (state === 'correct' || state === 'incorrect') {
+    return msgs[questionIndex % msgs.length];
+  }
+  if (state === 'speaking') {
+    return msgs[questionIndex % msgs.length];
+  }
+  return msgs[questionIndex % msgs.length];
 }
 
 export default function MascotaCopiloto({
@@ -66,12 +102,41 @@ export default function MascotaCopiloto({
   compact = false,
   onSpeakPress,
   isSpeaking = false,
+  questionIndex = 0,
 }: MascotaCopilotoProps) {
   const scale = useSharedValue(1);
   const bounceY = useSharedValue(0);
   const rotation = useSharedValue(0);
 
   const displayState = isSpeaking ? 'speaking' : state;
+
+  const [timerTick, setTimerTick] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const prevQuestionIndex = useRef(questionIndex);
+
+  useEffect(() => {
+    if (prevQuestionIndex.current !== questionIndex) {
+      setTimerTick(0);
+      prevQuestionIndex.current = questionIndex;
+    }
+  }, [questionIndex]);
+
+  useEffect(() => {
+    if (displayState === 'thinking' || displayState === 'idle') {
+      if (timerRef.current) clearInterval(timerRef.current);
+      timerRef.current = setInterval(() => {
+        setTimerTick(t => t + 1);
+      }, 8000);
+      return () => {
+        if (timerRef.current) clearInterval(timerRef.current);
+      };
+    } else {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    }
+  }, [displayState]);
 
   useEffect(() => {
     if (displayState === 'correct' || displayState === 'celebrate') {
@@ -133,7 +198,7 @@ export default function MascotaCopiloto({
     ],
   }));
 
-  const displayMessage = message || getRandomMessage(displayState);
+  const displayMessage = message || getProgressiveMessage(displayState, questionIndex, timerTick);
   const imgSize = compact ? 60 : 88;
 
   const getBubbleStyle = () => {

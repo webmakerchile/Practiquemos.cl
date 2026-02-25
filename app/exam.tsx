@@ -442,6 +442,7 @@ export default function ExamScreen() {
             onExplanationPress={() => setShowExplanation(!showExplanation)}
             compact
             isSpeaking={isSpeaking}
+            questionIndex={currentIndex}
           />
         )}
 
@@ -450,6 +451,7 @@ export default function ExamScreen() {
             state={getMascotaState()}
             compact
             isSpeaking={isSpeaking}
+            questionIndex={currentIndex}
           />
         )}
 
