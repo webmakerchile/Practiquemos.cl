@@ -114,6 +114,26 @@ export default function ExamScreen() {
 
   const currentQuestion = questions[currentIndex];
 
+  const humanizeText = (text: string): string => {
+    return text
+      .replace(/\.\s+/g, '... ')
+      .replace(/:\s*/g, ':... ')
+      .replace(/\?\s*/g, '?... ')
+      .replace(/;\s*/g, ';... ')
+      .replace(/,\s*/g, ', ');
+  };
+
+  const speakHuman = (text: string) => {
+    Speech.speak(humanizeText(text), {
+      language: 'es-419',
+      rate: 0.85,
+      pitch: 1.05,
+      onDone: () => setIsSpeaking(false),
+      onStopped: () => setIsSpeaking(false),
+      onError: () => setIsSpeaking(false),
+    });
+  };
+
   const handleSpeak = async () => {
     if (isSpeaking) {
       Speech.stop();
@@ -124,14 +144,7 @@ export default function ExamScreen() {
     setIsSpeaking(true);
     const text = currentQuestion.pregunta + '. ' + currentQuestion.opciones.map((o, i) =>
       `Opción ${String.fromCharCode(65 + i)}: ${o}`).join('. ');
-    Speech.speak(text, {
-      language: 'es-419',
-      rate: 0.9,
-      pitch: 1.0,
-      onDone: () => setIsSpeaking(false),
-      onStopped: () => setIsSpeaking(false),
-      onError: () => setIsSpeaking(false),
-    });
+    speakHuman(text);
   };
 
   const handleSpeakExplanation = async () => {
@@ -145,14 +158,7 @@ export default function ExamScreen() {
     const correctLetter = String.fromCharCode(65 + currentQuestion.respuestaCorrecta);
     const correctOption = currentQuestion.opciones[currentQuestion.respuestaCorrecta];
     const text = `La respuesta correcta es la opción ${correctLetter}: ${correctOption}. ${currentQuestion.explicacionTexto}`;
-    Speech.speak(text, {
-      language: 'es-419',
-      rate: 0.9,
-      pitch: 1.0,
-      onDone: () => setIsSpeaking(false),
-      onStopped: () => setIsSpeaking(false),
-      onError: () => setIsSpeaking(false),
-    });
+    speakHuman(text);
   };
 
   const handleAnswer = (optionIndex: number) => {
