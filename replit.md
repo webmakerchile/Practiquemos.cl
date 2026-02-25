@@ -29,7 +29,7 @@ Preferred communication style: Simple, everyday language.
   - `mascota-cuerpo.png` → Idle/correct/celebrate states in exam
   - `mascota-hablando.png` → When TTS is active (speaking state) + register step 2
   - `mascota-pensando.png` → When user is answering (thinking/incorrect state) + register step 3, exit modal
-- **Question Images**: `lib/questionImages.ts` provides a smart keyword-based image resolver. Questions in señalización categories (Señalización, Señales Reglamentarias, Señales Preventivas, Señales Informativas) automatically show relevant Chilean traffic sign images from Wikipedia Commons URLs.
+- **Question Images**: `lib/questionImages.ts` provides a smart keyword-based image resolver with 68 local PNG images in `assets/images/questions/`. All 1005 questions have specific keyword-matched illustrations (100% coverage). Images cover traffic signs, driving situations, vehicle mechanics, first aid, environmental topics, and safety concepts.
 
 ### Screen Structure
 
