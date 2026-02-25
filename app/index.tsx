@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
   headerActions: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
   headerBtn: { padding: 4 },
   logoSection: { alignItems: 'center', paddingVertical: 8 },
-  logoImg: { height: 72, width: '100%', maxWidth: 340 },
+  logoImg: { height: 110, width: '100%', maxWidth: 380 },
   licenseSelector: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: 'rgba(255,255,255,0.15)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, marginTop: 6 },
   licenseName: { color: 'rgba(255,255,255,0.9)', fontSize: 13, fontFamily: 'Nunito_600SemiBold', flexShrink: 1 },
   welcomeSection: { alignItems: 'center' },
