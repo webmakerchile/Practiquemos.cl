@@ -20,7 +20,16 @@ Preferred communication style: Simple, everyday language.
 - **Styling**: React Native `StyleSheet` objects (not Tailwind). The design system uses a custom color palette defined in `constants/colors.ts` — blue primary (#1d4ed8), amber accent (#f59e0b), slate neutrals.
 - **Fonts**: Nunito (Google Fonts via `@expo-google-fonts/nunito`) in Regular, SemiBold, Bold, and ExtraBold weights.
 - **Animations**: `react-native-reanimated` for the mascot copilot component animations.
-- **Key UX Pattern**: The mascot "copiloto" (`components/MascotaCopiloto.tsx`) provides positive reinforcement feedback during exams. No harsh red colors for errors — uses orange/amber tones instead.
+- **TTS**: `expo-speech` reads questions and options aloud in Spanish (es-419 locale). Speaker button on each question in exam.
+- **Audio**: `expo-av` plays correct/incorrect WAV sound effects stored in `assets/sounds/`. Sounds generated programmatically via Node.js.
+- **Key UX Pattern**: The mascot "copiloto" (`components/MascotaCopiloto.tsx`) provides positive reinforcement with dopamine-driven animations. No harsh red colors for errors — uses orange/amber tones. Streak badges for consecutive correct answers.
+- **Mascot Logos**: 5 real PNG images in `assets/images/`:
+  - `logo-completo.png` → Branding in home header and login screen
+  - `mascota-cabeza.png` → Avatar in profile (perfil) screen
+  - `mascota-cuerpo.png` → Idle/correct/celebrate states in exam
+  - `mascota-hablando.png` → When TTS is active (speaking state) + register step 2
+  - `mascota-pensando.png` → When user is answering (thinking/incorrect state) + register step 3, exit modal
+- **Question Images**: `lib/questionImages.ts` provides a smart keyword-based image resolver. Questions in señalización categories (Señalización, Señales Reglamentarias, Señales Preventivas, Señales Informativas) automatically show relevant Chilean traffic sign images from Wikipedia Commons URLs.
 
 ### Screen Structure
 
@@ -109,6 +118,8 @@ Study materials in `lib/temarioData.ts` with 6 chapters, 83 sections. The exam e
 - `@react-native-async-storage/async-storage` — Client-side token persistence
 - `expo-linear-gradient` — Gradient headers throughout the app
 - `@expo-google-fonts/nunito` — Typography
+- `expo-speech` — Text-to-speech (reads questions aloud in Spanish)
+- `expo-av` — Audio playback for correct/incorrect sound effects
 
 ### External Services
 - No third-party auth providers (custom username/password auth)

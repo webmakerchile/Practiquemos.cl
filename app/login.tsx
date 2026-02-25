@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, Pressable, Platform, Alert, KeyboardAvoidingView, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Pressable, Platform, Alert, KeyboardAvoidingView, ScrollView, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -43,9 +43,11 @@ export default function LoginScreen() {
       </LinearGradient>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.mascotRow}>
-          <View style={styles.mascotCircle}>
-            <Ionicons name="person" size={48} color={Colors.primary} />
-          </View>
+          <Image
+            source={require('../assets/images/logo-completo.png')}
+            style={styles.logoLogin}
+            resizeMode="contain"
+          />
         </View>
 
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
@@ -104,8 +106,8 @@ const styles = StyleSheet.create({
   backBtn: { padding: 4 },
   headerTitle: { color: '#fff', fontSize: 20, fontFamily: 'Nunito_700Bold' },
   content: { padding: 24, alignItems: 'center' },
-  mascotRow: { marginBottom: 24 },
-  mascotCircle: { width: 90, height: 90, borderRadius: 45, backgroundColor: Colors.surfaceSecondary, justifyContent: 'center', alignItems: 'center', borderWidth: 3, borderColor: Colors.primary },
+  mascotRow: { marginBottom: 20, alignItems: 'center' },
+  logoLogin: { width: 220, height: 70 },
   errorText: { color: '#dc2626', fontSize: 14, fontFamily: 'Nunito_600SemiBold', marginBottom: 12, textAlign: 'center' },
   inputGroup: { width: '100%', marginBottom: 16 },
   label: { fontSize: 14, fontFamily: 'Nunito_600SemiBold', color: Colors.text, marginBottom: 6 },

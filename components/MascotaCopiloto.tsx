@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Image } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -13,32 +13,45 @@ import Animated, {
 import { Ionicons } from '@expo/vector-icons';
 import Colors from '@/constants/colors';
 
-type MascotaState = 'idle' | 'correct' | 'incorrect' | 'celebrate' | 'encourage';
+export type MascotaState = 'idle' | 'correct' | 'incorrect' | 'celebrate' | 'encourage' | 'speaking' | 'thinking';
+
+const MASCOT_IMAGES: Record<MascotaState, any> = {
+  idle: require('../assets/images/mascota-cuerpo.png'),
+  correct: require('../assets/images/mascota-cuerpo.png'),
+  incorrect: require('../assets/images/mascota-pensando.png'),
+  celebrate: require('../assets/images/mascota-cuerpo.png'),
+  encourage: require('../assets/images/mascota-pensando.png'),
+  speaking: require('../assets/images/mascota-hablando.png'),
+  thinking: require('../assets/images/mascota-pensando.png'),
+};
 
 interface MascotaCopilotoProps {
   state: MascotaState;
   message?: string;
   onExplanationPress?: () => void;
   compact?: boolean;
+  onSpeakPress?: () => void;
+  isSpeaking?: boolean;
 }
 
 const mascotaMessages: Record<MascotaState, string[]> = {
-  idle: ['Estoy contigo, sigamos practicando'],
+  idle: ['¡Estoy contigo, sigamos practicando! 🐾', '¡Tú puedes lograrlo! 💪'],
   correct: [
-    'Bien hecho, sigamos practicando',
-    'Excelente, vas muy bien',
-    'Asi se hace, sigue asi',
+    '¡Excelente! ¡Eso es! 🎉',
+    '¡Muy bien! ¡Sigue así! ⭐',
+    '¡Perfecto! ¡Eres un crack! 🏆',
+    '¡Correcto! ¡Así se hace! 🎯',
+    '¡Genial! ¡Vas muy bien! 🚀',
   ],
   incorrect: [
-    'Revisemos juntos qué pasó...',
-    'No te preocupes, aprendamos de esto',
-    'Tranquilo, cada error nos enseña algo',
+    'Tranquilo, cada error nos enseña 📖',
+    'No te preocupes, aprendamos juntos 🤝',
+    'Revisa la explicación, ¡lo tendrás! 💡',
   ],
-  celebrate: ['Vamos por esa licencia'],
-  encourage: [
-    'Aún no es el resultado que buscamos, pero vamos bien',
-    'Revisemos los temas donde puedes reforzar',
-  ],
+  celebrate: ['¡FELICITACIONES! ¡Aprobaste! 🎊🏆🎉', '¡Increíble resultado! ¡Orgulloso de ti! ⭐'],
+  encourage: ['¡Aún puedes mejorar! ¡Repasemos! 💪', '¡No te rindas! ¡Inténtalo de nuevo! 🔥'],
+  speaking: ['Escucha la pregunta con atención 🎧', 'Te estoy leyendo la pregunta... 🗣️'],
+  thinking: ['Piénsalo bien antes de responder 🤔', 'Tómate tu tiempo, sin apuros ⏳'],
 };
 
 function getRandomMessage(state: MascotaState): string {
@@ -46,130 +59,133 @@ function getRandomMessage(state: MascotaState): string {
   return msgs[Math.floor(Math.random() * msgs.length)];
 }
 
-export default function MascotaCopiloto({ state, message, onExplanationPress, compact = false }: MascotaCopilotoProps) {
+export default function MascotaCopiloto({
+  state,
+  message,
+  onExplanationPress,
+  compact = false,
+  onSpeakPress,
+  isSpeaking = false,
+}: MascotaCopilotoProps) {
   const scale = useSharedValue(1);
-  const rotation = useSharedValue(0);
   const bounceY = useSharedValue(0);
-  const tailWag = useSharedValue(0);
+  const rotation = useSharedValue(0);
+
+  const displayState = isSpeaking ? 'speaking' : state;
 
   useEffect(() => {
-    if (state === 'correct' || state === 'celebrate') {
+    if (displayState === 'correct' || displayState === 'celebrate') {
       scale.value = withSequence(
-        withSpring(1.15, { damping: 4 }),
-        withSpring(1, { damping: 8 })
+        withSpring(1.2, { damping: 3, stiffness: 200 }),
+        withSpring(0.95, { damping: 8 }),
+        withSpring(1.05, { damping: 8 }),
+        withSpring(1, { damping: 10 })
       );
       bounceY.value = withSequence(
-        withSpring(-8, { damping: 4 }),
-        withSpring(0, { damping: 8 })
+        withTiming(-16, { duration: 150, easing: Easing.out(Easing.ease) }),
+        withTiming(4, { duration: 100 }),
+        withTiming(-8, { duration: 100 }),
+        withTiming(0, { duration: 100 })
       );
-      tailWag.value = withRepeat(
+    } else if (displayState === 'incorrect' || displayState === 'encourage') {
+      rotation.value = withSequence(
+        withTiming(-8, { duration: 100 }),
+        withTiming(8, { duration: 100 }),
+        withTiming(-6, { duration: 100 }),
+        withTiming(6, { duration: 100 }),
+        withTiming(0, { duration: 100 })
+      );
+    } else if (displayState === 'speaking') {
+      bounceY.value = withRepeat(
         withSequence(
-          withTiming(15, { duration: 150, easing: Easing.inOut(Easing.ease) }),
-          withTiming(-15, { duration: 150, easing: Easing.inOut(Easing.ease) }),
+          withTiming(-4, { duration: 300, easing: Easing.inOut(Easing.ease) }),
+          withTiming(0, { duration: 300, easing: Easing.inOut(Easing.ease) }),
         ),
-        4,
+        -1,
         true
       );
-    } else if (state === 'incorrect' || state === 'encourage') {
-      rotation.value = withSequence(
-        withTiming(-5, { duration: 200 }),
-        withTiming(5, { duration: 200 }),
-        withTiming(0, { duration: 200 })
+    } else if (displayState === 'thinking') {
+      rotation.value = withRepeat(
+        withSequence(
+          withTiming(-3, { duration: 600, easing: Easing.inOut(Easing.ease) }),
+          withTiming(3, { duration: 600, easing: Easing.inOut(Easing.ease) }),
+        ),
+        -1,
+        true
       );
     } else {
       bounceY.value = withRepeat(
         withSequence(
-          withDelay(2000, withTiming(-3, { duration: 800, easing: Easing.inOut(Easing.ease) })),
-          withTiming(0, { duration: 800, easing: Easing.inOut(Easing.ease) }),
+          withDelay(1500, withTiming(-5, { duration: 700, easing: Easing.inOut(Easing.ease) })),
+          withTiming(0, { duration: 700, easing: Easing.inOut(Easing.ease) }),
         ),
         -1,
         true
       );
     }
-  }, [state]);
+  }, [displayState]);
 
-  const bodyStyle = useAnimatedStyle(() => ({
+  const animStyle = useAnimatedStyle(() => ({
     transform: [
       { scale: scale.value },
-      { rotate: `${rotation.value}deg` },
       { translateY: bounceY.value },
+      { rotate: `${rotation.value}deg` },
     ],
   }));
 
-  const tailStyle = useAnimatedStyle(() => ({
-    transform: [{ rotate: `${tailWag.value}deg` }],
-  }));
+  const displayMessage = message || getRandomMessage(displayState);
+  const imgSize = compact ? 60 : 88;
 
-  const displayMessage = message || getRandomMessage(state);
-
-  const getMascotColor = () => {
-    switch (state) {
+  const getBubbleStyle = () => {
+    switch (displayState) {
       case 'correct':
       case 'celebrate':
-        return Colors.success;
+        return { backgroundColor: '#dcfce7', borderColor: Colors.success + '50' };
       case 'incorrect':
       case 'encourage':
-        return Colors.warning;
+        return { backgroundColor: '#fff7ed', borderColor: Colors.warning + '50' };
+      case 'speaking':
+        return { backgroundColor: '#eff6ff', borderColor: Colors.primary + '50' };
+      case 'thinking':
+        return { backgroundColor: '#faf5ff', borderColor: '#a855f750' };
       default:
-        return Colors.primary;
+        return { backgroundColor: Colors.surfaceSecondary, borderColor: Colors.border };
     }
   };
-
-  const getBubbleColor = () => {
-    switch (state) {
-      case 'correct':
-      case 'celebrate':
-        return Colors.successLight;
-      case 'incorrect':
-      case 'encourage':
-        return Colors.warningLight;
-      default:
-        return Colors.surfaceSecondary;
-    }
-  };
-
-  const size = compact ? 40 : 56;
 
   return (
     <View style={[styles.container, compact && styles.containerCompact]}>
-      <Animated.View style={[styles.mascotBody, bodyStyle, { width: size, height: size, borderRadius: size / 2 }]}>
-        <View style={[styles.mascotInner, { width: size, height: size, borderRadius: size / 2, backgroundColor: '#F5E6D3' }]}>
-          <View style={styles.face}>
-            <View style={[styles.eye, styles.leftEye, compact && styles.eyeSmall]}>
-              {(state === 'correct' || state === 'celebrate') ? (
-                <View style={[styles.happyEye, compact && styles.happyEyeSmall]} />
-              ) : (
-                <View style={[styles.pupil, compact && styles.pupilSmall]} />
-              )}
-            </View>
-            <View style={[styles.eye, styles.rightEye, compact && styles.eyeSmall]}>
-              {(state === 'correct' || state === 'celebrate') ? (
-                <View style={[styles.happyEye, compact && styles.happyEyeSmall]} />
-              ) : (
-                <View style={[styles.pupil, compact && styles.pupilSmall]} />
-              )}
-            </View>
-            <View style={[styles.nose, compact && styles.noseSmall]} />
-            {(state === 'correct' || state === 'celebrate') && (
-              <View style={[styles.mouth, compact && styles.mouthSmall]} />
-            )}
-          </View>
-          <Animated.View style={[styles.ear, styles.leftEar, compact && styles.earSmall, tailStyle]} />
-          <Animated.View style={[styles.ear, styles.rightEar, compact && styles.earSmall, { transform: [{ scaleX: -1 }] }]} />
-        </View>
-      </Animated.View>
+      <View style={{ alignItems: 'center', gap: 4 }}>
+        <Animated.View style={[{ width: imgSize, height: imgSize }, animStyle]}>
+          <Image
+            source={MASCOT_IMAGES[displayState]}
+            style={{ width: imgSize, height: imgSize }}
+            resizeMode="contain"
+          />
+        </Animated.View>
+        {onSpeakPress && (
+          <Pressable
+            onPress={onSpeakPress}
+            style={[styles.speakBtn, isSpeaking && styles.speakBtnActive]}
+            hitSlop={8}
+          >
+            <Ionicons
+              name={isSpeaking ? 'volume-high' : 'volume-medium-outline'}
+              size={14}
+              color={isSpeaking ? '#fff' : Colors.primary}
+            />
+          </Pressable>
+        )}
+      </View>
 
-      <View style={[styles.speechBubble, { backgroundColor: getBubbleColor(), borderColor: getMascotColor() + '30' }, compact && styles.speechBubbleCompact]}>
-        <Text style={[styles.messageText, compact && styles.messageTextCompact, { color: Colors.text }]}>
+      <View style={[styles.speechBubble, getBubbleStyle(), compact && styles.speechBubbleCompact]}>
+        <Text style={[styles.messageText, compact && styles.messageTextCompact]}>
           {displayMessage}
         </Text>
-        {state === 'incorrect' && onExplanationPress && (
+        {(displayState === 'incorrect') && onExplanationPress && (
           <Pressable
             onPress={onExplanationPress}
-            style={({ pressed }) => [
-              styles.explanationButton,
-              { backgroundColor: Colors.primary, opacity: pressed ? 0.8 : 1 },
-            ]}
+            style={({ pressed }) => [styles.explanationButton, pressed && { opacity: 0.8 }]}
           >
             <Ionicons name="book-outline" size={14} color="#fff" />
             <Text style={styles.explanationButtonText}>Ver explicación</Text>
@@ -193,119 +209,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     gap: 8,
   },
-  mascotBody: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  mascotInner: {
-    overflow: 'hidden',
-    justifyContent: 'center',
+  speakBtn: {
+    backgroundColor: Colors.primaryLight,
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#E8D5C0',
+    gap: 3,
   },
-  face: {
-    position: 'relative',
-    width: '100%',
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  eye: {
-    position: 'absolute',
-    width: 8,
-    height: 8,
-    backgroundColor: '#fff',
-    borderRadius: 4,
-    justifyContent: 'center',
-    alignItems: 'center',
-    top: '30%',
-  },
-  eyeSmall: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-  },
-  leftEye: {
-    left: '25%',
-  },
-  rightEye: {
-    right: '25%',
-  },
-  pupil: {
-    width: 4,
-    height: 4,
-    backgroundColor: '#3B2F2F',
-    borderRadius: 2,
-  },
-  pupilSmall: {
-    width: 3,
-    height: 3,
-    borderRadius: 1.5,
-  },
-  happyEye: {
-    width: 6,
-    height: 3,
-    borderTopLeftRadius: 3,
-    borderTopRightRadius: 3,
-    backgroundColor: '#3B2F2F',
-  },
-  happyEyeSmall: {
-    width: 5,
-    height: 2.5,
-  },
-  nose: {
-    position: 'absolute',
-    width: 6,
-    height: 4,
-    backgroundColor: '#8B6F5C',
-    borderRadius: 3,
-    top: '48%',
-  },
-  noseSmall: {
-    width: 4,
-    height: 3,
-  },
-  mouth: {
-    position: 'absolute',
-    width: 12,
-    height: 6,
-    borderBottomLeftRadius: 6,
-    borderBottomRightRadius: 6,
-    borderWidth: 1.5,
-    borderTopWidth: 0,
-    borderColor: '#8B6F5C',
-    top: '58%',
-  },
-  mouthSmall: {
-    width: 8,
-    height: 4,
-    borderWidth: 1,
-  },
-  ear: {
-    position: 'absolute',
-    width: 14,
-    height: 20,
-    backgroundColor: '#D4B896',
-    borderRadius: 7,
-    top: -6,
-  },
-  earSmall: {
-    width: 10,
-    height: 14,
-    borderRadius: 5,
-    top: -4,
-  },
-  leftEar: {
-    left: 4,
-    transform: [{ rotate: '-20deg' }],
-  },
-  rightEar: {
-    right: 4,
-    transform: [{ rotate: '20deg' }, { scaleX: -1 }],
+  speakBtnActive: {
+    backgroundColor: Colors.primary,
   },
   speechBubble: {
     flex: 1,
@@ -313,19 +227,23 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 12,
     gap: 8,
+    minHeight: 60,
+    justifyContent: 'center',
   },
   speechBubbleCompact: {
     padding: 10,
     borderRadius: 12,
+    minHeight: 50,
   },
   messageText: {
     fontSize: 14,
-    lineHeight: 20,
+    lineHeight: 21,
     fontFamily: 'Nunito_600SemiBold',
+    color: Colors.text,
   },
   messageTextCompact: {
     fontSize: 13,
-    lineHeight: 18,
+    lineHeight: 19,
   },
   explanationButton: {
     flexDirection: 'row',
@@ -335,6 +253,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     borderRadius: 20,
     alignSelf: 'flex-start',
+    backgroundColor: Colors.primary,
   },
   explanationButtonText: {
     color: '#fff',

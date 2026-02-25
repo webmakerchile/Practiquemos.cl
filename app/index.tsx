@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Platform, Modal } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Platform, Modal, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -69,26 +69,32 @@ export default function HomeScreen() {
           <Pressable onPress={() => setShowDrawer(true)} hitSlop={10}>
             <Ionicons name="menu" size={28} color="#fff" />
           </Pressable>
-          <Pressable onPress={() => setShowLicensePicker(true)} style={styles.licenseSelector}>
-            <Text style={styles.licenseName}>{currentLicense.name}</Text>
-            <Ionicons name="chevron-down" size={18} color="#fff" />
-          </Pressable>
+          <Image
+            source={require('../assets/images/logo-completo.png')}
+            style={styles.logoImg}
+            resizeMode="contain"
+          />
           <Pressable onPress={() => router.push(isLoggedIn ? '/perfil' : '/login')} hitSlop={10}>
-            <Ionicons name="person-circle-outline" size={28} color="#fff" />
+            <Ionicons name="person-circle-outline" size={30} color="#fff" />
           </Pressable>
         </View>
         <View style={styles.welcomeSection}>
           <Text style={styles.welcomeTitle}>
-            {isLoggedIn ? `Hola, ${user?.fullName || user?.username}` : 'Bienvenid@ a Practiquemos'}
+            {isLoggedIn ? `¡Hola, ${user?.fullName?.split(' ')[0] || user?.username}! 👋` : '¡Bienvenid@ a Practiquemos!'}
           </Text>
+          <Pressable onPress={() => setShowLicensePicker(true)} style={styles.licenseSelector}>
+            <Ionicons name="car-outline" size={16} color="rgba(255,255,255,0.85)" />
+            <Text style={styles.licenseName}>{currentLicense.name} — {currentLicense.description}</Text>
+            <Ionicons name="chevron-down" size={16} color="rgba(255,255,255,0.85)" />
+          </Pressable>
           {!isLoggedIn && (
             <View style={styles.authLinks}>
               <Pressable onPress={() => router.push('/login')}>
-                <Text style={styles.authLink}>Inicia Sesion</Text>
+                <Text style={styles.authLink}>Inicia Sesión</Text>
               </Pressable>
-              <Text style={styles.authSeparator}> o </Text>
+              <Text style={styles.authSeparator}> · </Text>
               <Pressable onPress={() => router.push('/register')}>
-                <Text style={styles.authLink}>Registrate Gratis</Text>
+                <Text style={styles.authLink}>Regístrate Gratis</Text>
               </Pressable>
             </View>
           )}
@@ -261,9 +267,10 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
   header: { backgroundColor: Colors.primary, paddingBottom: 20, paddingHorizontal: 16 },
-  headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
-  licenseSelector: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: 'rgba(255,255,255,0.2)', paddingHorizontal: 16, paddingVertical: 6, borderRadius: 20 },
-  licenseName: { color: '#fff', fontSize: 16, fontFamily: 'Nunito_700Bold' },
+  headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 },
+  logoImg: { height: 36, width: 160 },
+  licenseSelector: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: 'rgba(255,255,255,0.15)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, marginTop: 6 },
+  licenseName: { color: 'rgba(255,255,255,0.9)', fontSize: 13, fontFamily: 'Nunito_600SemiBold', flexShrink: 1 },
   welcomeSection: { alignItems: 'center' },
   welcomeTitle: { color: '#fff', fontSize: 22, fontFamily: 'Nunito_800ExtraBold', textAlign: 'center' },
   authLinks: { flexDirection: 'row', alignItems: 'center', marginTop: 4 },

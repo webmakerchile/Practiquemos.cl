@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Platform, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Platform, Alert, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -37,7 +37,11 @@ export default function PerfilScreen() {
       <ScrollView contentContainerStyle={[styles.content, { paddingBottom: (Platform.OS === 'web' ? 34 : insets.bottom) + 20 }]}>
         <View style={styles.avatarSection}>
           <View style={styles.avatar}>
-            <Ionicons name="person" size={48} color={Colors.primary} />
+            <Image
+              source={require('../assets/images/mascota-cabeza.png')}
+              style={{ width: 80, height: 80 }}
+              resizeMode="contain"
+            />
           </View>
           <Text style={styles.userName}>{user?.fullName || user?.username}</Text>
           <Text style={styles.userHandle}>@{user?.username}</Text>
@@ -105,7 +109,7 @@ const styles = StyleSheet.create({
   headerTitle: { color: '#fff', fontSize: 20, fontFamily: 'Nunito_700Bold' },
   content: { padding: 16 },
   avatarSection: { alignItems: 'center', marginBottom: 24 },
-  avatar: { width: 90, height: 90, borderRadius: 45, backgroundColor: Colors.surfaceSecondary, justifyContent: 'center', alignItems: 'center', borderWidth: 3, borderColor: Colors.primary, marginBottom: 12 },
+  avatar: { width: 96, height: 96, justifyContent: 'center', alignItems: 'center', marginBottom: 10 },
   userName: { fontSize: 22, fontFamily: 'Nunito_800ExtraBold', color: Colors.text },
   userHandle: { fontSize: 14, fontFamily: 'Nunito_400Regular', color: Colors.textSecondary },
   adminBadge: { backgroundColor: '#dc2626', paddingHorizontal: 10, paddingVertical: 3, borderRadius: 10, marginTop: 6 },
