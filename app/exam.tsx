@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, Platform, Modal, Image } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
   useSharedValue,
@@ -17,7 +17,7 @@ import Colors from '@/constants/colors';
 import { useUser } from '@/lib/UserContext';
 import { apiRequest } from '@/lib/query-client';
 import MascotaCopiloto, { MascotaState } from '@/components/MascotaCopiloto';
-import { getQuestionIcon, QuestionIcon } from '@/lib/questionImages';
+import { getQuestionImage } from '@/lib/questionImages';
 import { playCorrect, playIncorrect, loadSounds, unloadSounds } from '@/lib/sounds';
 import {
   Question, getRandomExam, getEasyExam, getHardExam, getCategoryExam,
@@ -310,7 +310,7 @@ export default function ExamScreen() {
     );
   }
 
-  const questionIcon = currentQuestion ? getQuestionIcon(currentQuestion) : null;
+  const questionVisual = currentQuestion ? getQuestionImage(currentQuestion) : null;
 
   return (
     <View style={styles.container}>
@@ -375,12 +375,12 @@ export default function ExamScreen() {
 
         {showStreak && <StreakBadge streak={streak} />}
 
-        {questionIcon && (
-          <View style={[styles.iconContainer, { backgroundColor: questionIcon.bgColor }]}>  
-            <MaterialCommunityIcons
-              name={questionIcon.name as any}
-              size={52}
-              color={questionIcon.color}
+        {questionVisual && (
+          <View style={styles.imageContainer}>
+            <Image
+              source={questionVisual.source}
+              style={styles.questionImage}
+              resizeMode="contain"
             />
           </View>
         )}
@@ -604,19 +604,20 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   streakText: { color: '#fff', fontSize: 14, fontFamily: 'Nunito_800ExtraBold' },
-  iconContainer: {
-    alignSelf: 'center',
-    width: 88,
-    height: 88,
-    borderRadius: 44,
+  imageContainer: {
+    marginHorizontal: 16,
+    marginTop: 10,
+    backgroundColor: '#f8fafc',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    overflow: 'hidden',
     alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
-    elevation: 4,
+    paddingVertical: 8,
+  },
+  questionImage: {
+    width: '90%',
+    height: 180,
   },
   questionText: {
     fontSize: 17,
