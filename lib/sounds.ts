@@ -6,6 +6,10 @@ let incorrectSounds: Audio.Sound[] = [];
 let loaded = false;
 let loadError = false;
 
+let correctIndex = 0;
+let incorrectIndex = 0;
+let lastType: 'correct' | 'incorrect' | null = null;
+
 const correctFiles = [
   require('../assets/sounds/correct.wav'),
   require('../assets/sounds/correct2.wav'),
@@ -16,6 +20,11 @@ const incorrectFiles = [
   require('../assets/sounds/incorrect2.wav'),
   require('../assets/sounds/incorrect3.wav'),
 ];
+
+const correctWebFreqs = [[523, 659, 784], [660, 880, 0], [440, 554, 660]];
+const incorrectWebFreqs = [[294, 220], [262, 196], [247, 185]];
+let webCorrectIndex = 0;
+let webIncorrectIndex = 0;
 
 function playWebTone(type: 'correct' | 'incorrect') {
   try {
@@ -28,8 +37,7 @@ function playWebTone(type: 'correct' | 'incorrect') {
     gain.connect(ctx.destination);
 
     if (type === 'correct') {
-      const freqs = [[523, 659, 784], [660, 880, 0], [440, 554, 660]];
-      const pick = freqs[Math.floor(Math.random() * freqs.length)];
+      const pick = correctWebFreqs[webCorrectIndex];
       osc.type = 'sine';
       osc.frequency.setValueAtTime(pick[0], ctx.currentTime);
       if (pick[1]) osc.frequency.linearRampToValueAtTime(pick[1], ctx.currentTime + 0.15);
@@ -38,9 +46,9 @@ function playWebTone(type: 'correct' | 'incorrect') {
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
       osc.start(ctx.currentTime);
       osc.stop(ctx.currentTime + 0.35);
+      if (webCorrectIndex < correctWebFreqs.length - 1) webCorrectIndex++;
     } else {
-      const freqs = [[294, 220], [262, 196], [247, 185]];
-      const pick = freqs[Math.floor(Math.random() * freqs.length)];
+      const pick = incorrectWebFreqs[webIncorrectIndex];
       osc.type = 'sine';
       osc.frequency.setValueAtTime(pick[0], ctx.currentTime);
       osc.frequency.linearRampToValueAtTime(pick[1], ctx.currentTime + 0.3);
@@ -48,6 +56,7 @@ function playWebTone(type: 'correct' | 'incorrect') {
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
       osc.start(ctx.currentTime);
       osc.stop(ctx.currentTime + 0.35);
+      if (webIncorrectIndex < incorrectWebFreqs.length - 1) webIncorrectIndex++;
     }
     setTimeout(() => ctx.close(), 500);
   } catch (_) {}
@@ -77,6 +86,12 @@ export async function loadSounds() {
 }
 
 export async function playCorrect() {
+  if (lastType !== 'correct') {
+    correctIndex = 0;
+    webCorrectIndex = 0;
+    lastType = 'correct';
+  }
+
   if (Platform.OS === 'web') {
     playWebTone('correct');
     return;
@@ -84,9 +99,10 @@ export async function playCorrect() {
   try {
     if (!loaded) await loadSounds();
     if (correctSounds.length > 0) {
-      const sound = correctSounds[Math.floor(Math.random() * correctSounds.length)];
+      const sound = correctSounds[correctIndex];
       await sound.setPositionAsync(0);
       await sound.playAsync();
+      if (correctIndex < correctSounds.length - 1) correctIndex++;
     }
   } catch (e) {
     console.warn('Play correct error:', e);
@@ -94,6 +110,12 @@ export async function playCorrect() {
 }
 
 export async function playIncorrect() {
+  if (lastType !== 'incorrect') {
+    incorrectIndex = 0;
+    webIncorrectIndex = 0;
+    lastType = 'incorrect';
+  }
+
   if (Platform.OS === 'web') {
     playWebTone('incorrect');
     return;
@@ -101,9 +123,10 @@ export async function playIncorrect() {
   try {
     if (!loaded) await loadSounds();
     if (incorrectSounds.length > 0) {
-      const sound = incorrectSounds[Math.floor(Math.random() * incorrectSounds.length)];
+      const sound = incorrectSounds[incorrectIndex];
       await sound.setPositionAsync(0);
       await sound.playAsync();
+      if (incorrectIndex < incorrectSounds.length - 1) incorrectIndex++;
     }
   } catch (e) {
     console.warn('Play incorrect error:', e);
@@ -117,4 +140,9 @@ export function unloadSounds() {
   incorrectSounds = [];
   loaded = false;
   loadError = false;
+  correctIndex = 0;
+  incorrectIndex = 0;
+  webCorrectIndex = 0;
+  webIncorrectIndex = 0;
+  lastType = null;
 }
