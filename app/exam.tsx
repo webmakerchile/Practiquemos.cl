@@ -87,7 +87,19 @@ export default function ExamScreen() {
       const all = getQuestionsByLicense(lt);
       qs = [...all].sort(() => Math.random() - 0.5).slice(0, 35);
     } else qs = getRandomExam(35, lt);
-    if (qs.length > 0) setQuestions(qs);
+    const shuffled = qs.map(q => {
+      const indices = q.opciones.map((_, i) => i);
+      for (let i = indices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [indices[i], indices[j]] = [indices[j], indices[i]];
+      }
+      return {
+        ...q,
+        opciones: indices.map(i => q.opciones[i]),
+        respuestaCorrecta: indices.indexOf(q.respuestaCorrecta),
+      };
+    });
+    if (shuffled.length > 0) setQuestions(shuffled);
   }, [mode, lt, selectedCategory]);
 
   useEffect(() => {
@@ -734,7 +746,7 @@ const styles = StyleSheet.create({
     borderColor: '#bae6fd',
   },
   explanationTitle: { fontSize: 14, fontFamily: 'Nunito_700Bold', color: Colors.primary },
-  explanationText: { fontSize: 14, fontFamily: 'Nunito_400Regular', color: Colors.text, lineHeight: 22 },
+  explanationText: { fontSize: 14, fontFamily: 'Nunito_400Regular', color: Colors.text, lineHeight: 22, textAlign: 'justify' as const },
   explanationSpeakBtn: {
     flexDirection: 'row',
     alignItems: 'center',

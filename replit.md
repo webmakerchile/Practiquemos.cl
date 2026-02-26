@@ -20,8 +20,9 @@ Preferred communication style: Simple, everyday language.
 - **Styling**: React Native `StyleSheet` objects (not Tailwind). The design system uses a custom color palette defined in `constants/colors.ts` — blue primary (#1d4ed8), amber accent (#f59e0b), slate neutrals.
 - **Fonts**: Nunito (Google Fonts via `@expo-google-fonts/nunito`) in Regular, SemiBold, Bold, and ExtraBold weights.
 - **Animations**: `react-native-reanimated` for the mascot copilot component animations.
-- **TTS**: `expo-speech` reads questions and options aloud in Spanish (es-419 locale). Speaker button on each question in exam.
-- **Audio**: `expo-av` plays correct/incorrect WAV sound effects stored in `assets/sounds/`. Sounds generated programmatically via Node.js.
+- **TTS**: `expo-speech` reads questions, options, and explanations aloud in Spanish (es-419 locale). Humanized voice (rate 0.85, pitch 1.05) with natural pauses after punctuation. Speaker buttons on exam questions, explanations, and temario sections.
+- **Audio**: `expo-av` plays correct/incorrect WAV sound effects stored in `assets/sounds/`. 3 variations each for correct and incorrect, randomly selected for variety.
+- **Answer Shuffle**: Options are shuffled at exam start so correct answers are randomly distributed across A/B/C/D (original data had 83% B bias).
 - **Key UX Pattern**: The mascot "copiloto" (`components/MascotaCopiloto.tsx`) provides positive reinforcement with dopamine-driven animations. No harsh red colors for errors — uses orange/amber tones. Streak badges for consecutive correct answers.
 - **Mascot Logos**: 5 real PNG images in `assets/images/`:
   - `logo-completo.png` → Branding in home header and login screen
@@ -29,7 +30,10 @@ Preferred communication style: Simple, everyday language.
   - `mascota-cuerpo.png` → Idle/correct/celebrate states in exam
   - `mascota-hablando.png` → When TTS is active (speaking state) + register step 2
   - `mascota-pensando.png` → When user is answering (thinking/incorrect state) + register step 3, exit modal
-- **Question Images**: `lib/questionImages.ts` provides a smart keyword-based image resolver with 68 local PNG images in `assets/images/questions/`. All 1005 questions have specific keyword-matched illustrations (100% coverage). Images cover traffic signs, driving situations, vehicle mechanics, first aid, environmental topics, and safety concepts.
+- **Question Images**: `lib/questionImages.ts` provides a smart keyword-based image resolver with 68 local PNG images in `assets/images/questions/`. All 1005 questions have specific keyword-matched illustrations (100% coverage). Images also used in temario sections via keyword matching.
+- **Custom Icons**: Home menu uses emoji-based custom icons (View+Text) instead of generic library icons for unique brand identity.
+- **Text Justify**: Body text throughout the app uses `textAlign: 'justify'` for a clean, professional look.
+- **License Types**: 6 types supported — Clase B (blue), A2 (purple), A4 (orange), C (green), D (amber), E (red).
 
 ### Screen Structure
 

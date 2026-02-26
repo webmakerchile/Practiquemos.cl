@@ -56,9 +56,11 @@ export default function HomeScreen() {
 
   const LICENSE_COLORS: Record<string, { bg: string; text: string; accent: string; icon: string }> = {
     clase_b: { bg: '#1d4ed8', text: '#fff', accent: '#3b82f6', icon: 'car-sport' },
-    clase_c: { bg: '#059669', text: '#fff', accent: '#34d399', icon: 'car' },
-    clase_d: { bg: '#d97706', text: '#fff', accent: '#fbbf24', icon: 'bus' },
-    clase_e: { bg: '#dc2626', text: '#fff', accent: '#f87171', icon: 'medical' },
+    clase_a2: { bg: '#7c3aed', text: '#fff', accent: '#a78bfa', icon: 'people' },
+    clase_a4: { bg: '#ea580c', text: '#fff', accent: '#fb923c', icon: 'cube' },
+    clase_c: { bg: '#059669', text: '#fff', accent: '#34d399', icon: 'bicycle' },
+    clase_d: { bg: '#d97706', text: '#fff', accent: '#fbbf24', icon: 'construct' },
+    clase_e: { bg: '#dc2626', text: '#fff', accent: '#f87171', icon: 'trail-sign' },
   };
   const licColors = LICENSE_COLORS[licenseType] || LICENSE_COLORS.clase_b;
 
@@ -125,81 +127,81 @@ export default function HomeScreen() {
         <MascotaCopiloto state="idle" message="Preparemos juntos tu examen de conducir" compact />
 
         <MenuItem
-          icon={<MaterialCommunityIcons name="school" size={28} color={Colors.primary} />}
-          title="Mi Curso"
-          description="Almacena todos tus avances para que sepas cuando estas preparad@ para el examen teorico."
+          icon={<View style={styles.customIcon}><Text style={styles.customIconEmoji}>🎓</Text></View>}
+          title="Ingresemos al curso"
+          description="Almacena todos tus avances para que sepas cuando estás preparad@ para el examen teórico."
           onPress={() => isLoggedIn ? router.push('/mi-curso') : router.push('/login')}
           locked={!isLoggedIn}
         />
         <MenuItem
-          icon={<MaterialCommunityIcons name="shuffle-variant" size={28} color={Colors.primary} />}
-          title="Test Aleatorio Diario"
+          icon={<View style={[styles.customIcon, { backgroundColor: '#e0f2fe' }]}><Text style={styles.customIconEmoji}>🎯</Text></View>}
+          title="Practiquemos tu test diario"
           description="Test de conducir generado de forma aleatoria con preguntas del examen oficial y sus explicaciones."
           onPress={() => startExam('daily')}
           badge={!isLoggedIn ? 'Sin Registro' : undefined}
           badgeColor={Colors.success}
         />
         <MenuItem
-          icon={<Ionicons name="book-outline" size={28} color={Colors.primary} />}
-          title="Temario y Libros"
-          description="Resumen y manual del Libro de la Conduccion en Chile. Todo el contenido para aprobar el examen."
+          icon={<View style={[styles.customIcon, { backgroundColor: '#fef3c7' }]}><Text style={styles.customIconEmoji}>📖</Text></View>}
+          title="Aprendamos contenidos del curso"
+          description="Resumen y manual del Libro de la Conducción en Chile. Todo el contenido para aprobar el examen."
           onPress={() => router.push('/temario')}
         />
         <MenuItem
-          icon={<MaterialCommunityIcons name="brain" size={28} color={Colors.accent} />}
-          title="Test Inteligente"
-          description="Mediante un algoritmo, te mostrara las preguntas mas convenientes para agilizar tu aprendizaje."
+          icon={<View style={[styles.customIcon, { backgroundColor: '#fce7f3' }]}><Text style={styles.customIconEmoji}>🧠</Text></View>}
+          title="Practiquemos un test Intermedio"
+          description="Mediante un algoritmo, te mostrará las preguntas más convenientes para agilizar tu aprendizaje."
           onPress={() => isPremium ? startExam('smart') : router.push('/plans')}
           locked={!isPremium}
         />
         <MenuItem
-          icon={<Ionicons name="happy-outline" size={28} color={Colors.success} />}
-          title="Test Facil"
-          description="El test con las preguntas mas FACILES del examen."
+          icon={<View style={[styles.customIcon, { backgroundColor: '#d1fae5' }]}><Text style={styles.customIconEmoji}>🌱</Text></View>}
+          title="Practiquemos un test básico"
+          description="El test con las preguntas más fáciles del examen."
           onPress={() => startExam('easy')}
         />
         <MenuItem
-          icon={<Ionicons name="flame-outline" size={28} color="#dc2626" />}
-          title="Test Dificil"
-          description="El test con las preguntas mas DIFICILES del examen."
+          icon={<View style={[styles.customIcon, { backgroundColor: '#fee2e2' }]}><Text style={styles.customIconEmoji}>🔥</Text></View>}
+          title="Practiquemos un test avanzado"
+          description="El test con las preguntas más difíciles del examen."
           onPress={() => startExam('hard')}
         />
         <MenuItem
-          icon={<Ionicons name="layers-outline" size={28} color={Colors.primary} />}
-          title="Test por Categoria"
-          description="Practica preguntas organizadas por tema: Ley de Transito, Señalizacion, Mecanica y mas."
+          icon={<View style={[styles.customIcon, { backgroundColor: '#e0e7ff' }]}><Text style={styles.customIconEmoji}>📋</Text></View>}
+          title="Practiquemos test por contenidos"
+          description="Practica preguntas organizadas por tema: Ley de Tránsito, Señalización, Mecánica y más."
           onPress={() => startExam('category')}
         />
         <MenuItem
-          icon={<Ionicons name="star-outline" size={28} color={Colors.accent} />}
+          icon={<View style={[styles.customIcon, { backgroundColor: '#fef9c3' }]}><Text style={styles.customIconEmoji}>⭐</Text></View>}
           title="Mis Favoritos"
           description="Repasa las preguntas que has marcado como favoritas para reforzar tu estudio."
           onPress={() => isLoggedIn ? router.push('/favoritos') : router.push('/login')}
           locked={!isLoggedIn}
         />
         <MenuItem
-          icon={<Ionicons name="diamond-outline" size={28} color="#7c3aed" />}
+          icon={<View style={[styles.customIcon, { backgroundColor: '#ede9fe' }]}><Text style={styles.customIconEmoji}>💎</Text></View>}
           title="Packs Premium"
-          description="Acceso ilimitado a todos los examenes, explicaciones detalladas y estadisticas avanzadas."
+          description="Acceso ilimitado a todos los exámenes, explicaciones detalladas y estadísticas avanzadas."
           onPress={() => router.push('/plans')}
         />
         <MenuItem
-          icon={<Ionicons name="time-outline" size={28} color={Colors.primary} />}
-          title="Mi Historial"
-          description="Revisa todos tus examenes anteriores y tu progreso a lo largo del tiempo."
+          icon={<View style={[styles.customIcon, { backgroundColor: '#dbeafe' }]}><Text style={styles.customIconEmoji}>📊</Text></View>}
+          title="Historial de avance"
+          description="Revisa todos tus exámenes anteriores y tu progreso a lo largo del tiempo."
           onPress={() => isLoggedIn ? router.push('/history') : router.push('/login')}
           locked={!isLoggedIn}
         />
         <MenuItem
-          icon={<Ionicons name="mail-outline" size={28} color={Colors.success} />}
+          icon={<View style={[styles.customIcon, { backgroundColor: '#d1fae5' }]}><Text style={styles.customIconEmoji}>💬</Text></View>}
           title="Contacto"
           description="Si tienes alguna duda, incidencia o quieres compartir tus preguntas del examen."
           onPress={() => router.push('/contacto')}
         />
         <MenuItem
-          icon={<Ionicons name="information-circle-outline" size={28} color={Colors.primary} />}
-          title="Quienes Somos"
-          description="Nuestra mision es ayudar a obtener la licencia de conducir a todas las personas."
+          icon={<View style={[styles.customIcon, { backgroundColor: '#dbeafe' }]}><Text style={styles.customIconEmoji}>🏫</Text></View>}
+          title="Quiénes Somos"
+          description="Nuestra misión es ayudar a obtener la licencia de conducir a todas las personas."
           onPress={() => router.push('/nosotros')}
         />
         {isAdmin && (
@@ -314,11 +316,13 @@ const styles = StyleSheet.create({
   menuListContent: { paddingTop: 8 },
   menuItem: { flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.surface, marginHorizontal: 12, marginVertical: 5, padding: 16, borderRadius: 14, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4, elevation: 2 },
   menuItemPressed: { opacity: 0.7, transform: [{ scale: 0.98 }] },
-  menuIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: Colors.surfaceSecondary, justifyContent: 'center', alignItems: 'center', marginRight: 12 },
+  menuIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: Colors.surfaceSecondary, justifyContent: 'center', alignItems: 'center', marginRight: 12, overflow: 'hidden' },
+  customIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#eef2ff', justifyContent: 'center', alignItems: 'center' },
+  customIconEmoji: { fontSize: 22 },
   menuContent: { flex: 1, marginRight: 8 },
   menuTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 3 },
   menuTitle: { fontSize: 16, fontFamily: 'Nunito_700Bold', color: Colors.text },
-  menuDescription: { fontSize: 13, fontFamily: 'Nunito_400Regular', color: Colors.textSecondary, lineHeight: 18 },
+  menuDescription: { fontSize: 13, fontFamily: 'Nunito_400Regular', color: Colors.textSecondary, lineHeight: 18, textAlign: 'justify' as const },
   badge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10 },
   badgeText: { color: '#fff', fontSize: 10, fontFamily: 'Nunito_700Bold' },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },

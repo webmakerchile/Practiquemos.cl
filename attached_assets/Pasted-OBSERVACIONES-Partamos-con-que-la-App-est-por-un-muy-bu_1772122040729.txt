@@ -1,0 +1,25 @@
+OBSERVACIONES 
+
+Partamos con que la App está por un muy buen rumbo, nos gusto mucho los avances que pudimos ver, eso nos tiene muy entusiasmados. Se está logrando el objetivo que es una App amigable, fácil de usar, con cercanía, así que ¡vamos super bien!. Sin embargo, pudimos ver algunos ítem que son importantes considerar para seguir avanzando e ir aplicando para las siguientes cargas de la App.
+1.- Revisamos los test, el aleatorio hay que configurarlo. ya que desde el 2do test (test tránsito) en adelante, la gran mayoría de las respuestas CORRECTAS, son la opción B. 
+2.- Tu nos indicaste que nos enviaras como una parrilla de voces para elegir, tu alli nos indicas si eso se hará al final de todo o podemos ir escogiendo la voz, ya que la que tienes ahora como prueba se escucha muy mecánica. allí quedamos a tu indicación si seguirás trabajando con esa y la cambiamos al final, o prefieres que elijamos en paralelo la voz.
+3.- Solicitar si tienes una parrilla de sonidos para los CHECK de respuestas CORRECTAS y para las respuestas INCORRECTAS. Es ideal también poder escuchar los que tienes para seleccionar o lo vemos al final, según te acomode. 
+4.- La sección de TEMARIOS Y LIBROS, esta buenisima porque es mucho texto pero en un apartado distinto. lo que no satura la pág. Sin embargo, quiero solicitar que también le puedas colocar la opción audio ya que son textos largos y además, colocar una imagen representativa a cada tema, por ejemplo: Documentación requerida para obtención de licencia (allí colocar una foto de una licencia o doc. varios.) solo para darle color y orientación visual.
+5.- Justificar los textos, esto para que se vea más ordenada la pág. (como ejemplo te coloco el texto de arriba que se encuentra justificado, y los que siguen más arriba no están justificados y se ven más desordenados.
+6.- Existe la opción de cambiar los iconos que tiene cada tema en la pantalla inicial?? ya que son los mismo que se utilizan en otras plataformas y seria genial darle otra identidad, colocar otros iconos seria genial, quedo atenta me comentes.
+
+7.- Cambiar los nombres de cada sección en pantalla inicial:
+Mi curso: Reemplazar por —----------- Ingresemos al curso
+Test aleatorio diario —--------------------Practiquemos tu test diario
+Temario y libros—--------------------------Aprendamos contenidos del curso
+Test inteligente —--------------------------Practiquemos un test Intermedio
+Test faci l—---------------------------------- Practiquemos un test básico
+Test difícil—--------------------------------- Practiquemos un test avanzado
+test por categoría—----------------------- practiquemos test por contenidos
+Mi historial—---------------------------------historial de avance 
+8.- Quienes somos: aquí debemos agregar 
+Misión: que ya está pero debemos ajustar el texto
+Quienes somos: Somos una escuela de conductores reconocida por el ministerio de transporte.
+objetivos: Que tengas los conocimientos óptimos para que saque tu licencia de conducir
+Estos textos los vamos a mejorar, es solo la idea para dejar las secciones creadas.
+9.- falta incorporar licencia clase A2 y clase A4

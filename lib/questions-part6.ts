@@ -1,6 +1,6 @@
 import type { Question } from './questionsData';
 
-const allTypes = ['clase_b', 'clase_c', 'clase_d', 'clase_e'];
+const allTypes = ['clase_b', 'clase_a2', 'clase_a4', 'clase_c', 'clase_d', 'clase_e'];
 
 export const questionsPart6: Question[] = [
   // =============================================

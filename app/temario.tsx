@@ -18,7 +18,7 @@ export default function TemarioScreen() {
         <Pressable onPress={() => router.back()} hitSlop={10}>
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </Pressable>
-        <Text style={styles.headerTitle}>Temario y Libros</Text>
+        <Text style={styles.headerTitle}>Aprendamos contenidos del curso</Text>
         <View style={{ width: 24 }} />
       </LinearGradient>
 
@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
   headerTitle: { color: '#fff', fontSize: 20, fontFamily: 'Nunito_700Bold' },
   content: { padding: 16 },
   subtitle: { fontSize: 18, fontFamily: 'Nunito_700Bold', color: Colors.text, marginBottom: 4 },
-  description: { fontSize: 14, fontFamily: 'Nunito_400Regular', color: Colors.textSecondary, marginBottom: 20, lineHeight: 22 },
+  description: { fontSize: 14, fontFamily: 'Nunito_400Regular', color: Colors.textSecondary, marginBottom: 20, lineHeight: 22, textAlign: 'justify' as const },
   chapterCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.surface, padding: 16, borderRadius: 14, marginBottom: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4, elevation: 2 },
   chapterIcon: { width: 52, height: 52, borderRadius: 26, backgroundColor: Colors.surfaceSecondary, justifyContent: 'center', alignItems: 'center', marginRight: 14 },
   chapterContent: { flex: 1 },

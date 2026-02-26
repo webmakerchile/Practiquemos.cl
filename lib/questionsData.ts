@@ -25,12 +25,14 @@ export const categorias = [
 
 export const licenseTypes = [
   { id: 'clase_b', name: 'Clase B', description: 'Vehículos livianos particulares' },
-  { id: 'clase_c', name: 'Clase C', description: 'Taxis y transporte menor' },
-  { id: 'clase_d', name: 'Clase D', description: 'Transporte escolar y de trabajadores' },
-  { id: 'clase_e', name: 'Clase E', description: 'Vehículos de emergencia' },
+  { id: 'clase_a2', name: 'Clase A2', description: 'Transporte de pasajeros (10-17 asientos)' },
+  { id: 'clase_a4', name: 'Clase A4', description: 'Vehículos de carga' },
+  { id: 'clase_c', name: 'Clase C', description: 'Motocicletas y similares' },
+  { id: 'clase_d', name: 'Clase D', description: 'Maquinaria automotriz' },
+  { id: 'clase_e', name: 'Clase E', description: 'Tracción animal y ciclos con motor' },
 ];
 
-const allTypes = ['clase_b', 'clase_c', 'clase_d', 'clase_e'];
+const allTypes = ['clase_b', 'clase_a2', 'clase_a4', 'clase_c', 'clase_d', 'clase_e'];
 
 export const questionsBank: Question[] = [
   // =============================================
