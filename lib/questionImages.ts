@@ -295,6 +295,40 @@ const KEYWORD_IMAGES: Array<{ kw: string[]; img: ImageSourcePropType }> = [
   { kw: ['número en blanco', 'número blanco'], img: IMG.senalesTipos },
   { kw: ['tachada', 'tachado'], img: IMG.noEstacionar },
   { kw: ['cebra', 'tipo cebra'], img: IMG.crucePeatonal },
+
+  { kw: ['minibús', 'minibus', 'viaje de pie', 'servicio de transporte de pasajeros'], img: IMG.bus },
+  { kw: ['jornada de servicio', 'iniciar cada jornada'], img: IMG.mantenimiento },
+  { kw: ['pasajero se siente mal', 'pasajero enfermo'], img: IMG.primerosAuxilios },
+  { kw: ['puertas del minibús', 'puertas no cierran'], img: IMG.bus },
+  { kw: ['falla mecánica grave', 'falla mecánica'], img: IMG.trianguloEmergencia },
+  { kw: ['técnica de observación'], img: IMG.visionConduccion },
+  { kw: ['descanse adecuadamente', 'descansar antes de conducir'], img: IMG.fatiga },
+  { kw: ['samu', 'número de emergencia'], img: IMG.primerosAuxilios },
+
+  { kw: ['restricción horaria', 'camiones en zonas urbanas'], img: IMG.licencia },
+  { kw: ['tanque parcialmente lleno', 'tanque parcialmente'], img: IMG.autopista },
+  { kw: ['peso por eje', 'peso máximo por eje'], img: IMG.autopista },
+  { kw: ['fines de semana largos', 'feriados'], img: IMG.licencia },
+  { kw: ['carta de porte'], img: IMG.licencia },
+
+  { kw: ['maquinaria pesada', 'maquinaria automotriz', 'operador de maquinaria'], img: IMG.zonaObras },
+  { kw: ['tendidos eléctricos', 'cables eléctricos aéreos'], img: IMG.zonaObras },
+  { kw: ['orugas', 'sistema de orugas'], img: IMG.zonaObras },
+  { kw: ['sistema hidráulico', 'hidráulico'], img: IMG.motor },
+  { kw: ['protección personal', 'elementos de protección'], img: IMG.cinturon },
+  { kw: ['subir o bajar', 'en movimiento'], img: IMG.zonaObras },
+  { kw: ['estabilizadores', 'gatos hidráulicos', 'grúa móvil'], img: IMG.zonaObras },
+  { kw: ['terreno blando', 'lodoso', 'atrapada'], img: IMG.zonaObras },
+  { kw: ['rops', 'estructura rops'], img: IMG.zonaObras },
+  { kw: ['cruzar un puente'], img: IMG.autopista },
+  { kw: ['redes de servicios subterráneos', 'servicios subterráneos'], img: IMG.zonaObras },
+  { kw: ['seguro adicional', 'seguro para la operación'], img: IMG.licencia },
+  { kw: ['objetos que caen', 'fops', 'protege al operador'], img: IMG.zonaObras },
+
+  { kw: ['animal de tiro', 'tracción animal', 'vehículo de tracción animal'], img: IMG.curva },
+  { kw: ['herraduras', 'herradura'], img: IMG.mantenimiento },
+  { kw: ['se niega a avanzar', 'animal se niega'], img: IMG.curva },
+  { kw: ['dar agua al animal', 'bienestar animal'], img: IMG.medioAmbiente },
 ];
 
 const CATEGORY_DEFAULTS: Record<string, ImageSourcePropType> = {
