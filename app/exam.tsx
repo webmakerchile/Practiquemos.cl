@@ -21,7 +21,7 @@ import { getQuestionImage } from '@/lib/questionImages';
 import { playCorrect, playIncorrect, loadSounds, unloadSounds } from '@/lib/sounds';
 import {
   Question, getRandomExam, getEasyExam, getHardExam, getCategoryExam,
-  getQuestionsByLicense, categorias, EXAM_CONFIG,
+  getQuestionsByLicense, categorias, EXAM_CONFIG, getExamConfig,
 } from '@/lib/mockDatabase';
 
 function StreakBadge({ streak }: { streak: number }) {
@@ -57,7 +57,8 @@ export default function ExamScreen() {
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [showExplanation, setShowExplanation] = useState(false);
   const [learningMode, setLearningMode] = useState(true);
-  const [timeLeft, setTimeLeft] = useState(EXAM_CONFIG.timeLimit);
+  const examConfig = getExamConfig(lt);
+  const [timeLeft, setTimeLeft] = useState(examConfig.timeLimit);
   const [showTimer, setShowTimer] = useState(true);
   const [showQuestionGrid, setShowQuestionGrid] = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
@@ -79,14 +80,15 @@ export default function ExamScreen() {
   }, []);
 
   useEffect(() => {
+    const numQ = examConfig.questionsPerExam;
     let qs: Question[] = [];
-    if (mode === 'easy') qs = getEasyExam(35, lt);
-    else if (mode === 'hard') qs = getHardExam(35, lt);
+    if (mode === 'easy') qs = getEasyExam(numQ, lt);
+    else if (mode === 'hard') qs = getHardExam(numQ, lt);
     else if (mode === 'category' && selectedCategory) qs = getCategoryExam(selectedCategory, lt);
     else if (mode === 'smart') {
       const all = getQuestionsByLicense(lt);
-      qs = [...all].sort(() => Math.random() - 0.5).slice(0, 35);
-    } else qs = getRandomExam(35, lt);
+      qs = [...all].sort(() => Math.random() - 0.5).slice(0, numQ);
+    } else qs = getRandomExam(numQ, lt);
     const shuffled = qs.map(q => {
       const indices = q.opciones.map((_, i) => i);
       for (let i = indices.length - 1; i > 0; i--) {
@@ -250,8 +252,8 @@ export default function ExamScreen() {
       }
     });
     const score = Math.round((correct / questions.length) * 100);
-    const passed = score >= EXAM_CONFIG.passingScore * 100;
-    const timeSpent = EXAM_CONFIG.timeLimit - timeLeft;
+    const passed = score >= examConfig.passingScore * 100;
+    const timeSpent = examConfig.timeLimit - timeLeft;
 
     if (isLoggedIn) {
       apiRequest('POST', '/api/exam-results', {

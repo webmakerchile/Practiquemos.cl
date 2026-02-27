@@ -8,6 +8,7 @@ export interface Question {
   urlAudio: string | null;
   dificultad: 'facil' | 'media' | 'dificil';
   licenseTypes: string[];
+  oficial?: boolean;
 }
 
 export const categorias = [

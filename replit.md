@@ -100,9 +100,25 @@ Questions are stored client-side across multiple files and combined in `lib/mock
 - `lib/questions-c.ts` — 60 exclusive Clase C questions: motorcycle safety, helmets, two-wheeled dynamics (IDs 1300-1359)
 - `lib/questions-d.ts` — 50 exclusive Clase D questions: heavy machinery, construction safety, tractor ops (IDs 1400-1449)
 - `lib/questions-e.ts` — 50 exclusive Clase E questions: animal-drawn vehicles, motorized cycles (IDs 1500-1549)
+- `lib/questions-oficial-conaset.ts` — 62 official CONASET questions Part 1: Conducta Vial + Mecánica (IDs 2001-2062, A2/D/E)
+- `lib/questions-oficial-conaset2.ts` — 92 official CONASET questions Part 2: Conocimientos Legales (IDs 2063-2154, A2/D/E)
+- `lib/questions-oficial-clase-c.ts` — 152 official CONASET Clase C Restringida questions (IDs 2200-2351, exclusive clase_c)
 
-Total: 1,285 questions across 10 categories. Per license type: Clase B (995), A2 (1,049), A4 (1,049), C (1,052), D (1,049), E (1,046). Each non-B license has 50-60 exclusive specialized questions.
-Study materials in `lib/temarioData.ts` with 6 chapters, 83 sections. The exam engine (`app/exam.tsx`) pulls from this local data and supports multiple exam modes: daily, easy, hard, category-specific, and smart (randomized).
+Total: ~1,591 questions across 10 categories. Official CONASET questions (306 total) are marked with `oficial: true` flag.
+
+### Exam Configuration (per license type)
+
+| License | Questions | Passing | Time |
+|---------|-----------|---------|------|
+| Clase B | 35 (38 pts, 3 worth 2pts) | 33/38 (87%) | 45 min |
+| Clase A2 | 20 | 16/20 (80%) | 30 min |
+| Clase A4 | 35 | 70% | 45 min |
+| Clase C | 20 | 15/20 (75%) | 30 min |
+| Clase D | 12 | 9/12 (75%) | 20 min |
+| Clase E | 10 | 7/10 (70%) | 20 min |
+
+Configs defined in `LICENSE_EXAM_CONFIGS` in `lib/mockDatabase.ts`. The exam engine (`app/exam.tsx`) uses `getExamConfig(licenseType)` for license-specific question counts, passing scores, and time limits.
+Study materials in `lib/temarioData.ts` with 6 chapters, 83 sections.
 
 ### Build & Deployment
 
