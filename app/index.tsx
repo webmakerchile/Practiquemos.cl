@@ -127,7 +127,7 @@ export default function HomeScreen() {
         <MascotaCopiloto state="idle" message="Preparemos juntos tu examen de conducir" compact />
 
         <MenuItem
-          icon={<Image source={require('../assets/images/icon-mi-curso.png')} style={{ width: 52, height: 52, borderRadius: 26 }} resizeMode="cover" />}
+          icon={<Image source={require('../assets/images/icon-mi-curso.png')} style={styles.menuIconImage} resizeMode="cover" />}
           title="Ingresemos al curso"
           description="Almacena todos tus avances para que sepas cuando estás preparad@ para el examen teórico."
           onPress={() => isLoggedIn ? router.push('/mi-curso') : router.push('/login')}
@@ -316,9 +316,8 @@ const styles = StyleSheet.create({
   menuListContent: { paddingTop: 8 },
   menuItem: { flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.surface, marginHorizontal: 12, marginVertical: 5, padding: 16, borderRadius: 14, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4, elevation: 2 },
   menuItemPressed: { opacity: 0.7, transform: [{ scale: 0.98 }] },
-  menuIcon: { width: 52, height: 52, borderRadius: 26, backgroundColor: Colors.surfaceSecondary, justifyContent: 'center', alignItems: 'center', marginRight: 12, overflow: 'hidden' },
-  menuIconImageWrap: { width: 52, height: 52, borderRadius: 26, overflow: 'hidden' as const, justifyContent: 'center' as const, alignItems: 'center' as const },
-  menuIconImage: { width: 50, height: 50, borderRadius: 0 },
+  menuIcon: { width: 52, height: 52, borderRadius: 26, backgroundColor: Colors.surfaceSecondary, justifyContent: 'center', alignItems: 'center', marginRight: 12, overflow: 'hidden' as const },
+  menuIconImage: { width: 52, height: 52 },
   customIcon: { width: 52, height: 52, borderRadius: 26, backgroundColor: '#eef2ff', justifyContent: 'center', alignItems: 'center' },
   customIconEmoji: { fontSize: 24 },
   menuContent: { flex: 1, marginRight: 8 },
