@@ -7,27 +7,31 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Colors from '@/constants/colors';
 import { useUser } from '@/lib/UserContext';
 import { apiRequest } from '@/lib/query-client';
-import { mockQuestions } from '@/lib/mockDatabase';
+import { fetchQuestionsByLicense } from '@/lib/mockDatabase';
+import type { Question } from '@/lib/mockDatabase';
 
 export default function FavoritosScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { isLoggedIn, licenseType } = useUser();
   const [favoriteIds, setFavoriteIds] = useState<number[]>([]);
+  const [allQuestions, setAllQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const webTopInset = Platform.OS === 'web' ? 67 : 0;
 
   useEffect(() => {
     if (!isLoggedIn) { setLoading(false); return; }
-    apiRequest('GET', `/api/favorites/${licenseType}`)
-      .then(res => res.json())
-      .then(data => setFavoriteIds(data))
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    Promise.all([
+      apiRequest('GET', `/api/favorites/${licenseType}`).then(res => res.json()),
+      fetchQuestionsByLicense(licenseType),
+    ]).then(([favIds, questions]) => {
+      setFavoriteIds(favIds);
+      setAllQuestions(questions);
+    }).catch(() => {}).finally(() => setLoading(false));
   }, [isLoggedIn, licenseType]);
 
-  const favoriteQuestions = mockQuestions.filter(q => favoriteIds.includes(q.id));
+  const favoriteQuestions = allQuestions.filter(q => favoriteIds.includes(q.id));
 
   const removeFavorite = async (questionId: number) => {
     await apiRequest('DELETE', `/api/favorites/${questionId}/${licenseType}`).catch(() => {});

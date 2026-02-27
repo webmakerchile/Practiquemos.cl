@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, boolean, timestamp, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, boolean, timestamp, jsonb, serial } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -57,6 +57,22 @@ export const categoryProgress = pgTable("category_progress", {
   lastPracticed: timestamp("last_practiced"),
 });
 
+export const questions = pgTable("questions", {
+  id: integer("id").primaryKey(),
+  pregunta: text("pregunta").notNull(),
+  opciones: jsonb("opciones").notNull().$type<string[]>(),
+  respuestaCorrecta: integer("respuesta_correcta").notNull(),
+  explicacionTexto: text("explicacion_texto").notNull().default(""),
+  categoria: text("categoria").notNull(),
+  dificultad: text("dificultad").notNull().default("media"),
+  licenseTypes: jsonb("license_types").notNull().$type<string[]>(),
+  oficial: boolean("oficial").notNull().default(false),
+  urlAudio: text("url_audio").default(""),
+  enabled: boolean("enabled").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -86,8 +102,35 @@ export const adminUpdateUserSchema = z.object({
   role: z.enum(["user", "admin"]).optional(),
 });
 
+export const adminCreateQuestionSchema = z.object({
+  id: z.number().int().positive().optional(),
+  pregunta: z.string().min(5),
+  opciones: z.array(z.string().min(1)).min(2).max(6),
+  respuestaCorrecta: z.number().int().min(0),
+  explicacionTexto: z.string().default(""),
+  categoria: z.string().min(1),
+  dificultad: z.enum(["facil", "media", "dificil"]).default("media"),
+  licenseTypes: z.array(z.string()).min(1),
+  oficial: z.boolean().default(false),
+  urlAudio: z.string().default(""),
+});
+
+export const adminUpdateQuestionSchema = z.object({
+  pregunta: z.string().min(5).optional(),
+  opciones: z.array(z.string().min(1)).min(2).max(6).optional(),
+  respuestaCorrecta: z.number().int().min(0).optional(),
+  explicacionTexto: z.string().optional(),
+  categoria: z.string().min(1).optional(),
+  dificultad: z.enum(["facil", "media", "dificil"]).optional(),
+  licenseTypes: z.array(z.string()).min(1).optional(),
+  oficial: z.boolean().optional(),
+  urlAudio: z.string().optional(),
+  enabled: z.boolean().optional(),
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type ExamResult = typeof examResults.$inferSelect;
 export type Favorite = typeof favorites.$inferSelect;
 export type CategoryProgress = typeof categoryProgress.$inferSelect;
+export type QuestionRecord = typeof questions.$inferSelect;

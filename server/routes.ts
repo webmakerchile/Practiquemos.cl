@@ -5,6 +5,8 @@ import {
   loginSchema,
   adminCreateUserSchema,
   adminUpdateUserSchema,
+  adminCreateQuestionSchema,
+  adminUpdateQuestionSchema,
 } from "@shared/schema";
 import crypto from "crypto";
 
@@ -234,6 +236,137 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     await storage.deleteUser(req.params.id);
     res.json({ message: "Usuario eliminado" });
+  });
+
+  // PUBLIC QUESTIONS ENDPOINT
+  app.get("/api/questions", async (req: Request, res: Response) => {
+    try {
+      const licenseType = req.query.licenseType as string;
+      if (!licenseType) {
+        return res.status(400).json({ message: "licenseType es requerido" });
+      }
+      const qs = await storage.getQuestionsByLicense(licenseType);
+      res.json(qs);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // ADMIN QUESTIONS ROUTES
+  app.get("/api/admin/questions", async (req: Request, res: Response) => {
+    const session = requireAdmin(req, res);
+    if (!session) return;
+    try {
+      const filters = {
+        page: parseInt(req.query.page as string) || 1,
+        limit: parseInt(req.query.limit as string) || 50,
+        search: (req.query.search as string) || undefined,
+        category: (req.query.category as string) || undefined,
+        licenseType: (req.query.licenseType as string) || undefined,
+        dificultad: (req.query.dificultad as string) || undefined,
+        oficial: req.query.oficial !== undefined ? req.query.oficial === "true" : undefined,
+        enabled: req.query.enabled !== undefined ? req.query.enabled === "true" : undefined,
+      };
+      const result = await storage.getAllQuestionsAdmin(filters);
+      res.json(result);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  app.get("/api/admin/questions/:id", async (req: Request, res: Response) => {
+    const session = requireAdmin(req, res);
+    if (!session) return;
+    try {
+      const q = await storage.getQuestionById(parseInt(req.params.id));
+      if (!q) return res.status(404).json({ message: "Pregunta no encontrada" });
+      res.json(q);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  app.post("/api/admin/questions", async (req: Request, res: Response) => {
+    const session = requireAdmin(req, res);
+    if (!session) return;
+    try {
+      const parsed = adminCreateQuestionSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Datos inválidos", errors: parsed.error.errors });
+      }
+      const data = parsed.data;
+      if (data.respuestaCorrecta >= data.opciones.length) {
+        return res.status(400).json({ message: "respuestaCorrecta debe ser menor que el número de opciones" });
+      }
+      let questionId = data.id;
+      if (!questionId) {
+        questionId = await storage.getNextQuestionId();
+      }
+      const existing = await storage.getQuestionById(questionId);
+      if (existing) {
+        return res.status(400).json({ message: `Ya existe una pregunta con ID ${questionId}` });
+      }
+      const q = await storage.createQuestion({
+        id: questionId,
+        pregunta: data.pregunta,
+        opciones: data.opciones,
+        respuestaCorrecta: data.respuestaCorrecta,
+        explicacionTexto: data.explicacionTexto,
+        categoria: data.categoria,
+        dificultad: data.dificultad,
+        licenseTypes: data.licenseTypes,
+        oficial: data.oficial,
+        urlAudio: data.urlAudio,
+        enabled: true,
+      });
+      res.json(q);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  app.put("/api/admin/questions/:id", async (req: Request, res: Response) => {
+    const session = requireAdmin(req, res);
+    if (!session) return;
+    try {
+      const parsed = adminUpdateQuestionSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Datos inválidos", errors: parsed.error.errors });
+      }
+      const data = parsed.data;
+      if (data.opciones && data.respuestaCorrecta !== undefined && data.respuestaCorrecta >= data.opciones.length) {
+        return res.status(400).json({ message: "respuestaCorrecta debe ser menor que el número de opciones" });
+      }
+      const existing = await storage.getQuestionById(parseInt(req.params.id));
+      if (!existing) {
+        return res.status(404).json({ message: "Pregunta no encontrada" });
+      }
+      if (data.respuestaCorrecta !== undefined && !data.opciones) {
+        const currentOpciones = existing.opciones as string[];
+        if (data.respuestaCorrecta >= currentOpciones.length) {
+          return res.status(400).json({ message: "respuestaCorrecta debe ser menor que el número de opciones" });
+        }
+      }
+      const q = await storage.updateQuestion(parseInt(req.params.id), data);
+      res.json(q);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  app.delete("/api/admin/questions/:id", async (req: Request, res: Response) => {
+    const session = requireAdmin(req, res);
+    if (!session) return;
+    try {
+      const existing = await storage.getQuestionById(parseInt(req.params.id));
+      if (!existing) {
+        return res.status(404).json({ message: "Pregunta no encontrada" });
+      }
+      await storage.deleteQuestion(parseInt(req.params.id));
+      res.json({ message: "Pregunta desactivada" });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
   });
 
   // EXAM RESULTS

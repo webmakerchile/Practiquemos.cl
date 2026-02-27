@@ -125,6 +125,12 @@ export default function AdminScreen() {
         </Pressable>
       </LinearGradient>
 
+      <Pressable onPress={() => router.push('/admin-questions')} style={styles.questionsBtn}>
+        <Ionicons name="document-text-outline" size={22} color="#fff" />
+        <Text style={styles.questionsBtnText}>Gestionar Preguntas</Text>
+        <Ionicons name="chevron-forward" size={20} color="rgba(255,255,255,0.7)" />
+      </Pressable>
+
       <View style={styles.statsRow}>
         <View style={styles.statCard}>
           <Text style={styles.statNumber}>{users.length}</Text>
@@ -276,4 +282,6 @@ const styles = StyleSheet.create({
   planOptionTextActive: { color: '#fff' },
   createBtn: { backgroundColor: Colors.primary, paddingVertical: 14, borderRadius: 12, alignItems: 'center', marginTop: 8 },
   createBtnText: { color: '#fff', fontSize: 16, fontFamily: 'Nunito_700Bold' },
+  questionsBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.primary, marginHorizontal: 12, marginTop: 12, padding: 14, borderRadius: 12, gap: 10 },
+  questionsBtnText: { flex: 1, color: '#fff', fontSize: 16, fontFamily: 'Nunito_700Bold' },
 });

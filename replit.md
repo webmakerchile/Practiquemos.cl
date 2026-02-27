@@ -50,6 +50,7 @@ Preferred communication style: Simple, everyday language.
 | `plans` | Premium subscription plans display |
 | `perfil` | User profile and settings |
 | `admin` | Admin panel for user management |
+| `admin-questions` | Admin question CRUD management (search, filter, create, edit, delete) |
 | `contacto` / `nosotros` | Static info pages |
 
 ### Backend (Express.js)
@@ -69,10 +70,16 @@ Preferred communication style: Simple, everyday language.
 - `GET /api/favorites/:licenseType` — Get favorited question IDs
 - `POST /api/favorites` / `DELETE /api/favorites/:id/:licenseType` — Manage favorites
 - `GET /api/progress/:licenseType` — Get category progress
+- `GET /api/questions?licenseType=X` — Get all enabled questions for a license type
 - `GET /api/admin/users` — Admin: list all users
 - `POST /api/admin/users` — Admin: create user
 - `PUT /api/admin/users/:id` — Admin: update user
 - `DELETE /api/admin/users/:id` — Admin: delete user
+- `GET /api/admin/questions?page=&limit=&search=&category=&licenseType=&dificultad=&oficial=` — Admin: paginated question list with filters
+- `GET /api/admin/questions/:id` — Admin: get single question
+- `POST /api/admin/questions` — Admin: create question
+- `PUT /api/admin/questions/:id` — Admin: update question
+- `DELETE /api/admin/questions/:id` — Admin: soft-delete (disable) question
 
 ### Database (PostgreSQL + Drizzle ORM)
 
@@ -83,26 +90,22 @@ Preferred communication style: Simple, everyday language.
   - `exam_results` — id, userId (FK), examMode, licenseType, scores, passed, timeSpent, categoryBreakdown (JSONB)
   - `favorites` — id, userId (FK), questionId, licenseType
   - `category_progress` — id, userId, licenseType, category, progress tracking
+  - `questions` — id (integer PK), pregunta, opciones (JSONB string[]), respuestaCorrecta (int), explicacionTexto, categoria, dificultad, licenseTypes (JSONB string[]), oficial (bool), urlAudio, enabled (bool), timestamps
 - **Migrations**: Generated via `drizzle-kit` to `./migrations/` directory. Push with `npm run db:push`.
 
 ### Question Data
 
-Questions are stored client-side across multiple files and combined in `lib/mockDatabase.ts`:
+Questions are stored in the PostgreSQL `questions` table (1,591 questions). On first server start, questions are auto-seeded from static TypeScript files in `lib/` via `server/seed-questions.ts`. After seeding, questions are served exclusively via the `/api/questions` API endpoint.
+
+**Source files** (kept as seed data only, not used at runtime):
 - `lib/questionsData.ts` — Base 235 questions (IDs 1-235)
-- `lib/questions-part2.ts` — 150 questions: Ley de Tránsito + Señalización (IDs 236-385)
-- `lib/questions-part3.ts` — 150 questions: Mecánica Básica + Primeros Auxilios (IDs 386-535)
-- `lib/questions-part4.ts` — 150 questions: Conducción Segura + Defensiva + Medio Ambiente (IDs 536-685)
-- `lib/questions-part5.ts` — 120 questions: Advanced scenarios + specific signals (IDs 686-805)
-- `lib/questions-part6.ts` — 100 questions: Real exam mechanics, distances, safety (IDs 806-905)
-- `lib/questions-part7.ts` — 100 questions: Signals detail, speeds, pedestrians, alcohol, accidents (IDs 906-1005)
-- `lib/questions-a2.ts` — 60 exclusive Clase A2 questions: passenger transport, minibus safety (IDs 1100-1159)
-- `lib/questions-a4.ts` — 60 exclusive Clase A4 questions: cargo securing, weight limits, hazmat (IDs 1200-1259)
-- `lib/questions-c.ts` — 60 exclusive Clase C questions: motorcycle safety, helmets, two-wheeled dynamics (IDs 1300-1359)
-- `lib/questions-d.ts` — 50 exclusive Clase D questions: heavy machinery, construction safety, tractor ops (IDs 1400-1449)
-- `lib/questions-e.ts` — 50 exclusive Clase E questions: animal-drawn vehicles, motorized cycles (IDs 1500-1549)
-- `lib/questions-oficial-conaset.ts` — 62 official CONASET questions Part 1: Conducta Vial + Mecánica (IDs 2001-2062, A2/D/E)
-- `lib/questions-oficial-conaset2.ts` — 92 official CONASET questions Part 2: Conocimientos Legales (IDs 2063-2154, A2/D/E)
-- `lib/questions-oficial-clase-c.ts` — 152 official CONASET Clase C Restringida questions (IDs 2200-2351, exclusive clase_c)
+- `lib/questions-part2.ts` through `lib/questions-part7.ts` — 770 additional questions (IDs 236-1005)
+- `lib/questions-a2.ts`, `questions-a4.ts`, `questions-c.ts`, `questions-d.ts`, `questions-e.ts` — License-specific questions
+- `lib/questions-oficial-conaset.ts`, `questions-oficial-conaset2.ts`, `questions-oficial-clase-c.ts` — Official CONASET questions
+
+**Data flow**: Frontend fetches questions via `fetchQuestionsByLicense(licenseType)` in `lib/mockDatabase.ts` → API call to `/api/questions?licenseType=X` → PostgreSQL query with JSONB containment filter on `license_types` column. Client cache TTL: 5 seconds for near-real-time sync.
+
+**Admin management**: Admin can create, edit, search, filter, and soft-delete questions via `/admin-questions` screen. Changes are persisted to PostgreSQL and reflected for all users within 5 seconds.
 
 Total: ~1,591 questions across 10 categories. Official CONASET questions (306 total) are marked with `oficial: true` flag.
 

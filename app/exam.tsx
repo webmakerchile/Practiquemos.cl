@@ -20,8 +20,8 @@ import MascotaCopiloto, { MascotaState } from '@/components/MascotaCopiloto';
 import { getQuestionImage } from '@/lib/questionImages';
 import { playCorrect, playIncorrect, loadSounds, unloadSounds } from '@/lib/sounds';
 import {
-  Question, getRandomExam, getEasyExam, getHardExam, getCategoryExam,
-  getQuestionsByLicense, categorias, EXAM_CONFIG, getExamConfig,
+  Question, fetchQuestionsByLicense, selectRandomExam, selectEasyExam,
+  selectHardExam, selectCategoryExam, categorias, EXAM_CONFIG, getExamConfig,
 } from '@/lib/mockDatabase';
 
 function StreakBadge({ streak }: { streak: number }) {
@@ -79,29 +79,42 @@ export default function ExamScreen() {
     };
   }, []);
 
+  const [loadingQuestions, setLoadingQuestions] = useState(true);
+
   useEffect(() => {
-    const numQ = examConfig.questionsPerExam;
-    let qs: Question[] = [];
-    if (mode === 'easy') qs = getEasyExam(numQ, lt);
-    else if (mode === 'hard') qs = getHardExam(numQ, lt);
-    else if (mode === 'category' && selectedCategory) qs = getCategoryExam(selectedCategory, lt);
-    else if (mode === 'smart') {
-      const all = getQuestionsByLicense(lt);
-      qs = [...all].sort(() => Math.random() - 0.5).slice(0, numQ);
-    } else qs = getRandomExam(numQ, lt);
-    const shuffled = qs.map(q => {
-      const indices = q.opciones.map((_, i) => i);
-      for (let i = indices.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [indices[i], indices[j]] = [indices[j], indices[i]];
-      }
-      return {
-        ...q,
-        opciones: indices.map(i => q.opciones[i]),
-        respuestaCorrecta: indices.indexOf(q.respuestaCorrecta),
-      };
+    let cancelled = false;
+    setLoadingQuestions(true);
+
+    fetchQuestionsByLicense(lt).then(allQ => {
+      if (cancelled) return;
+      const numQ = examConfig.questionsPerExam;
+      let qs: Question[] = [];
+      if (mode === 'easy') qs = selectEasyExam(allQ, numQ);
+      else if (mode === 'hard') qs = selectHardExam(allQ, numQ);
+      else if (mode === 'category' && selectedCategory) qs = selectCategoryExam(allQ, selectedCategory, lt);
+      else if (mode === 'smart') {
+        qs = [...allQ].sort(() => Math.random() - 0.5).slice(0, numQ);
+      } else qs = selectRandomExam(allQ, numQ);
+      const shuffled = qs.map(q => {
+        const indices = q.opciones.map((_, i) => i);
+        for (let i = indices.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [indices[i], indices[j]] = [indices[j], indices[i]];
+        }
+        return {
+          ...q,
+          opciones: indices.map(i => q.opciones[i]),
+          respuestaCorrecta: indices.indexOf(q.respuestaCorrecta),
+        };
+      });
+      if (shuffled.length > 0) setQuestions(shuffled);
+      setLoadingQuestions(false);
+    }).catch(err => {
+      console.error('Error loading questions:', err);
+      setLoadingQuestions(false);
     });
-    if (shuffled.length > 0) setQuestions(shuffled);
+
+    return () => { cancelled = true; };
   }, [mode, lt, selectedCategory]);
 
   useEffect(() => {

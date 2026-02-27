@@ -33,6 +33,7 @@ function RootLayoutNav() {
       <Stack.Screen name="mi-curso" />
       <Stack.Screen name="favoritos" />
       <Stack.Screen name="admin" />
+      <Stack.Screen name="admin-questions" />
       <Stack.Screen name="contacto" />
       <Stack.Screen name="nosotros" />
       <Stack.Screen name="perfil" />

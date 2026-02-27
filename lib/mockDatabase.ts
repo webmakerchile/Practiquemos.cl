@@ -2,42 +2,44 @@ export type { Question } from './questionsData';
 export { categorias, licenseTypes } from './questionsData';
 export { temarioChapters } from './temarioData';
 
-import { questionsBank } from './questionsData';
-import { questionsPart2 } from './questions-part2';
-import { questionsPart3 } from './questions-part3';
-import { questionsPart4 } from './questions-part4';
-import { questionsPart5 } from './questions-part5';
-import { questionsPart6 } from './questions-part6';
-import { questionsPart7 } from './questions-part7';
-import { questionsA2 } from './questions-a2';
-import { questionsA4 } from './questions-a4';
-import { questionsClaseC } from './questions-c';
-import { questionsClaseD } from './questions-d';
-import { questionsClaseE } from './questions-e';
-import { questionsOficialPart1 } from './questions-oficial-conaset';
-import { questionsOficialPart2 } from './questions-oficial-conaset2';
-import { questionsOficialClaseC } from './questions-oficial-clase-c';
 import type { Question } from './questionsData';
+import { apiRequest } from './query-client';
 
-const allQuestions: Question[] = [
-  ...questionsBank,
-  ...questionsPart2,
-  ...questionsPart3,
-  ...questionsPart4,
-  ...questionsPart5,
-  ...questionsPart6,
-  ...questionsPart7,
-  ...questionsA2,
-  ...questionsA4,
-  ...questionsClaseC,
-  ...questionsClaseD,
-  ...questionsClaseE,
-  ...questionsOficialPart1,
-  ...questionsOficialPart2,
-  ...questionsOficialClaseC,
-];
+const questionsCache: Record<string, { data: Question[]; timestamp: number }> = {};
+const CACHE_TTL = 5 * 1000;
 
-export const mockQuestions = allQuestions;
+export async function fetchQuestionsByLicense(licenseType: string): Promise<Question[]> {
+  const cached = questionsCache[licenseType];
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached.data;
+  }
+
+  try {
+    const res = await apiRequest('GET', `/api/questions?licenseType=${licenseType}`);
+    const data = await res.json();
+    const mapped: Question[] = data.map((q: any) => ({
+      id: q.id,
+      pregunta: q.pregunta,
+      opciones: q.opciones as string[],
+      respuestaCorrecta: q.respuestaCorrecta,
+      explicacionTexto: q.explicacionTexto || '',
+      categoria: q.categoria,
+      dificultad: q.dificultad as 'facil' | 'media' | 'dificil',
+      licenseTypes: q.licenseTypes as string[],
+      oficial: q.oficial || false,
+      urlAudio: q.urlAudio || null,
+    }));
+    questionsCache[licenseType] = { data: mapped, timestamp: Date.now() };
+    return mapped;
+  } catch (err) {
+    if (cached) return cached.data;
+    throw err;
+  }
+}
+
+export function invalidateQuestionsCache() {
+  Object.keys(questionsCache).forEach(key => delete questionsCache[key]);
+}
 
 export interface LicenseExamConfig {
   questionsPerExam: number;
@@ -99,27 +101,22 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-export function getQuestionsByLicense(licenseType: string): Question[] {
-  return allQuestions.filter(q => q.licenseTypes.includes(licenseType));
+export function selectRandomExam(allQuestions: Question[], count: number): Question[] {
+  return shuffle(allQuestions).slice(0, count);
 }
 
-export function getRandomExam(count: number, licenseType: string): Question[] {
-  const filtered = getQuestionsByLicense(licenseType);
+export function selectEasyExam(allQuestions: Question[], count: number): Question[] {
+  const filtered = allQuestions.filter(q => q.dificultad === 'facil');
   return shuffle(filtered).slice(0, count);
 }
 
-export function getEasyExam(count: number, licenseType: string): Question[] {
-  const filtered = getQuestionsByLicense(licenseType).filter(q => q.dificultad === 'facil');
+export function selectHardExam(allQuestions: Question[], count: number): Question[] {
+  const filtered = allQuestions.filter(q => q.dificultad === 'dificil' || q.dificultad === 'media');
   return shuffle(filtered).slice(0, count);
 }
 
-export function getHardExam(count: number, licenseType: string): Question[] {
-  const filtered = getQuestionsByLicense(licenseType).filter(q => q.dificultad === 'dificil' || q.dificultad === 'media');
-  return shuffle(filtered).slice(0, count);
-}
-
-export function getCategoryExam(category: string, licenseType: string): Question[] {
+export function selectCategoryExam(allQuestions: Question[], category: string, licenseType: string): Question[] {
   const config = getExamConfig(licenseType);
-  const filtered = getQuestionsByLicense(licenseType).filter(q => q.categoria === category);
+  const filtered = allQuestions.filter(q => q.categoria === category);
   return shuffle(filtered).slice(0, Math.min(filtered.length, config.questionsPerExam));
 }
