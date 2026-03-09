@@ -7,6 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as Speech from 'expo-speech';
 import Colors from '@/constants/colors';
 import { temarioChapters } from '@/lib/mockDatabase';
+import { useVoice } from '@/lib/VoiceContext';
 
 const CHAPTER_IMAGES: Record<string, any> = {
   ch1: require('../assets/images/questions/licencia.png'),
@@ -62,6 +63,7 @@ export default function TemarioDetailScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { chapterId } = useLocalSearchParams<{ chapterId: string }>();
+  const { getSpeechOptions } = useVoice();
   const webTopInset = Platform.OS === 'web' ? 67 : 0;
 
   const chapter = temarioChapters.find(c => c.id === chapterId);
@@ -87,9 +89,7 @@ export default function TemarioDetailScreen() {
       .replace(/;\s*/g, ';... ')
       .replace(/,\s*/g, ', ');
     Speech.speak(humanized, {
-      language: 'es-419',
-      rate: 0.85,
-      pitch: 1.05,
+      ...getSpeechOptions(),
       onDone: () => setSpeakingIdx(null),
       onStopped: () => setSpeakingIdx(null),
       onError: () => setSpeakingIdx(null),

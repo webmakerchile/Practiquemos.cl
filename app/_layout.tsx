@@ -7,6 +7,7 @@ import { KeyboardProvider } from "react-native-keyboard-controller";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { queryClient } from "@/lib/query-client";
 import { UserProvider } from "@/lib/UserContext";
+import { VoiceProvider } from "@/lib/VoiceContext";
 import { StatusBar } from "expo-status-bar";
 import {
   useFonts,
@@ -37,6 +38,7 @@ function RootLayoutNav() {
       <Stack.Screen name="contacto" />
       <Stack.Screen name="nosotros" />
       <Stack.Screen name="perfil" />
+      <Stack.Screen name="voice-settings" />
     </Stack>
   );
 }
@@ -76,8 +78,10 @@ export default function RootLayout() {
         <GestureHandlerRootView style={{ flex: 1 }}>
           <KeyboardProvider>
             <UserProvider>
-              <StatusBar style="light" />
-              <RootLayoutNav />
+              <VoiceProvider>
+                <StatusBar style="light" />
+                <RootLayoutNav />
+              </VoiceProvider>
             </UserProvider>
           </KeyboardProvider>
         </GestureHandlerRootView>

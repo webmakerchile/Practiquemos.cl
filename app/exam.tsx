@@ -15,6 +15,7 @@ import Animated, {
 import * as Speech from 'expo-speech';
 import Colors from '@/constants/colors';
 import { useUser } from '@/lib/UserContext';
+import { useVoice } from '@/lib/VoiceContext';
 import { apiRequest } from '@/lib/query-client';
 import MascotaCopiloto, { MascotaState } from '@/components/MascotaCopiloto';
 import { getQuestionImage } from '@/lib/questionImages';
@@ -45,6 +46,7 @@ export default function ExamScreen() {
   const params = useLocalSearchParams<{ mode: string; licenseType: string; category?: string }>();
   const insets = useSafeAreaInsets();
   const { isLoggedIn, incrementFreeExams, licenseType: userLicense } = useUser();
+  const { getSpeechOptions } = useVoice();
 
   const mode = params.mode || 'daily';
   const lt = params.licenseType || userLicense || 'clase_b';
@@ -152,9 +154,7 @@ export default function ExamScreen() {
 
   const speakHuman = (text: string) => {
     Speech.speak(humanizeText(text), {
-      language: 'es-419',
-      rate: 0.85,
-      pitch: 1.05,
+      ...getSpeechOptions(),
       onDone: () => setIsSpeaking(false),
       onStopped: () => setIsSpeaking(false),
       onError: () => setIsSpeaking(false),

@@ -20,7 +20,7 @@ Preferred communication style: Simple, everyday language.
 - **Styling**: React Native `StyleSheet` objects (not Tailwind). The design system uses a custom color palette defined in `constants/colors.ts` — blue primary (#1d4ed8), amber accent (#f59e0b), slate neutrals.
 - **Fonts**: Nunito (Google Fonts via `@expo-google-fonts/nunito`) in Regular, SemiBold, Bold, and ExtraBold weights.
 - **Animations**: `react-native-reanimated` for the mascot copilot component animations.
-- **TTS**: `expo-speech` reads questions, options, and explanations aloud in Spanish (es-419 locale). Humanized voice (rate 0.85, pitch 1.05) with natural pauses after punctuation. Speaker buttons on exam questions, explanations, and temario sections.
+- **TTS**: `expo-speech` reads questions, options, and explanations aloud in Spanish (es-419 locale). Humanized voice (rate 0.85, pitch 1.05) with natural pauses after punctuation. Speaker buttons on exam questions, explanations, and temario sections. Voice settings (voice, speed, pitch) configurable via `lib/VoiceContext.tsx` and `app/voice-settings.tsx`, persisted in AsyncStorage.
 - **Audio**: `expo-av` plays correct/incorrect WAV sound effects stored in `assets/sounds/`. 3 variations each for correct and incorrect, randomly selected for variety.
 - **Answer Shuffle**: Options are shuffled at exam start so correct answers are randomly distributed across A/B/C/D (original data had 83% B bias).
 - **Key UX Pattern**: The mascot "copiloto" (`components/MascotaCopiloto.tsx`) provides positive reinforcement with dopamine-driven animations. No harsh red colors for errors — uses orange/amber tones. Streak badges for consecutive correct answers.
@@ -48,7 +48,8 @@ Preferred communication style: Simple, everyday language.
 | `mi-curso` | Progress tracking per category |
 | `favoritos` | Saved/bookmarked questions |
 | `plans` | Premium subscription plans display |
-| `perfil` | User profile and settings |
+| `perfil` | User profile and settings (includes voice config link) |
+| `voice-settings` | TTS voice picker, speed/pitch controls |
 | `admin` | Admin panel for user management |
 | `admin-questions` | Admin question CRUD management (search, filter, create, edit, delete) |
 | `contacto` / `nosotros` | Static info pages |

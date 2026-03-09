@@ -86,6 +86,12 @@ export default function PerfilScreen() {
           <Ionicons name="chevron-forward" size={20} color={Colors.textMuted} />
         </Pressable>
 
+        <Pressable onPress={() => router.push('/voice-settings')} style={({ pressed }) => [styles.actionBtn, pressed && { opacity: 0.7 }]}>
+          <Ionicons name="volume-high-outline" size={22} color={Colors.primary} />
+          <Text style={styles.actionText}>Configurar Voz</Text>
+          <Ionicons name="chevron-forward" size={20} color={Colors.textMuted} />
+        </Pressable>
+
         {isAdmin && (
           <Pressable onPress={() => router.push('/admin')} style={({ pressed }) => [styles.actionBtn, pressed && { opacity: 0.7 }]}>
             <Ionicons name="settings-outline" size={22} color="#dc2626" />
