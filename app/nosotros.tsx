@@ -22,7 +22,7 @@ export default function NosotrosScreen() {
       </LinearGradient>
 
       <ScrollView contentContainerStyle={[styles.content, { paddingBottom: (Platform.OS === 'web' ? 34 : insets.bottom) + 20 }]}>
-        <Image source={require('@/assets/images/logo-completo.png')} style={styles.logo} resizeMode="contain" />
+        <Image source={require('@/assets/images/logo-texto.png')} style={styles.logo} resizeMode="contain" />
 
         <Text style={styles.title}>Practiquemos.cl</Text>
         <Text style={styles.subtitle}>Tu compañero para la licencia de conducir</Text>

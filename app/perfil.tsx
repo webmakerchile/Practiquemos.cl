@@ -38,8 +38,8 @@ export default function PerfilScreen() {
         <View style={styles.avatarSection}>
           <View style={styles.avatar}>
             <Image
-              source={require('../assets/images/mascota-cabeza.png')}
-              style={{ width: 80, height: 80 }}
+              source={require('../assets/images/logo-texto.png')}
+              style={{ width: 160, height: 60 }}
               resizeMode="contain"
             />
           </View>
