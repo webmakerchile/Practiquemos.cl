@@ -14,7 +14,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import Colors from '@/constants/colors';
 import { useUser } from '@/lib/UserContext';
-import { speakWithNova, stopNova } from '@/lib/ttsService';
+import { speakWithNova, stopNova, prefetchExamAudio, prefetchAudio } from '@/lib/ttsService';
 import { apiRequest } from '@/lib/query-client';
 import MascotaCopiloto, { MascotaState } from '@/components/MascotaCopiloto';
 import { getQuestionImage } from '@/lib/questionImages';
@@ -106,7 +106,10 @@ export default function ExamScreen() {
           respuestaCorrecta: indices.indexOf(q.respuestaCorrecta),
         };
       });
-      if (shuffled.length > 0) setQuestions(shuffled);
+      if (shuffled.length > 0) {
+        setQuestions(shuffled);
+        prefetchExamAudio(shuffled);
+      }
       setLoadingQuestions(false);
     }).catch(err => {
       console.error('Error loading questions:', err);
@@ -136,6 +139,20 @@ export default function ExamScreen() {
     setIsSpeaking(false);
     setShowExplanation(false);
     correctFlash.value = 0;
+
+    for (let i = 1; i <= 3; i++) {
+      const nextQ = questions[currentIndex + i];
+      if (nextQ) {
+        const opciones = nextQ.opciones.map((o, j) =>
+          `La ${String.fromCharCode(65 + j)}, ${o}`).join('. ');
+        prefetchAudio(`${nextQ.pregunta} Las opciones son: ${opciones}`);
+        if (nextQ.explicacionTexto) {
+          const letter = String.fromCharCode(65 + nextQ.respuestaCorrecta);
+          const opt = nextQ.opciones[nextQ.respuestaCorrecta];
+          prefetchAudio(`La respuesta correcta es la ${letter}, ${opt}. ${nextQ.explicacionTexto}`);
+        }
+      }
+    }
   }, [currentIndex]);
 
   const currentQuestion = questions[currentIndex];

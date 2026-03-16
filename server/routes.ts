@@ -459,7 +459,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "tts-1-hd",
+          model: "tts-1",
           input: text,
           voice: "nova",
           response_format: "mp3",
