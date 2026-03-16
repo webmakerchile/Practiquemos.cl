@@ -72,3 +72,33 @@ id = "O2LCuA613K6oF9hhNPvXc"
 uri = "file://attached_assets/voz-onyx.mp3"
 type = "audio"
 title = "🎤 ONYX - Masculina, profunda"
+
+[[outputs]]
+id = "fosUY32SMXVvhLs2gPA22"
+uri = "file://attached_assets/nova-velocidad.mp3"
+type = "audio"
+title = "Nova - Efecto de la velocidad en el campo visual"
+
+[[outputs]]
+id = "DyivMQ0hHcvvtRzw_X6xq"
+uri = "file://attached_assets/nova-luces-automaticas.mp3"
+type = "audio"
+title = "Nova - Luces automáticas del vehículo"
+
+[[outputs]]
+id = "i1vRmwm7wKFhdx3oY1Deh"
+uri = "file://attached_assets/nova-carretera-montana.mp3"
+type = "audio"
+title = "Nova - Carretera de montaña con camión"
+
+[[outputs]]
+id = "qNBqgpaWywHRw1OSVP3YN"
+uri = "file://attached_assets/nova-bateria.mp3"
+type = "audio"
+title = "Nova - Limpieza de bornes de batería"
+
+[[outputs]]
+id = "H76nKnB3sgd1Rq_GdCVQJ"
+uri = "file://attached_assets/nova-excavadora.mp3"
+type = "audio"
+title = "Nova - Zona de peligro de excavadora"
