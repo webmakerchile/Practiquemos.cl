@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
   header: { paddingBottom: 16, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   headerTitle: { color: '#fff', fontSize: 20, fontFamily: 'Nunito_700Bold' },
   content: { padding: 20, alignItems: 'center' },
-  logo: { width: 140, height: 100, marginBottom: 8 },
+  logo: { width: 220, height: 60, marginBottom: 8 },
   title: { fontSize: 26, fontFamily: 'Nunito_800ExtraBold', color: Colors.text },
   subtitle: { fontSize: 14, fontFamily: 'Nunito_400Regular', color: Colors.textSecondary, marginBottom: 24 },
   sectionCard: {

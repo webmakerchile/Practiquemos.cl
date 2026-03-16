@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
   header: { paddingBottom: 16, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   headerTitle: { color: '#fff', fontSize: 20, fontFamily: 'Nunito_700Bold' },
   content: { padding: 16 },
-  avatarSection: { alignItems: 'center', marginBottom: 24 },
+  avatarSection: { alignItems: 'center', marginBottom: 24, backgroundColor: '#fff', borderRadius: 16, paddingVertical: 20, paddingHorizontal: 16, marginHorizontal: 4 },
   avatar: { width: 96, height: 96, justifyContent: 'center', alignItems: 'center', marginBottom: 10 },
   userName: { fontSize: 22, fontFamily: 'Nunito_800ExtraBold', color: Colors.text },
   userHandle: { fontSize: 14, fontFamily: 'Nunito_400Regular', color: Colors.textSecondary },
