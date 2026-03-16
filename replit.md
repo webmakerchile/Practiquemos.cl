@@ -20,7 +20,7 @@ Preferred communication style: Simple, everyday language.
 - **Styling**: React Native `StyleSheet` objects (not Tailwind). The design system uses a custom color palette defined in `constants/colors.ts` — blue primary (#1d4ed8), amber accent (#f59e0b), slate neutrals.
 - **Fonts**: Nunito (Google Fonts via `@expo-google-fonts/nunito`) in Regular, SemiBold, Bold, and ExtraBold weights.
 - **Animations**: `react-native-reanimated` for the mascot copilot component animations.
-- **TTS**: `expo-speech` reads questions, options, and explanations aloud in Spanish (es-419 locale). Humanized voice (rate 0.85, pitch 1.05) with natural pauses after punctuation. Speaker buttons on exam questions, explanations, and temario sections. Voice settings (voice, speed, pitch) configurable via `lib/VoiceContext.tsx` and `app/voice-settings.tsx`, persisted in AsyncStorage.
+- **TTS**: OpenAI TTS HD with "Nova" voice (female, professional teacher style). Audio generated server-side via `/api/tts` endpoint, played client-side via `lib/ttsService.ts`. Text is humanized with natural pauses before sending to OpenAI. Speaker buttons on exam questions, explanations, and temario sections. Voice preview available in `app/voice-settings.tsx`.
 - **Audio**: `expo-av` plays correct/incorrect WAV sound effects stored in `assets/sounds/`. 3 variations each for correct and incorrect, randomly selected for variety.
 - **Answer Shuffle**: Options are shuffled at exam start so correct answers are randomly distributed across A/B/C/D (original data had 83% B bias).
 - **Key UX Pattern**: The mascot "copiloto" (`components/MascotaCopiloto.tsx`) provides positive reinforcement with dopamine-driven animations. No harsh red colors for errors — uses orange/amber tones. Streak badges for consecutive correct answers.
@@ -81,6 +81,7 @@ Preferred communication style: Simple, everyday language.
 - `POST /api/admin/questions` — Admin: create question
 - `PUT /api/admin/questions/:id` — Admin: update question
 - `DELETE /api/admin/questions/:id` — Admin: soft-delete (disable) question
+- `POST /api/tts` — Text-to-speech via OpenAI TTS HD Nova voice, returns mp3 audio
 
 ### Database (PostgreSQL + Drizzle ORM)
 
@@ -151,6 +152,7 @@ Study materials in `lib/temarioData.ts` with 11 chapters total: 6 base chapters 
 - `expo-av` — Audio playback for correct/incorrect sound effects
 
 ### External Services
+- **OpenAI TTS HD** — Text-to-speech via API (`OPENAI_API_KEY` env secret). Uses "Nova" voice model for reading questions and study material aloud
 - No third-party auth providers (custom username/password auth)
 - No payment processing yet (plans page is display-only)
 - No external analytics or crash reporting

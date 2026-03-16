@@ -426,6 +426,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ message: "ok" });
   });
 
+  app.post("/api/tts", async (req: Request, res: Response) => {
+    const { text } = req.body;
+    if (!text || typeof text !== "string") {
+      return res.status(400).json({ message: "Se requiere texto" });
+    }
+    if (text.length > 4000) {
+      return res.status(400).json({ message: "Texto demasiado largo (máx 4000 caracteres)" });
+    }
+
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      return res.status(500).json({ message: "TTS no configurado" });
+    }
+
+    try {
+      const response = await fetch("https://api.openai.com/v1/audio/speech", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "tts-1-hd",
+          input: text,
+          voice: "nova",
+          response_format: "mp3",
+        }),
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        console.error("OpenAI TTS error:", errText);
+        return res.status(502).json({ message: "Error generando audio" });
+      }
+
+      res.setHeader("Content-Type", "audio/mpeg");
+      res.setHeader("Cache-Control", "public, max-age=86400");
+      const arrayBuffer = await response.arrayBuffer();
+      res.send(Buffer.from(arrayBuffer));
+    } catch (err) {
+      console.error("TTS error:", err);
+      res.status(500).json({ message: "Error interno de TTS" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

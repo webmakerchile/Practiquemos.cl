@@ -12,10 +12,9 @@ import Animated, {
   FadeIn,
   ZoomIn,
 } from 'react-native-reanimated';
-import * as Speech from 'expo-speech';
 import Colors from '@/constants/colors';
 import { useUser } from '@/lib/UserContext';
-import { useVoice } from '@/lib/VoiceContext';
+import { speakWithNova, stopNova } from '@/lib/ttsService';
 import { apiRequest } from '@/lib/query-client';
 import MascotaCopiloto, { MascotaState } from '@/components/MascotaCopiloto';
 import { getQuestionImage } from '@/lib/questionImages';
@@ -46,8 +45,6 @@ export default function ExamScreen() {
   const params = useLocalSearchParams<{ mode: string; licenseType: string; category?: string }>();
   const insets = useSafeAreaInsets();
   const { isLoggedIn, incrementFreeExams, licenseType: userLicense } = useUser();
-  const { getSpeechOptions } = useVoice();
-
   const mode = params.mode || 'daily';
   const lt = params.licenseType || userLicense || 'clase_b';
   const webTopInset = Platform.OS === 'web' ? 67 : 0;
@@ -76,7 +73,7 @@ export default function ExamScreen() {
   useEffect(() => {
     loadSounds();
     return () => {
-      Speech.stop();
+      stopNova();
       unloadSounds();
     };
   }, []);
@@ -135,7 +132,7 @@ export default function ExamScreen() {
   }, [questions, examFinished]);
 
   useEffect(() => {
-    Speech.stop();
+    stopNova();
     setIsSpeaking(false);
     setShowExplanation(false);
     correctFlash.value = 0;
@@ -143,40 +140,30 @@ export default function ExamScreen() {
 
   const currentQuestion = questions[currentIndex];
 
-  const humanizeText = (text: string): string => {
-    return text
-      .replace(/\.\s+/g, '... ')
-      .replace(/:\s*/g, ':... ')
-      .replace(/\?\s*/g, '?... ')
-      .replace(/;\s*/g, ';... ')
-      .replace(/,\s*/g, ', ');
-  };
-
-  const speakHuman = (text: string) => {
-    Speech.speak(humanizeText(text), {
-      ...getSpeechOptions(),
+  const speakNova = (text: string) => {
+    speakWithNova(text, {
       onDone: () => setIsSpeaking(false),
-      onStopped: () => setIsSpeaking(false),
       onError: () => setIsSpeaking(false),
     });
   };
 
   const handleSpeak = async () => {
     if (isSpeaking) {
-      Speech.stop();
+      stopNova();
       setIsSpeaking(false);
       return;
     }
     if (!currentQuestion) return;
     setIsSpeaking(true);
-    const text = currentQuestion.pregunta + '. ' + currentQuestion.opciones.map((o, i) =>
-      `Opción ${String.fromCharCode(65 + i)}: ${o}`).join('. ');
-    speakHuman(text);
+    const opciones = currentQuestion.opciones.map((o, i) =>
+      `La ${String.fromCharCode(65 + i)}, ${o}`).join('. ');
+    const text = `${currentQuestion.pregunta} Las opciones son: ${opciones}`;
+    speakNova(text);
   };
 
   const handleSpeakExplanation = async () => {
     if (isSpeaking) {
-      Speech.stop();
+      stopNova();
       setIsSpeaking(false);
       return;
     }
@@ -184,8 +171,8 @@ export default function ExamScreen() {
     setIsSpeaking(true);
     const correctLetter = String.fromCharCode(65 + currentQuestion.respuestaCorrecta);
     const correctOption = currentQuestion.opciones[currentQuestion.respuestaCorrecta];
-    const text = `La respuesta correcta es la opción ${correctLetter}: ${correctOption}. ${currentQuestion.explicacionTexto}`;
-    speakHuman(text);
+    const text = `La respuesta correcta es la ${correctLetter}, ${correctOption}. ${currentQuestion.explicacionTexto}`;
+    speakNova(text);
   };
 
   const handleAnswer = (optionIndex: number) => {
@@ -223,7 +210,7 @@ export default function ExamScreen() {
   };
 
   const goNext = () => {
-    Speech.stop();
+    stopNova();
     setIsSpeaking(false);
     setShowExplanation(false);
     if (currentIndex < questions.length - 1) {
@@ -234,14 +221,14 @@ export default function ExamScreen() {
   };
 
   const goPrev = () => {
-    Speech.stop();
+    stopNova();
     setIsSpeaking(false);
     setShowExplanation(false);
     if (currentIndex > 0) setCurrentIndex(currentIndex - 1);
   };
 
   const jumpTo = (idx: number) => {
-    Speech.stop();
+    stopNova();
     setIsSpeaking(false);
     setShowExplanation(false);
     setCurrentIndex(idx);
@@ -251,7 +238,7 @@ export default function ExamScreen() {
   const finishExam = useCallback(() => {
     if (examFinished) return;
     setExamFinished(true);
-    Speech.stop();
+    stopNova();
     if (timerRef.current) clearInterval(timerRef.current);
 
     let correct = 0;

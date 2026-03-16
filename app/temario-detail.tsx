@@ -4,10 +4,9 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import * as Speech from 'expo-speech';
 import Colors from '@/constants/colors';
 import { temarioChapters } from '@/lib/mockDatabase';
-import { useVoice } from '@/lib/VoiceContext';
+import { speakWithNova, stopNova } from '@/lib/ttsService';
 
 const CHAPTER_IMAGES: Record<string, any> = {
   ch1: require('../assets/images/questions/licencia.png'),
@@ -63,7 +62,6 @@ export default function TemarioDetailScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { chapterId } = useLocalSearchParams<{ chapterId: string }>();
-  const { getSpeechOptions } = useVoice();
   const webTopInset = Platform.OS === 'web' ? 67 : 0;
 
   const chapter = temarioChapters.find(c => c.id === chapterId);
@@ -71,27 +69,19 @@ export default function TemarioDetailScreen() {
   const [speakingIdx, setSpeakingIdx] = useState<number | null>(null);
 
   useEffect(() => {
-    return () => { Speech.stop(); };
+    return () => { stopNova(); };
   }, []);
 
   const handleSpeak = (text: string, idx: number) => {
     if (speakingIdx === idx) {
-      Speech.stop();
+      stopNova();
       setSpeakingIdx(null);
       return;
     }
-    Speech.stop();
+    stopNova();
     setSpeakingIdx(idx);
-    const humanized = text
-      .replace(/\.\s+/g, '... ')
-      .replace(/:\s*/g, ':... ')
-      .replace(/\?\s*/g, '?... ')
-      .replace(/;\s*/g, ';... ')
-      .replace(/,\s*/g, ', ');
-    Speech.speak(humanized, {
-      ...getSpeechOptions(),
+    speakWithNova(text, {
       onDone: () => setSpeakingIdx(null),
-      onStopped: () => setSpeakingIdx(null),
       onError: () => setSpeakingIdx(null),
     });
   };
@@ -110,7 +100,7 @@ export default function TemarioDetailScreen() {
   return (
     <View style={styles.container}>
       <LinearGradient colors={[Colors.primary, Colors.primaryLight]} style={[styles.header, { paddingTop: (insets.top || webTopInset) + 12 }]}>
-        <Pressable onPress={() => { Speech.stop(); router.back(); }} hitSlop={10}>
+        <Pressable onPress={() => { stopNova(); router.back(); }} hitSlop={10}>
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </Pressable>
         <View style={styles.headerContent}>
