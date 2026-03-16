@@ -132,3 +132,15 @@ id = "7VL95ztL5u1QArzZMkv7K"
 uri = "file://attached_assets/humanizada-alloy.mp3"
 type = "audio"
 title = "Voz 3: ALLOY - Neutra y versátil"
+
+[[outputs]]
+id = "ZFc96EbfMiPSFLClXAZtO"
+uri = "file://attached_assets/variante-1-nova-chilena.mp3"
+type = "audio"
+title = "Variante 1 - Nova estilo chileno (femenina, enérgica)"
+
+[[outputs]]
+id = "MUn9nczhkBOzs58HOa2Ac"
+uri = "file://attached_assets/variante-2-fable-chilena.mp3"
+type = "audio"
+title = "Variante 2 - Fable estilo chileno (cálida, cercana)"
