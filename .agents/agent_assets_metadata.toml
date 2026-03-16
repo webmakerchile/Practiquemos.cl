@@ -36,3 +36,39 @@ id = "A0Qd1wbgwbXRRZHMzM1sj"
 uri = "file://attached_assets/pregunta-ejemplo-3-nova.mp3"
 type = "audio"
 title = "Voz Nova - Pregunta 3 (estacionamiento)"
+
+[[outputs]]
+id = "JLsJOtRPORYD0ysSn1qzS"
+uri = "file://attached_assets/voz-nova.mp3"
+type = "audio"
+title = "🎤 NOVA - Femenina, clara y enérgica"
+
+[[outputs]]
+id = "JvhSYPO8XFo-xWS1_Ov6d"
+uri = "file://attached_assets/voz-shimmer.mp3"
+type = "audio"
+title = "🎤 SHIMMER - Femenina, suave y cálida"
+
+[[outputs]]
+id = "trv8VBP3rPpO0qZZGnLiN"
+uri = "file://attached_assets/voz-alloy.mp3"
+type = "audio"
+title = "🎤 ALLOY - Neutra, versátil"
+
+[[outputs]]
+id = "1txb1CTeKzxnEI8J_xbWh"
+uri = "file://attached_assets/voz-echo.mp3"
+type = "audio"
+title = "🎤 ECHO - Masculina, grave"
+
+[[outputs]]
+id = "0cT2_KTSzp1YVQUzdBzaK"
+uri = "file://attached_assets/voz-fable.mp3"
+type = "audio"
+title = "🎤 FABLE - Masculina, cálida"
+
+[[outputs]]
+id = "O2LCuA613K6oF9hhNPvXc"
+uri = "file://attached_assets/voz-onyx.mp3"
+type = "audio"
+title = "🎤 ONYX - Masculina, profunda"
