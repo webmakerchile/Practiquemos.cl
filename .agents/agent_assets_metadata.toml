@@ -155,10 +155,28 @@ title = "Nova Ultra Humanizada - Estilo chileno cercano"
 id = "HhrN3kGgZBmatPl8vvbk_"
 uri = "file://attached_assets/nova-profesora-neutra.mp3"
 type = "audio"
-title = "Nova - Profesora neutra chilena (sin chilenismos exagerados)"
+title = "1. Profesora - Campo visual y velocidad (la original)"
 
 [[outputs]]
 id = "OVl80E29I8b543yf9HOYY"
 uri = "file://attached_assets/nova-r-reforzada.mp3"
 type = "audio"
 title = "Nova Profesora - R reforzada"
+
+[[outputs]]
+id = "_tRfrjgoPXIhwSC51MUon"
+uri = "file://attached_assets/profesora-luces.mp3"
+type = "audio"
+title = "2. Profesora - Luces automáticas del vehículo"
+
+[[outputs]]
+id = "zTIBh-o9Cj7cET_pBjCwV"
+uri = "file://attached_assets/profesora-montana.mp3"
+type = "audio"
+title = "3. Profesora - Camión en carretera de montaña"
+
+[[outputs]]
+id = "PJpzDuVw8uLOT-fGpUUc7"
+uri = "file://attached_assets/profesora-paradero.mp3"
+type = "audio"
+title = "4. Profesora - Distancia de paradero de buses"
