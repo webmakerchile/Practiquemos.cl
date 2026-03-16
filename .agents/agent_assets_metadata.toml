@@ -156,3 +156,9 @@ id = "HhrN3kGgZBmatPl8vvbk_"
 uri = "file://attached_assets/nova-profesora-neutra.mp3"
 type = "audio"
 title = "Nova - Profesora neutra chilena (sin chilenismos exagerados)"
+
+[[outputs]]
+id = "OVl80E29I8b543yf9HOYY"
+uri = "file://attached_assets/nova-r-reforzada.mp3"
+type = "audio"
+title = "Nova Profesora - R reforzada"
