@@ -296,7 +296,7 @@ const styles = StyleSheet.create({
   headerBtn: { padding: 4 },
   logoRow: { flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1, justifyContent: 'center' },
   logoAvatar: { width: 44, height: 44 },
-  logoText: { height: 50, width: 220 },
+  logoText: { height: 65, width: 280 },
   welcomeTitle: { color: Colors.text, fontSize: 16, fontFamily: 'Nunito_700Bold', textAlign: 'center', marginBottom: 6 },
   licenseBanner: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 12, borderRadius: 14, gap: 10 },
   licenseBannerText: { flex: 1 },
