@@ -6,8 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import Colors from '@/constants/colors';
 import { useUser } from '@/lib/UserContext';
-import { getApiUrl } from '@/lib/query-client';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getApiUrl, getToken } from '@/lib/query-client';
 
 export default function PlansScreen() {
   const router = useRouter();
@@ -36,7 +35,7 @@ export default function PlansScreen() {
 
     setLoading(plan);
     try {
-      const token = await AsyncStorage.getItem('auth_token');
+      const token = getToken();
       const apiUrl = getApiUrl();
       const url = new URL('/api/payments/create-preference', apiUrl).toString();
 
