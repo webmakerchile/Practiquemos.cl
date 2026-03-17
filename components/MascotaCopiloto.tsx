@@ -75,7 +75,7 @@ const mascotaMessages: Record<MascotaState, string[]> = {
   incorrect: incorrectMessages,
   celebrate: ['¡FELICITACIONES! ¡Aprobaste! 🎊🏆🎉', '¡Increíble resultado! ¡Orgulloso de ti! ⭐'],
   encourage: ['¡Aún puedes mejorar! ¡Repasemos! 💪', '¡No te rindas! ¡Inténtalo de nuevo! 🔥'],
-  speaking: ['Escucha la pregunta con atención 🎧', 'Te estoy leyendo la pregunta... 🗣️'],
+  speaking: ['Escucha con atención 🎧', 'Te estoy leyendo... 🗣️'],
   thinking: thinkingMessages,
 };
 

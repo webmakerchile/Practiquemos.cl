@@ -503,6 +503,7 @@ export default function ExamScreen() {
             onExplanationPress={() => setShowExplanation(!showExplanation)}
             compact
             isSpeaking={isSpeaking}
+            message={isSpeaking ? 'Escucha la respuesta con atención 🎧' : undefined}
             questionIndex={currentIndex}
           />
         )}

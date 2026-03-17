@@ -28,6 +28,15 @@ function humanizeForProfesora(text: string): string {
     .replace(/;\s*/g, ';... ');
 }
 
+function blobToDataUrl(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
 async function fetchAudioBlob(text: string): Promise<string> {
   const humanized = humanizeForProfesora(text);
   const key = getCacheKey(humanized);
@@ -51,9 +60,14 @@ async function fetchAudioBlob(text: string): Promise<string> {
       if (!response.ok) throw new Error(`TTS error: ${response.status}`);
 
       const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      audioCache.set(key, blobUrl);
-      return blobUrl;
+      let audioUrl: string;
+      try {
+        audioUrl = URL.createObjectURL(blob);
+      } catch {
+        audioUrl = await blobToDataUrl(blob);
+      }
+      audioCache.set(key, audioUrl);
+      return audioUrl;
     } finally {
       pendingRequests.delete(key);
     }
