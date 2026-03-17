@@ -1,17 +1,20 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Platform, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, Pressable, Platform, Alert, ActivityIndicator, Linking } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import Colors from '@/constants/colors';
 import { useUser } from '@/lib/UserContext';
+import { getApiUrl } from '@/lib/query-client';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function PlansScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { isPremium, user } = useUser();
+  const { isPremium, user, refreshUser } = useUser();
   const webTopInset = Platform.OS === 'web' ? 67 : 0;
+  const [loading, setLoading] = useState<string | null>(null);
 
   const features = [
     { icon: 'infinite-outline' as const, text: 'Examenes ilimitados' },
@@ -21,6 +24,50 @@ export default function PlansScreen() {
     { icon: 'star-outline' as const, text: 'Favoritos ilimitados' },
     { icon: 'layers-outline' as const, text: 'Todas las categorias' },
   ];
+
+  const handlePurchase = async (plan: string) => {
+    if (!user) {
+      Alert.alert('Inicia sesión', 'Necesitas una cuenta para comprar un plan Premium.', [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Iniciar sesión', onPress: () => router.push('/login') },
+      ]);
+      return;
+    }
+
+    setLoading(plan);
+    try {
+      const token = await AsyncStorage.getItem('auth_token');
+      const apiUrl = getApiUrl();
+      const url = new URL('/api/payments/create-preference', apiUrl).toString();
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ plan }),
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.message || 'Error al crear pago');
+      }
+
+      const data = await response.json();
+      const paymentUrl = data.sandboxInitPoint || data.initPoint;
+
+      if (Platform.OS === 'web') {
+        window.open(paymentUrl, '_blank');
+      } else {
+        await Linking.openURL(paymentUrl);
+      }
+    } catch (err: any) {
+      Alert.alert('Error', err.message || 'No se pudo procesar el pago. Intenta nuevamente.');
+    } finally {
+      setLoading(null);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -56,20 +103,42 @@ export default function PlansScreen() {
           <Text style={styles.planName}>Premium 30 Dias</Text>
           <Text style={styles.planPrice}>$4.990 CLP</Text>
           <Text style={styles.planPeriod}>30 dias de acceso completo</Text>
-          <Pressable style={({ pressed }) => [styles.planBtn, pressed && { opacity: 0.8 }]}
-            onPress={() => Alert.alert('Pago', 'Contacta al administrador para activar tu plan Premium.')}>
-            <Text style={styles.planBtnText}>Obtener Premium</Text>
+          <Pressable
+            style={({ pressed }) => [styles.planBtn, pressed && { opacity: 0.8 }, loading === 'premium_30' && { opacity: 0.6 }]}
+            onPress={() => handlePurchase('premium_30')}
+            disabled={loading !== null}
+          >
+            {loading === 'premium_30' ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.planBtnText}>Obtener Premium</Text>
+            )}
           </Pressable>
+          <View style={styles.mpBadge}>
+            <Ionicons name="shield-checkmark" size={14} color="#009ee3" />
+            <Text style={styles.mpBadgeText}>Pago seguro con Mercado Pago</Text>
+          </View>
         </View>
 
         <View style={styles.planCardAlt}>
           <Text style={styles.planName}>Premium 10 Dias</Text>
           <Text style={styles.planPrice}>$2.990 CLP</Text>
           <Text style={styles.planPeriod}>10 dias de acceso completo</Text>
-          <Pressable style={({ pressed }) => [styles.planBtnAlt, pressed && { opacity: 0.8 }]}
-            onPress={() => Alert.alert('Pago', 'Contacta al administrador para activar tu plan Premium.')}>
-            <Text style={styles.planBtnAltText}>Obtener Premium</Text>
+          <Pressable
+            style={({ pressed }) => [styles.planBtnAlt, pressed && { opacity: 0.8 }, loading === 'premium_10' && { opacity: 0.6 }]}
+            onPress={() => handlePurchase('premium_10')}
+            disabled={loading !== null}
+          >
+            {loading === 'premium_10' ? (
+              <ActivityIndicator color={Colors.text} />
+            ) : (
+              <Text style={styles.planBtnAltText}>Obtener Premium</Text>
+            )}
           </Pressable>
+          <View style={styles.mpBadge}>
+            <Ionicons name="shield-checkmark" size={14} color="#009ee3" />
+            <Text style={styles.mpBadgeText}>Pago seguro con Mercado Pago</Text>
+          </View>
         </View>
 
         <View style={styles.freeCard}>
@@ -99,10 +168,12 @@ const styles = StyleSheet.create({
   planName: { fontSize: 18, fontFamily: 'Nunito_700Bold', color: Colors.text },
   planPrice: { fontSize: 28, fontFamily: 'Nunito_800ExtraBold', color: '#7c3aed', marginTop: 4 },
   planPeriod: { fontSize: 14, fontFamily: 'Nunito_400Regular', color: Colors.textSecondary, marginBottom: 16 },
-  planBtn: { backgroundColor: '#7c3aed', paddingVertical: 14, paddingHorizontal: 40, borderRadius: 14, width: '100%', alignItems: 'center' },
+  planBtn: { backgroundColor: '#7c3aed', paddingVertical: 14, paddingHorizontal: 40, borderRadius: 14, width: '100%', alignItems: 'center', minHeight: 48, justifyContent: 'center' },
   planBtnText: { color: '#fff', fontSize: 16, fontFamily: 'Nunito_700Bold' },
   planCardAlt: { backgroundColor: Colors.surface, borderRadius: 16, padding: 20, marginBottom: 12, alignItems: 'center', borderWidth: 1, borderColor: Colors.border },
-  planBtnAlt: { backgroundColor: Colors.surfaceSecondary, paddingVertical: 14, paddingHorizontal: 40, borderRadius: 14, width: '100%', alignItems: 'center', borderWidth: 1, borderColor: Colors.border },
+  planBtnAlt: { backgroundColor: Colors.surfaceSecondary, paddingVertical: 14, paddingHorizontal: 40, borderRadius: 14, width: '100%', alignItems: 'center', borderWidth: 1, borderColor: Colors.border, minHeight: 48, justifyContent: 'center' },
   planBtnAltText: { color: Colors.text, fontSize: 16, fontFamily: 'Nunito_700Bold' },
   freeCard: { backgroundColor: Colors.surfaceSecondary, borderRadius: 16, padding: 20, alignItems: 'center' },
+  mpBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 10 },
+  mpBadgeText: { fontSize: 12, fontFamily: 'Nunito_600SemiBold', color: '#009ee3' },
 });

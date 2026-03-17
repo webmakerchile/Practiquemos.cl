@@ -153,7 +153,7 @@ Study materials in `lib/temarioData.ts` with 11 chapters total: 6 base chapters 
 
 ### External Services
 - **OpenAI TTS HD** — Text-to-speech via API (`OPENAI_API_KEY` env secret). Uses "Nova" voice model for reading questions and study material aloud
+- **Mercado Pago Checkout Pro** — Payment gateway for premium plans (`MP_ACCESS_TOKEN`, `MP_PUBLIC_KEY` env secrets). Plans: $2.990 CLP (10 days), $4.990 CLP (30 days). Payments table in DB tracks transactions. Webhook + success redirect activate plans automatically.
 - No third-party auth providers (custom username/password auth)
-- No payment processing yet (plans page is display-only)
 - No external analytics or crash reporting
 - Contact links to email (contacto@practiquemos.cl), WhatsApp, and Instagram

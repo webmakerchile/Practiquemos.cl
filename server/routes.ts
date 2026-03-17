@@ -7,8 +7,12 @@ import {
   adminUpdateUserSchema,
   adminCreateQuestionSchema,
   adminUpdateQuestionSchema,
+  payments,
+  users,
 } from "@shared/schema";
 import crypto from "crypto";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 function hashPassword(password: string): string {
   return crypto.createHash("sha256").update(password).digest("hex");
@@ -424,6 +428,185 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const { licenseType, category, correct } = req.body;
     await storage.updateCategoryProgress(session.userId, licenseType, category, correct);
     res.json({ message: "ok" });
+  });
+
+  const PLAN_CONFIG: Record<string, { title: string; price: number; days: number }> = {
+    premium_10: { title: "Premium 10 Días - Practiquemos.cl", price: 2990, days: 10 },
+    premium_30: { title: "Premium 30 Días - Practiquemos.cl", price: 4990, days: 30 },
+  };
+
+  app.post("/api/payments/create-preference", async (req: Request, res: Response) => {
+    const session = getSession(req);
+    if (!session) return res.status(401).json({ message: "No autorizado" });
+
+    const { plan } = req.body;
+    const config = PLAN_CONFIG[plan];
+    if (!config) return res.status(400).json({ message: "Plan inválido" });
+
+    const accessToken = process.env.MP_ACCESS_TOKEN;
+    if (!accessToken) return res.status(500).json({ message: "Mercado Pago no configurado" });
+
+    try {
+      const baseUrl = `https://${process.env.REPLIT_DEV_DOMAIN || process.env.REPLIT_DOMAINS?.split(",")[0] || "localhost:5000"}`;
+
+      const preference = {
+        items: [{
+          title: config.title,
+          quantity: 1,
+          unit_price: config.price,
+          currency_id: "CLP",
+        }],
+        back_urls: {
+          success: `${baseUrl}/api/payments/success`,
+          failure: `${baseUrl}/api/payments/failure`,
+          pending: `${baseUrl}/api/payments/pending`,
+        },
+        auto_return: "approved" as const,
+        external_reference: `${session.userId}|${plan}`,
+        notification_url: `${baseUrl}/api/payments/webhook`,
+      };
+
+      const mpResponse = await fetch("https://api.mercadopago.com/checkout/preferences", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(preference),
+      });
+
+      if (!mpResponse.ok) {
+        const errText = await mpResponse.text();
+        console.error("MP preference error:", errText);
+        return res.status(502).json({ message: "Error creando preferencia de pago" });
+      }
+
+      const data = await mpResponse.json() as any;
+
+      await db.insert(payments).values({
+        userId: session.userId,
+        preferenceId: data.id,
+        plan,
+        amount: config.price,
+        status: "pending",
+      });
+
+      res.json({
+        preferenceId: data.id,
+        initPoint: data.init_point,
+        sandboxInitPoint: data.sandbox_init_point,
+      });
+    } catch (err) {
+      console.error("Payment error:", err);
+      res.status(500).json({ message: "Error procesando pago" });
+    }
+  });
+
+  app.post("/api/payments/webhook", async (req: Request, res: Response) => {
+    try {
+      const { type, data } = req.body;
+      if (type !== "payment" || !data?.id) return res.sendStatus(200);
+
+      const accessToken = process.env.MP_ACCESS_TOKEN;
+      if (!accessToken) return res.sendStatus(200);
+
+      const mpResponse = await fetch(`https://api.mercadopago.com/v1/payments/${data.id}`, {
+        headers: { "Authorization": `Bearer ${accessToken}` },
+      });
+
+      if (!mpResponse.ok) return res.sendStatus(200);
+
+      const payment = await mpResponse.json() as any;
+      const externalRef = payment.external_reference;
+      if (!externalRef) return res.sendStatus(200);
+
+      const [userId, plan] = externalRef.split("|");
+      const config = PLAN_CONFIG[plan];
+      if (!config) return res.sendStatus(200);
+
+      if (payment.status === "approved") {
+        const expiry = new Date();
+        expiry.setDate(expiry.getDate() + config.days);
+
+        await db.update(users).set({
+          plan,
+          planExpiry: expiry,
+        }).where(eq(users.id, userId));
+
+        const existingPayments = await db.select().from(payments)
+          .where(eq(payments.preferenceId, payment.preference_id || ""));
+
+        if (existingPayments.length > 0) {
+          await db.update(payments).set({
+            mercadoPagoId: String(data.id),
+            status: "approved",
+            updatedAt: new Date(),
+          }).where(eq(payments.preferenceId, payment.preference_id || ""));
+        }
+
+        console.log(`Payment approved for user ${userId}, plan ${plan}, expires ${expiry.toISOString()}`);
+      }
+
+      res.sendStatus(200);
+    } catch (err) {
+      console.error("Webhook error:", err);
+      res.sendStatus(200);
+    }
+  });
+
+  app.get("/api/payments/success", async (req: Request, res: Response) => {
+    const paymentId = req.query.payment_id as string;
+    const externalRef = req.query.external_reference as string;
+    const status = req.query.status as string || req.query.collection_status as string;
+
+    if (externalRef && status === "approved") {
+      const [userId, plan] = externalRef.split("|");
+      const config = PLAN_CONFIG[plan];
+      if (config) {
+        const expiry = new Date();
+        expiry.setDate(expiry.getDate() + config.days);
+        await db.update(users).set({ plan, planExpiry: expiry }).where(eq(users.id, userId));
+
+        if (paymentId) {
+          const preferenceId = req.query.preference_id as string;
+          if (preferenceId) {
+            await db.update(payments).set({
+              mercadoPagoId: paymentId,
+              status: "approved",
+              updatedAt: new Date(),
+            }).where(eq(payments.preferenceId, preferenceId));
+          }
+        }
+      }
+    }
+
+    const appUrl = `https://${process.env.REPLIT_DEV_DOMAIN || process.env.REPLIT_DOMAINS?.split(",")[0] || "localhost:8081"}`;
+    res.send(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Pago exitoso</title><style>body{font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#f0fdf4;text-align:center}.card{background:#fff;border-radius:16px;padding:40px;box-shadow:0 4px 12px rgba(0,0,0,0.1);max-width:400px}h1{color:#166534;font-size:24px}p{color:#333;font-size:16px}a{display:inline-block;margin-top:20px;background:#7c3aed;color:#fff;padding:14px 32px;border-radius:12px;text-decoration:none;font-weight:bold}</style></head><body><div class="card"><h1>¡Pago exitoso! ✅</h1><p>Tu plan Premium ha sido activado correctamente.</p><p>Ya puedes disfrutar de todos los contenidos.</p><a href="${appUrl}">Volver a la app</a></div></body></html>`);
+  });
+
+  app.get("/api/payments/failure", (_req: Request, res: Response) => {
+    const appUrl = `https://${process.env.REPLIT_DEV_DOMAIN || process.env.REPLIT_DOMAINS?.split(",")[0] || "localhost:8081"}`;
+    res.send(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Pago fallido</title><style>body{font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#fef2f2;text-align:center}.card{background:#fff;border-radius:16px;padding:40px;box-shadow:0 4px 12px rgba(0,0,0,0.1);max-width:400px}h1{color:#991b1b;font-size:24px}p{color:#333;font-size:16px}a{display:inline-block;margin-top:20px;background:#7c3aed;color:#fff;padding:14px 32px;border-radius:12px;text-decoration:none;font-weight:bold}</style></head><body><div class="card"><h1>Pago no completado</h1><p>Hubo un problema con tu pago. Puedes intentarlo nuevamente.</p><a href="${appUrl}">Volver a la app</a></div></body></html>`);
+  });
+
+  app.get("/api/payments/pending", (_req: Request, res: Response) => {
+    const appUrl = `https://${process.env.REPLIT_DEV_DOMAIN || process.env.REPLIT_DOMAINS?.split(",")[0] || "localhost:8081"}`;
+    res.send(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Pago pendiente</title><style>body{font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#fffbeb;text-align:center}.card{background:#fff;border-radius:16px;padding:40px;box-shadow:0 4px 12px rgba(0,0,0,0.1);max-width:400px}h1{color:#92400e;font-size:24px}p{color:#333;font-size:16px}a{display:inline-block;margin-top:20px;background:#7c3aed;color:#fff;padding:14px 32px;border-radius:12px;text-decoration:none;font-weight:bold}</style></head><body><div class="card"><h1>Pago pendiente ⏳</h1><p>Tu pago está siendo procesado. Te avisaremos cuando se confirme.</p><a href="${appUrl}">Volver a la app</a></div></body></html>`);
+  });
+
+  app.get("/api/payments/status", async (req: Request, res: Response) => {
+    const session = getSession(req);
+    if (!session) return res.status(401).json({ message: "No autorizado" });
+
+    const user = await storage.getUser(session.userId);
+    if (!user) return res.status(404).json({ message: "Usuario no encontrado" });
+
+    res.json({
+      plan: user.plan,
+      planExpiry: user.planExpiry,
+      isPremium: (user.plan === "premium_10" || user.plan === "premium_30") && 
+        (!user.planExpiry || new Date(user.planExpiry) > new Date()),
+    });
   });
 
   const ttsCache = new Map<string, Buffer>();

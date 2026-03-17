@@ -73,6 +73,20 @@ export const questions = pgTable("questions", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+export const payments = pgTable("payments", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id),
+  mercadoPagoId: text("mercado_pago_id"),
+  preferenceId: text("preference_id").notNull(),
+  plan: text("plan").notNull(),
+  amount: integer("amount").notNull(),
+  status: text("status").notNull().default("pending"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -134,3 +148,4 @@ export type ExamResult = typeof examResults.$inferSelect;
 export type Favorite = typeof favorites.$inferSelect;
 export type CategoryProgress = typeof categoryProgress.$inferSelect;
 export type QuestionRecord = typeof questions.$inferSelect;
+export type Payment = typeof payments.$inferSelect;
