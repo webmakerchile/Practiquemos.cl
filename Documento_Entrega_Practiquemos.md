@@ -114,7 +114,7 @@ Para compras dentro de la app en iPhone/iPad, se utiliza **RevenueCat** integrad
 ## Contacto y soporte
 
 Para cualquier consulta tecnica o soporte:
-- **Email**: contacto@practiquemos.cl
+- **Email**: practiquemos.cl@gmail.com
 - **Desarrollador**: WebMakerChile
 
 ---

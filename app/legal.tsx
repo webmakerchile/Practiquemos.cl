@@ -114,7 +114,7 @@ export default function LegalScreen() {
           {'\n'}
           Para usuarios de Android y Web:{'\n'}
           • Las compras se procesan a través de Mercado Pago{'\n'}
-          • Para consultas sobre pagos o reembolsos, contáctanos en contacto@practiquemos.cl
+          • Para consultas sobre pagos o reembolsos, contáctanos en practiquemos.cl@gmail.com
         </Text>
 
         <Text style={styles.heading}>6. Contenido educativo</Text>
@@ -134,7 +134,7 @@ export default function LegalScreen() {
 
         <Text style={styles.heading}>9. Contacto</Text>
         <Text style={styles.body}>
-          Para consultas sobre estos términos o la política de privacidad, contáctanos en contacto@practiquemos.cl
+          Para consultas sobre estos términos o la política de privacidad, contáctanos en practiquemos.cl@gmail.com
         </Text>
 
         <Text style={styles.copyright}>© 2026 Practiquemos.cl - Todos los derechos reservados</Text>

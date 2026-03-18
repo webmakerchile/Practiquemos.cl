@@ -28,11 +28,11 @@ export default function ContactoScreen() {
         <Text style={styles.title}>Como podemos ayudarte?</Text>
         <Text style={styles.desc}>Si tienes alguna incidencia, duda sobre el servicio, o quieres compartir tus preguntas del examen, no dudes en contactarnos.</Text>
 
-        <Pressable style={styles.contactCard} onPress={() => Linking.openURL('mailto:contacto@practiquemos.cl')}>
+        <Pressable style={styles.contactCard} onPress={() => Linking.openURL('mailto:practiquemos.cl@gmail.com')}>
           <Ionicons name="mail-outline" size={24} color={Colors.primary} />
           <View style={styles.contactInfo}>
             <Text style={styles.contactLabel}>Email</Text>
-            <Text style={styles.contactValue}>contacto@practiquemos.cl</Text>
+            <Text style={styles.contactValue}>practiquemos.cl@gmail.com</Text>
           </View>
         </Pressable>
 
