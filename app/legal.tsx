@@ -97,33 +97,47 @@ export default function LegalScreen() {
         <Text style={styles.heading}>4. Planes y pagos</Text>
         <Text style={styles.body}>
           • El plan gratuito permite un número limitado de exámenes diarios{'\n'}
-          • Los planes Premium otorgan acceso completo por un período determinado{'\n'}
+          • Los planes Premium otorgan acceso completo por un período determinado (10 o 30 días){'\n'}
           • Los pagos en iOS se procesan a través de la App Store de Apple{'\n'}
           • Los pagos en Android y web se procesan a través de Mercado Pago{'\n'}
-          • Los precios están sujetos a cambios con previo aviso
+          • Los precios están sujetos a cambios con previo aviso{'\n'}
+          • Los planes Premium no son suscripciones con renovación automática; se adquieren como compras únicas por un período determinado
         </Text>
 
-        <Text style={styles.heading}>5. Contenido educativo</Text>
+        <Text style={styles.heading}>5. Gestión de compras y reembolsos</Text>
+        <Text style={styles.body}>
+          Para usuarios de iOS:{'\n'}
+          • Las compras se procesan a través de tu cuenta de Apple y están sujetas a los términos de Apple{'\n'}
+          • Para gestionar tus compras, ve a Ajustes {'>'} tu nombre {'>'} Suscripciones en tu dispositivo iOS{'\n'}
+          • Puedes restaurar compras previas desde la pantalla de Packs Premium dentro de la aplicación{'\n'}
+          • Los reembolsos deben solicitarse directamente a Apple a través de reportaproblem.apple.com{'\n'}
+          {'\n'}
+          Para usuarios de Android y Web:{'\n'}
+          • Las compras se procesan a través de Mercado Pago{'\n'}
+          • Para consultas sobre pagos o reembolsos, contáctanos en contacto@practiquemos.cl
+        </Text>
+
+        <Text style={styles.heading}>6. Contenido educativo</Text>
         <Text style={styles.body}>
           El contenido de Practiquemos.cl es de carácter educativo y complementario. No garantizamos la aprobación del examen oficial. Las preguntas se basan en el material oficial pero pueden diferir del examen real.
         </Text>
 
-        <Text style={styles.heading}>6. Propiedad intelectual</Text>
+        <Text style={styles.heading}>7. Propiedad intelectual</Text>
         <Text style={styles.body}>
           Todo el contenido, diseño, código y marca de Practiquemos.cl son propiedad de sus creadores. No está permitido copiar, reproducir o distribuir el contenido sin autorización previa.
         </Text>
 
-        <Text style={styles.heading}>7. Limitación de responsabilidad</Text>
+        <Text style={styles.heading}>8. Limitación de responsabilidad</Text>
         <Text style={styles.body}>
           Practiquemos.cl se ofrece "tal cual". No nos hacemos responsables por interrupciones del servicio, pérdida de datos o resultados en el examen oficial.
         </Text>
 
-        <Text style={styles.heading}>8. Contacto</Text>
+        <Text style={styles.heading}>9. Contacto</Text>
         <Text style={styles.body}>
           Para consultas sobre estos términos o la política de privacidad, contáctanos en contacto@practiquemos.cl
         </Text>
 
-        <Text style={styles.copyright}>© 2024 Practiquemos.cl - Todos los derechos reservados</Text>
+        <Text style={styles.copyright}>© 2026 Practiquemos.cl - Todos los derechos reservados</Text>
       </ScrollView>
     </View>
   );

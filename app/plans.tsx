@@ -27,6 +27,7 @@ export default function PlansScreen() {
   const { isPremium, user, refreshUser } = useUser();
   const webTopInset = Platform.OS === 'web' ? 67 : 0;
   const [loading, setLoading] = useState<string | null>(null);
+  const [restoring, setRestoring] = useState(false);
   const [rcPackages, setRcPackages] = useState<any[]>([]);
   const useRevenueCat = Platform.OS === 'ios' && !!Purchases;
 
@@ -140,6 +141,32 @@ export default function PlansScreen() {
     }
   };
 
+  const handleRestorePurchases = async () => {
+    if (!Purchases) return;
+    setRestoring(true);
+    try {
+      const customerInfo = await Purchases.restorePurchases();
+      const entitlements = customerInfo?.entitlements?.active || {};
+      const hasActive = Object.keys(entitlements).length > 0;
+
+      if (hasActive) {
+        try {
+          const productId = Object.values(entitlements as Record<string, any>)[0]?.productIdentifier || '';
+          const plan = productId.includes('10') ? 'premium_10' : 'premium_30';
+          await apiRequest('POST', '/api/payments/revenucat-activate', { plan });
+        } catch {}
+        await refreshUser();
+        Alert.alert('¡Compra restaurada!', 'Tu plan Premium ha sido restaurado exitosamente.');
+      } else {
+        Alert.alert('Sin compras previas', 'No se encontraron compras anteriores asociadas a tu cuenta.');
+      }
+    } catch (err: any) {
+      Alert.alert('Error', 'No se pudieron restaurar las compras. Intenta nuevamente.');
+    } finally {
+      setRestoring(false);
+    }
+  };
+
   const handlePurchase = (plan: string) => {
     if (useRevenueCat) {
       handleiOSPurchase(plan);
@@ -229,6 +256,32 @@ export default function PlansScreen() {
           <Text style={styles.planPrice}>Gratis</Text>
           <Text style={styles.planPeriod}>1 test diario gratuito</Text>
         </View>
+
+        {useRevenueCat && (
+          <View style={styles.iosSection}>
+            <Pressable
+              onPress={handleRestorePurchases}
+              disabled={restoring}
+              style={({ pressed }) => [styles.restoreBtn, (pressed || restoring) && { opacity: 0.6 }]}
+            >
+              {restoring ? (
+                <ActivityIndicator size="small" color="#7c3aed" />
+              ) : (
+                <>
+                  <Ionicons name="refresh-outline" size={18} color="#7c3aed" />
+                  <Text style={styles.restoreBtnText}>Restaurar Compras</Text>
+                </>
+              )}
+            </Pressable>
+
+            <View style={styles.iosInfoBox}>
+              <Ionicons name="logo-apple" size={16} color="#64748b" />
+              <Text style={styles.iosInfoText}>
+                Las compras se procesan a través de tu cuenta de Apple. Para gestionar o cancelar tu plan, ve a Ajustes {'>'} tu nombre {'>'} Suscripciones en tu dispositivo iOS.
+              </Text>
+            </View>
+          </View>
+        )}
       </ScrollView>
     </View>
   );
@@ -259,4 +312,9 @@ const styles = StyleSheet.create({
   freeCard: { backgroundColor: Colors.surfaceSecondary, borderRadius: 16, padding: 20, alignItems: 'center' },
   mpBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 10 },
   mpBadgeText: { fontSize: 12, fontFamily: 'Nunito_600SemiBold', color: '#009ee3' },
+  iosSection: { marginTop: 16, gap: 12 },
+  restoreBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14, borderRadius: 12, borderWidth: 1.5, borderColor: '#7c3aed', backgroundColor: Colors.surface, minHeight: 48 },
+  restoreBtnText: { fontSize: 15, fontFamily: 'Nunito_700Bold', color: '#7c3aed' },
+  iosInfoBox: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, backgroundColor: '#f1f5f9', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: '#e2e8f0' },
+  iosInfoText: { flex: 1, fontSize: 12, fontFamily: 'Nunito_400Regular', color: '#64748b', lineHeight: 18 },
 });
