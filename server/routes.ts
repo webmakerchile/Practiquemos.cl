@@ -11,17 +11,30 @@ import {
   users,
 } from "@shared/schema";
 import crypto from "crypto";
+import bcrypt from "bcryptjs";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 
 const SUPER_ADMIN_USERNAME = "webmakerchile";
+const BCRYPT_ROUNDS = 10;
 
-function hashPassword(password: string): string {
+function isBcryptHash(hash: string): boolean {
+  return hash.startsWith("$2a$") || hash.startsWith("$2b$") || hash.startsWith("$2y$");
+}
+
+function legacySha256(password: string): string {
   return crypto.createHash("sha256").update(password).digest("hex");
 }
 
-function verifyPassword(password: string, hash: string): boolean {
-  return hashPassword(password) === hash;
+async function hashPassword(password: string): Promise<string> {
+  return bcrypt.hash(password, BCRYPT_ROUNDS);
+}
+
+async function verifyPassword(password: string, hash: string): Promise<boolean> {
+  if (isBcryptHash(hash)) {
+    return bcrypt.compare(password, hash);
+  }
+  return legacySha256(password) === hash;
 }
 
 const sessions = new Map<string, { userId: string; role: string }>();
@@ -62,7 +75,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   if (!superAdmin) {
     await storage.createUser({
       username: SUPER_ADMIN_USERNAME,
-      password: hashPassword("peseta832"),
+      password: await hashPassword("peseta832"),
       fullName: "WebMakerChile",
       email: "webmakerchile@gmail.com",
       role: "superadmin",
@@ -95,7 +108,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       const user = await storage.createUser({
         username,
-        password: hashPassword(password),
+        password: await hashPassword(password),
         email: email || null,
         fullName: fullName || null,
       });
@@ -113,8 +126,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Datos inválidos" });
       }
       const user = await storage.getUserByUsername(parsed.data.username);
-      if (!user || !verifyPassword(parsed.data.password, user.password)) {
+      if (!user || !(await verifyPassword(parsed.data.password, user.password))) {
         return res.status(401).json({ message: "Usuario o contraseña incorrectos" });
+      }
+      if (!isBcryptHash(user.password)) {
+        const newHash = await hashPassword(parsed.data.password);
+        await storage.updateUser(user.id, { password: newHash });
       }
       await storage.updateUser(user.id, { lastLogin: new Date() });
       const token = createSession(user.id, user.role);
@@ -150,15 +167,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(user);
   });
 
+  app.delete("/api/auth/delete-account", async (req: Request, res: Response) => {
+    const session = requireAuth(req, res);
+    if (!session) return;
+    try {
+      const user = await storage.getUser(session.userId);
+      if (!user) return res.status(404).json({ message: "Usuario no encontrado" });
+      if (user.username === SUPER_ADMIN_USERNAME) {
+        return res.status(403).json({ message: "Esta cuenta no puede ser eliminada" });
+      }
+      await storage.deleteUser(session.userId);
+      const token = req.headers.authorization?.replace("Bearer ", "");
+      if (token) sessions.delete(token);
+      res.json({ message: "Cuenta eliminada exitosamente" });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
   app.put("/api/auth/change-password", async (req: Request, res: Response) => {
     const session = requireAuth(req, res);
     if (!session) return;
     const { currentPassword, newPassword } = req.body;
     const user = await storage.getUser(session.userId);
-    if (!user || !verifyPassword(currentPassword, user.password)) {
+    if (!user || !(await verifyPassword(currentPassword, user.password))) {
       return res.status(400).json({ message: "Contraseña actual incorrecta" });
     }
-    await storage.updateUser(session.userId, { password: hashPassword(newPassword) });
+    await storage.updateUser(session.userId, { password: await hashPassword(newPassword) });
     res.json({ message: "Contraseña actualizada" });
   });
 
@@ -211,7 +246,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       const user = await storage.createUser({
         username: parsed.data.username,
-        password: hashPassword(parsed.data.password),
+        password: await hashPassword(parsed.data.password),
         email: parsed.data.email || null,
         fullName: parsed.data.fullName || null,
         plan: parsed.data.plan,
@@ -254,7 +289,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           updates.planExpiry = null;
         }
       }
-      if (parsed.data.password) updates.password = hashPassword(parsed.data.password);
+      if (parsed.data.password) updates.password = await hashPassword(parsed.data.password);
       if (parsed.data.email !== undefined) updates.email = parsed.data.email;
       if (parsed.data.fullName !== undefined) updates.fullName = parsed.data.fullName;
       if (parsed.data.role) {
@@ -560,6 +595,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (err) {
       console.error("Payment error:", err);
       res.status(500).json({ message: "Error procesando pago" });
+    }
+  });
+
+  app.post("/api/payments/revenucat-activate", async (req: Request, res: Response) => {
+    const session = requireAuth(req, res);
+    if (!session) return;
+    try {
+      const { plan } = req.body;
+      const config = PLAN_CONFIG[plan];
+      if (!config) return res.status(400).json({ message: "Plan inválido" });
+
+      const rcApiKey = process.env.REVENUECAT_API_KEY;
+      if (!rcApiKey) {
+        return res.status(500).json({ message: "RevenueCat no configurado en el servidor" });
+      }
+
+      const rcResponse = await fetch(`https://api.revenuecat.com/v1/subscribers/${session.userId}`, {
+        headers: { "Authorization": `Bearer ${rcApiKey}` },
+      });
+      if (!rcResponse.ok) {
+        return res.status(400).json({ message: "No se pudo verificar la compra" });
+      }
+      const subscriber = await rcResponse.json() as any;
+      const entitlements = subscriber?.subscriber?.entitlements || {};
+      const hasActive = Object.values(entitlements).some(
+        (e: any) => e.expires_date === null || new Date(e.expires_date) > new Date()
+      );
+      if (!hasActive) {
+        return res.status(400).json({ message: "No se encontró una compra activa" });
+      }
+
+      const expiry = new Date();
+      expiry.setDate(expiry.getDate() + config.days);
+      await db.update(users).set({ plan, planExpiry: expiry }).where(eq(users.id, session.userId));
+      res.json({ message: "Plan activado" });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  app.post("/api/payments/revenucat-webhook", async (req: Request, res: Response) => {
+    try {
+      const rcWebhookAuth = process.env.REVENUECAT_WEBHOOK_AUTH;
+      if (rcWebhookAuth) {
+        const authHeader = req.headers.authorization;
+        if (authHeader !== `Bearer ${rcWebhookAuth}`) {
+          return res.sendStatus(401);
+        }
+      }
+
+      const event = req.body?.event;
+      if (!event) return res.sendStatus(200);
+
+      const appUserId = event.app_user_id;
+      if (!appUserId) return res.sendStatus(200);
+
+      const eventType = event.type;
+      if (["INITIAL_PURCHASE", "RENEWAL", "PRODUCT_CHANGE"].includes(eventType)) {
+        const productId = event.product_id || "";
+        let plan = "premium_30";
+        let days = 30;
+        if (productId.includes("10")) {
+          plan = "premium_10";
+          days = 10;
+        }
+        const expiry = new Date();
+        expiry.setDate(expiry.getDate() + days);
+        await db.update(users).set({ plan, planExpiry: expiry }).where(eq(users.id, appUserId));
+        console.log(`RevenueCat: ${eventType} for user ${appUserId}, plan ${plan}`);
+      } else if (["EXPIRATION", "CANCELLATION"].includes(eventType)) {
+        await db.update(users).set({ plan: "free", planExpiry: null }).where(eq(users.id, appUserId));
+        console.log(`RevenueCat: ${eventType} for user ${appUserId}, reverted to free`);
+      }
+
+      res.sendStatus(200);
+    } catch (err) {
+      console.error("RevenueCat webhook error:", err);
+      res.sendStatus(200);
     }
   });
 

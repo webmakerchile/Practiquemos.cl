@@ -1,21 +1,48 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Platform, Alert, Image } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, Pressable, Platform, Alert, Image, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import Colors from '@/constants/colors';
 import { useUser } from '@/lib/UserContext';
+import { apiRequest } from '@/lib/query-client';
 
 export default function PerfilScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { user, isPremium, logout, isAdmin } = useUser();
   const webTopInset = Platform.OS === 'web' ? 67 : 0;
+  const [deleting, setDeleting] = useState(false);
 
   const handleLogout = async () => {
     await logout();
     router.replace('/');
+  };
+
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      'Eliminar mi cuenta',
+      'Esta acción es irreversible. Se borrarán permanentemente todos tus datos, incluyendo resultados de exámenes, favoritos y progreso. ¿Estás seguro?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Eliminar',
+          style: 'destructive',
+          onPress: async () => {
+            setDeleting(true);
+            try {
+              await apiRequest('DELETE', '/api/auth/delete-account');
+              await logout();
+              router.replace('/');
+            } catch {
+              Alert.alert('Error', 'No se pudo eliminar la cuenta. Intenta nuevamente.');
+              setDeleting(false);
+            }
+          },
+        },
+      ]
+    );
   };
 
   const getPlanLabel = () => {
@@ -87,6 +114,12 @@ export default function PerfilScreen() {
         </Pressable>
 
 
+        <Pressable onPress={() => router.push('/legal')} style={({ pressed }) => [styles.actionBtn, pressed && { opacity: 0.7 }]}>
+          <Ionicons name="document-text-outline" size={22} color={Colors.primary} />
+          <Text style={styles.actionText}>Privacidad y Términos</Text>
+          <Ionicons name="chevron-forward" size={20} color={Colors.textMuted} />
+        </Pressable>
+
         {isAdmin && (
           <Pressable onPress={() => router.push('/admin')} style={({ pressed }) => [styles.actionBtn, pressed && { opacity: 0.7 }]}>
             <Ionicons name="settings-outline" size={22} color="#dc2626" />
@@ -98,6 +131,17 @@ export default function PerfilScreen() {
         <Pressable onPress={handleLogout} style={styles.logoutBtn}>
           <Ionicons name="log-out-outline" size={20} color="#dc2626" />
           <Text style={styles.logoutText}>Cerrar Sesion</Text>
+        </Pressable>
+
+        <Pressable onPress={handleDeleteAccount} disabled={deleting} style={styles.deleteBtn}>
+          {deleting ? (
+            <ActivityIndicator size="small" color="#dc2626" />
+          ) : (
+            <>
+              <Ionicons name="trash-outline" size={20} color="#dc2626" />
+              <Text style={styles.deleteText}>Eliminar mi cuenta</Text>
+            </>
+          )}
         </Pressable>
       </ScrollView>
     </View>
@@ -123,4 +167,6 @@ const styles = StyleSheet.create({
   actionText: { flex: 1, fontSize: 15, fontFamily: 'Nunito_600SemiBold', color: Colors.text },
   logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 20, paddingVertical: 14, borderRadius: 12, borderWidth: 1, borderColor: '#fecaca' },
   logoutText: { fontSize: 15, fontFamily: 'Nunito_700Bold', color: '#dc2626' },
+  deleteBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 12, paddingVertical: 14, borderRadius: 12, backgroundColor: '#fef2f2', minHeight: 48 },
+  deleteText: { fontSize: 14, fontFamily: 'Nunito_600SemiBold', color: '#dc2626' },
 });

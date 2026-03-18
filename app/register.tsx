@@ -45,6 +45,7 @@ export default function RegisterScreen() {
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const goNext = () => {
     setError('');
@@ -74,6 +75,10 @@ export default function RegisterScreen() {
     }
     if (password !== confirmPassword) {
       setError('Las contraseñas no coinciden');
+      return;
+    }
+    if (!acceptedTerms) {
+      setError('Debes aceptar la Política de Privacidad y los Términos de Servicio');
       return;
     }
     setLoading(true);
@@ -315,6 +320,25 @@ export default function RegisterScreen() {
                 )}
               </View>
             </View>
+
+            <Pressable
+              onPress={() => setAcceptedTerms(!acceptedTerms)}
+              style={styles.termsRow}
+            >
+              <View style={[styles.checkbox, acceptedTerms && styles.checkboxChecked]}>
+                {acceptedTerms && <Ionicons name="checkmark" size={14} color="#fff" />}
+              </View>
+              <Text style={styles.termsText}>
+                Acepto la{' '}
+                <Text style={styles.termsLink} onPress={() => router.push('/legal')}>
+                  Política de Privacidad
+                </Text>
+                {' '}y los{' '}
+                <Text style={styles.termsLink} onPress={() => router.push('/legal')}>
+                  Términos de Servicio
+                </Text>
+              </Text>
+            </Pressable>
           </Animated.View>
         )}
       </ScrollView>
@@ -531,4 +555,9 @@ const styles = StyleSheet.create({
   loginRow: { flexDirection: 'row', justifyContent: 'center', paddingTop: 4 },
   loginText: { fontSize: 14, fontFamily: 'Nunito_400Regular', color: Colors.textSecondary },
   loginLink: { fontSize: 14, fontFamily: 'Nunito_700Bold', color: Colors.primary },
+  termsRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginTop: 16, paddingHorizontal: 4 },
+  checkbox: { width: 22, height: 22, borderRadius: 6, borderWidth: 2, borderColor: Colors.border, justifyContent: 'center', alignItems: 'center', marginTop: 1 },
+  checkboxChecked: { backgroundColor: Colors.primary, borderColor: Colors.primary },
+  termsText: { flex: 1, fontSize: 13, fontFamily: 'Nunito_400Regular', color: Colors.textSecondary, lineHeight: 20 },
+  termsLink: { color: Colors.primary, fontFamily: 'Nunito_700Bold' },
 });

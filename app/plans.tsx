@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, Platform, Alert, ActivityIndicator, Linking } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -6,7 +6,20 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import Colors from '@/constants/colors';
 import { useUser } from '@/lib/UserContext';
-import { getApiUrl, getToken } from '@/lib/query-client';
+import { getApiUrl, getToken, apiRequest } from '@/lib/query-client';
+
+let Purchases: any = null;
+if (Platform.OS === 'ios') {
+  try {
+    Purchases = require('react-native-purchases').default;
+  } catch {}
+}
+
+const RC_IOS_API_KEY = process.env.EXPO_PUBLIC_RC_IOS_API_KEY || '';
+const RC_PRODUCT_IDS = {
+  premium_10: 'premium_10_days',
+  premium_30: 'premium_30_days',
+};
 
 export default function PlansScreen() {
   const router = useRouter();
@@ -14,6 +27,23 @@ export default function PlansScreen() {
   const { isPremium, user, refreshUser } = useUser();
   const webTopInset = Platform.OS === 'web' ? 67 : 0;
   const [loading, setLoading] = useState<string | null>(null);
+  const [rcPackages, setRcPackages] = useState<any[]>([]);
+  const useRevenueCat = Platform.OS === 'ios' && !!Purchases;
+
+  useEffect(() => {
+    if (useRevenueCat && RC_IOS_API_KEY && user) {
+      const initRC = async () => {
+        try {
+          Purchases.configure({ apiKey: RC_IOS_API_KEY, appUserID: user.id });
+          const offerings = await Purchases.getOfferings();
+          if (offerings.current?.availablePackages) {
+            setRcPackages(offerings.current.availablePackages);
+          }
+        } catch {}
+      };
+      initRC();
+    }
+  }, [useRevenueCat, user]);
 
   const features = [
     { icon: 'infinite-outline' as const, text: 'Examenes ilimitados' },
@@ -24,7 +54,49 @@ export default function PlansScreen() {
     { icon: 'layers-outline' as const, text: 'Todas las categorias' },
   ];
 
-  const handlePurchase = async (plan: string) => {
+  const handleiOSPurchase = async (plan: string) => {
+    if (!user) {
+      Alert.alert('Inicia sesión', 'Necesitas una cuenta para comprar un plan Premium.', [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Iniciar sesión', onPress: () => router.push('/login') },
+      ]);
+      return;
+    }
+
+    if (!RC_IOS_API_KEY) {
+      Alert.alert('Error', 'El sistema de pagos no está configurado. Contacta soporte.');
+      return;
+    }
+
+    setLoading(plan);
+    try {
+      const productId = RC_PRODUCT_IDS[plan as keyof typeof RC_PRODUCT_IDS];
+      const targetPackage = rcPackages.find(
+        (p: any) => p.product?.identifier === productId
+      );
+
+      if (targetPackage) {
+        await Purchases.purchasePackage(targetPackage);
+      } else {
+        const { customerInfo } = await Purchases.purchaseProduct(productId);
+      }
+
+      try {
+        await apiRequest('POST', '/api/payments/revenucat-activate', { plan });
+      } catch {}
+
+      await refreshUser();
+      Alert.alert('¡Éxito!', 'Tu plan Premium ha sido activado.');
+    } catch (err: any) {
+      if (!err.userCancelled) {
+        Alert.alert('Error', 'No se pudo completar la compra. Intenta nuevamente.');
+      }
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const handleMercadoPagoPurchase = async (plan: string) => {
     if (!user) {
       Alert.alert('Inicia sesión', 'Necesitas una cuenta para comprar un plan Premium.', [
         { text: 'Cancelar', style: 'cancel' },
@@ -65,6 +137,14 @@ export default function PlansScreen() {
       Alert.alert('Error', err.message || 'No se pudo procesar el pago. Intenta nuevamente.');
     } finally {
       setLoading(null);
+    }
+  };
+
+  const handlePurchase = (plan: string) => {
+    if (useRevenueCat) {
+      handleiOSPurchase(plan);
+    } else {
+      handleMercadoPagoPurchase(plan);
     }
   };
 
@@ -113,10 +193,12 @@ export default function PlansScreen() {
               <Text style={styles.planBtnText}>Obtener Premium</Text>
             )}
           </Pressable>
-          <View style={styles.mpBadge}>
-            <Ionicons name="shield-checkmark" size={14} color="#009ee3" />
-            <Text style={styles.mpBadgeText}>Pago seguro con Mercado Pago</Text>
-          </View>
+          {!useRevenueCat && (
+            <View style={styles.mpBadge}>
+              <Ionicons name="shield-checkmark" size={14} color="#009ee3" />
+              <Text style={styles.mpBadgeText}>Pago seguro con Mercado Pago</Text>
+            </View>
+          )}
         </View>
 
         <View style={styles.planCardAlt}>
@@ -134,10 +216,12 @@ export default function PlansScreen() {
               <Text style={styles.planBtnAltText}>Obtener Premium</Text>
             )}
           </Pressable>
-          <View style={styles.mpBadge}>
-            <Ionicons name="shield-checkmark" size={14} color="#009ee3" />
-            <Text style={styles.mpBadgeText}>Pago seguro con Mercado Pago</Text>
-          </View>
+          {!useRevenueCat && (
+            <View style={styles.mpBadge}>
+              <Ionicons name="shield-checkmark" size={14} color="#009ee3" />
+              <Text style={styles.mpBadgeText}>Pago seguro con Mercado Pago</Text>
+            </View>
+          )}
         </View>
 
         <View style={styles.freeCard}>

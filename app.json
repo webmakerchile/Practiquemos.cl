@@ -15,10 +15,12 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "cl.practiquemos.app"
+      "bundleIdentifier": "cl.practiquemos.app",
+      "buildNumber": "1"
     },
     "android": {
       "package": "cl.practiquemos.app",
+      "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#1d4ed8",
         "foregroundImage": "./assets/images/android-icon-foreground.png",

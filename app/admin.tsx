@@ -59,16 +59,12 @@ export default function AdminScreen() {
       setFormError('');
       loadUsers();
     } catch (err: any) {
-      let msg = 'Error al crear usuario';
       try {
-        const errText = err.message || '';
-        const jsonStart = errText.indexOf('{');
-        if (jsonStart >= 0) {
-          const parsed = JSON.parse(errText.substring(jsonStart));
-          if (parsed.message) msg = parsed.message;
-        }
-      } catch {}
-      setFormError(msg);
+        const data = await err.json?.();
+        setFormError(data?.message || 'Error al crear usuario');
+      } catch {
+        setFormError('Error al crear usuario');
+      }
     }
   };
 
@@ -86,16 +82,12 @@ export default function AdminScreen() {
       setFormError('');
       loadUsers();
     } catch (err: any) {
-      let msg = 'Error al actualizar usuario';
       try {
-        const errText = err.message || '';
-        const jsonStart = errText.indexOf('{');
-        if (jsonStart >= 0) {
-          const parsed = JSON.parse(errText.substring(jsonStart));
-          if (parsed.message) msg = parsed.message;
-        }
-      } catch {}
-      setFormError(msg);
+        const data = await err.json?.();
+        setFormError(data?.message || 'Error al actualizar usuario');
+      } catch {
+        setFormError('Error al actualizar usuario');
+      }
     }
   };
 

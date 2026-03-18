@@ -98,6 +98,11 @@ export default function NosotrosScreen() {
           ))}
         </View>
 
+        <Pressable onPress={() => router.push('/legal')} style={styles.legalBtn}>
+          <Ionicons name="document-text-outline" size={18} color={Colors.primary} />
+          <Text style={styles.legalBtnText}>Política de Privacidad y Términos de Servicio</Text>
+        </Pressable>
+
         <Text style={styles.version}>Versión 1.0.0</Text>
         <Text style={styles.copyright}>2024 Practiquemos.cl - Todos los derechos reservados</Text>
       </ScrollView>
@@ -147,6 +152,8 @@ const styles = StyleSheet.create({
   featureTitle: { fontSize: 17, fontFamily: 'Nunito_700Bold', color: Colors.text, marginBottom: 4 },
   featureRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
   featureText: { flex: 1, fontSize: 14, fontFamily: 'Nunito_400Regular', color: Colors.textSecondary, textAlign: 'justify', lineHeight: 22 },
+  legalBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: Colors.surface, paddingVertical: 14, paddingHorizontal: 20, borderRadius: 14, marginBottom: 16, width: '100%', justifyContent: 'center' },
+  legalBtnText: { fontSize: 14, fontFamily: 'Nunito_600SemiBold', color: Colors.primary },
   version: { fontSize: 13, fontFamily: 'Nunito_600SemiBold', color: Colors.textMuted },
   copyright: { fontSize: 12, fontFamily: 'Nunito_400Regular', color: Colors.textMuted, marginTop: 4 },
 });

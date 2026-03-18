@@ -56,8 +56,8 @@ export default function ContactoScreen() {
           <Text style={styles.helpTitle}>Preguntas frecuentes</Text>
           <Text style={styles.helpItem}>Como puedo compartir preguntas del examen?</Text>
           <Text style={styles.helpAnswer}>Envianos un correo con las preguntas que recuerdas de tu examen y las agregaremos a nuestra base de datos.</Text>
-          <Text style={styles.helpItem}>Como activo mi plan Premium?</Text>
-          <Text style={styles.helpAnswer}>Contactanos por WhatsApp o email, te indicaremos los metodos de pago disponibles.</Text>
+          <Text style={styles.helpItem}>¿Necesitas ayuda con tu cuenta Premium?</Text>
+          <Text style={styles.helpAnswer}>Contáctanos y te ayudaremos con cualquier duda sobre tu suscripción o cuenta.</Text>
         </View>
       </ScrollView>
     </View>

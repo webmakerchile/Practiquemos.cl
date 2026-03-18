@@ -52,6 +52,7 @@ Preferred communication style: Simple, everyday language.
 | `voice-settings` | TTS voice picker, speed/pitch controls |
 | `admin` | Admin panel for user management |
 | `admin-questions` | Admin question CRUD management (search, filter, create, edit, delete) |
+| `legal` | Privacy policy and terms of service |
 | `contacto` / `nosotros` | Static info pages |
 
 ### Backend (Express.js)
@@ -59,7 +60,7 @@ Preferred communication style: Simple, everyday language.
 - **Runtime**: Node.js with Express 5, written in TypeScript, compiled with `tsx` (dev) or `esbuild` (prod).
 - **Entry point**: `server/index.ts` — sets up CORS, JSON parsing, routes, and static file serving.
 - **Routes**: `server/routes.ts` — RESTful API with auth middleware. Uses in-memory session tokens (Map-based, not JWT persistence).
-- **Authentication**: SHA-256 password hashing (via Node's `crypto`). Bearer token sessions stored in-memory on the server. Tokens are stored client-side in AsyncStorage.
+- **Authentication**: bcrypt password hashing (via `bcryptjs`). Legacy SHA-256 hashes are auto-migrated to bcrypt on login. Bearer token sessions stored in-memory on the server. Tokens are stored client-side in AsyncStorage.
 - **Roles**: Three roles — `user` (regular), `admin` (client-managed admin), `superadmin` (invisible platform owner). Super-admin is auto-seeded on startup, hidden from user lists, protected from deletion/demotion, and self-heals if tampered with.
 - **Uniqueness**: Username uniqueness enforced at application level. Email uniqueness also checked during registration and admin user creation.
 - **Storage layer**: `server/storage.ts` — `DatabaseStorage` class implementing `IStorage` interface with Drizzle ORM queries. This abstraction makes swapping storage implementations straightforward.
@@ -155,7 +156,8 @@ Study materials in `lib/temarioData.ts` with 11 chapters total: 6 base chapters 
 
 ### External Services
 - **OpenAI TTS HD** — Text-to-speech via API (`OPENAI_API_KEY` env secret). Uses "Nova" voice model for reading questions and study material aloud
-- **Mercado Pago Checkout Pro** — Payment gateway for premium plans (`MP_ACCESS_TOKEN`, `MP_PUBLIC_KEY` env secrets). Plans: $2.990 CLP (10 days), $4.990 CLP (30 days). Payments table in DB tracks transactions. Webhook + success redirect activate plans automatically.
+- **Mercado Pago Checkout Pro** — Payment gateway for premium plans on Android/web (`MP_ACCESS_TOKEN`, `MP_PUBLIC_KEY` env secrets). Plans: $2.990 CLP (10 days), $4.990 CLP (30 days). Payments table in DB tracks transactions. Webhook + success redirect activate plans automatically.
+- **RevenueCat** — In-app purchase system for iOS (`EXPO_PUBLIC_RC_IOS_API_KEY` env secret). Products: `premium_10_days`, `premium_30_days`. Webhook endpoint at `/api/payments/revenucat-webhook`.
 - No third-party auth providers (custom username/password auth)
 - No external analytics or crash reporting
 - Contact links to email (contacto@practiquemos.cl), WhatsApp, and Instagram

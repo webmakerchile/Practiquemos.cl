@@ -112,12 +112,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
     } catch (err: any) {
       let msg = 'Error al registrarse. Intenta de nuevo.';
       try {
-        const errText = err.message || '';
-        const jsonStart = errText.indexOf('{');
-        if (jsonStart >= 0) {
-          const parsed = JSON.parse(errText.substring(jsonStart));
-          if (parsed.message) msg = parsed.message;
-        }
+        const data = await err.json?.();
+        if (data?.message) msg = data.message;
       } catch {}
       return { success: false, error: msg };
     }
