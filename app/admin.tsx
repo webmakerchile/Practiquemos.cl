@@ -49,7 +49,7 @@ export default function AdminScreen() {
 
   const handleCreate = async () => {
     if (!formData.username || !formData.password) {
-      setFormError('Usuario y contrasena son requeridos');
+      setFormError('Usuario y contraseña son requeridos');
       return;
     }
     try {
@@ -59,7 +59,16 @@ export default function AdminScreen() {
       setFormError('');
       loadUsers();
     } catch (err: any) {
-      setFormError(err.message?.includes('400') ? 'El usuario ya existe' : 'Error al crear usuario');
+      let msg = 'Error al crear usuario';
+      try {
+        const errText = err.message || '';
+        const jsonStart = errText.indexOf('{');
+        if (jsonStart >= 0) {
+          const parsed = JSON.parse(errText.substring(jsonStart));
+          if (parsed.message) msg = parsed.message;
+        }
+      } catch {}
+      setFormError(msg);
     }
   };
 
@@ -74,9 +83,19 @@ export default function AdminScreen() {
       setShowEditModal(false);
       setSelectedUser(null);
       setEditData({ password: '', plan: '', role: '' });
+      setFormError('');
       loadUsers();
     } catch (err: any) {
-      setFormError('Error al actualizar usuario');
+      let msg = 'Error al actualizar usuario';
+      try {
+        const errText = err.message || '';
+        const jsonStart = errText.indexOf('{');
+        if (jsonStart >= 0) {
+          const parsed = JSON.parse(errText.substring(jsonStart));
+          if (parsed.message) msg = parsed.message;
+        }
+      } catch {}
+      setFormError(msg);
     }
   };
 

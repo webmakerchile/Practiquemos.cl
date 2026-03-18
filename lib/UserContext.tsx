@@ -110,7 +110,15 @@ export function UserProvider({ children }: { children: ReactNode }) {
       setUser(data.user);
       return { success: true };
     } catch (err: any) {
-      const msg = err.message?.includes('400') ? 'El usuario ya existe' : 'Error al registrarse';
+      let msg = 'Error al registrarse. Intenta de nuevo.';
+      try {
+        const errText = err.message || '';
+        const jsonStart = errText.indexOf('{');
+        if (jsonStart >= 0) {
+          const parsed = JSON.parse(errText.substring(jsonStart));
+          if (parsed.message) msg = parsed.message;
+        }
+      } catch {}
       return { success: false, error: msg };
     }
   }, []);
@@ -146,7 +154,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const isLoggedIn = !!user;
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = user?.role === 'admin' || user?.role === 'superadmin';
   const isPremium = user?.plan !== 'free' && !!user?.plan;
   const canTakeExam = isPremium || freeExamsUsed < 1;
 

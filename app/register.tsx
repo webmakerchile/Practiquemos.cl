@@ -224,7 +224,7 @@ export default function RegisterScreen() {
             <View style={styles.infoBox}>
               <Ionicons name="shield-checkmark" size={16} color={Colors.primary} />
               <Text style={styles.infoText}>
-                Tu información está protegida y solo se usa para personalizar tu aprendizaje
+                Tu información está protegida y solo se usa para{'\n'}personalizar tu aprendizaje
               </Text>
             </View>
           </Animated.View>
@@ -495,13 +495,15 @@ const styles = StyleSheet.create({
   infoBox: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 8,
-    backgroundColor: Colors.primaryLight,
+    gap: 10,
+    backgroundColor: '#eff6ff',
     borderRadius: 12,
-    padding: 12,
-    marginTop: 8,
+    padding: 14,
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: '#dbeafe',
   },
-  infoText: { flex: 1, fontSize: 13, fontFamily: 'Nunito_400Regular', color: Colors.primary, lineHeight: 20 },
+  infoText: { flex: 1, fontSize: 13, fontFamily: 'Nunito_400Regular', color: '#1e40af', lineHeight: 20 },
   bottomActions: {
     padding: 16,
     paddingTop: 0,

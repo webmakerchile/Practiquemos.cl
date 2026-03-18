@@ -60,6 +60,8 @@ Preferred communication style: Simple, everyday language.
 - **Entry point**: `server/index.ts` — sets up CORS, JSON parsing, routes, and static file serving.
 - **Routes**: `server/routes.ts` — RESTful API with auth middleware. Uses in-memory session tokens (Map-based, not JWT persistence).
 - **Authentication**: SHA-256 password hashing (via Node's `crypto`). Bearer token sessions stored in-memory on the server. Tokens are stored client-side in AsyncStorage.
+- **Roles**: Three roles — `user` (regular), `admin` (client-managed admin), `superadmin` (invisible platform owner). Super-admin is auto-seeded on startup, hidden from user lists, protected from deletion/demotion, and self-heals if tampered with.
+- **Uniqueness**: Username uniqueness enforced at application level. Email uniqueness also checked during registration and admin user creation.
 - **Storage layer**: `server/storage.ts` — `DatabaseStorage` class implementing `IStorage` interface with Drizzle ORM queries. This abstraction makes swapping storage implementations straightforward.
 
 ### API Structure
