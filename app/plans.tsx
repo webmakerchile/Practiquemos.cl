@@ -151,9 +151,7 @@ export default function PlansScreen() {
 
       if (hasActive) {
         try {
-          const productId = Object.values(entitlements as Record<string, any>)[0]?.productIdentifier || '';
-          const plan = productId.includes('10') ? 'premium_10' : 'premium_30';
-          await apiRequest('POST', '/api/payments/revenucat-activate', { plan });
+          await apiRequest('POST', '/api/payments/revenucat-activate', {});
         } catch {}
         await refreshUser();
         Alert.alert('¡Compra restaurada!', 'Tu plan Premium ha sido restaurado exitosamente.');

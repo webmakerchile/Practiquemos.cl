@@ -602,10 +602,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const session = requireAuth(req, res);
     if (!session) return;
     try {
-      const { plan } = req.body;
-      const config = PLAN_CONFIG[plan];
-      if (!config) return res.status(400).json({ message: "Plan inválido" });
-
       const rcApiKey = process.env.REVENUECAT_API_KEY;
       if (!rcApiKey) {
         return res.status(500).json({ message: "RevenueCat no configurado en el servidor" });
@@ -619,17 +615,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       const subscriber = await rcResponse.json() as any;
       const entitlements = subscriber?.subscriber?.entitlements || {};
-      const hasActive = Object.values(entitlements).some(
+      const activeEntitlement = Object.values(entitlements).find(
         (e: any) => e.expires_date === null || new Date(e.expires_date) > new Date()
-      );
-      if (!hasActive) {
+      ) as any;
+      if (!activeEntitlement) {
         return res.status(400).json({ message: "No se encontró una compra activa" });
       }
+
+      const productId = activeEntitlement.product_identifier || "";
+      const plan = productId.includes("10") ? "premium_10" : "premium_30";
+      const config = PLAN_CONFIG[plan];
+      if (!config) return res.status(400).json({ message: "Plan no reconocido" });
 
       const expiry = new Date();
       expiry.setDate(expiry.getDate() + config.days);
       await db.update(users).set({ plan, planExpiry: expiry }).where(eq(users.id, session.userId));
-      res.json({ message: "Plan activado" });
+      res.json({ message: "Plan activado", plan });
     } catch (err: any) {
       res.status(500).json({ message: err.message });
     }

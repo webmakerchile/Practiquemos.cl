@@ -17,6 +17,7 @@
       "supportsTablet": false,
       "bundleIdentifier": "cl.practiquemos.app",
       "buildNumber": "1",
+      "privacyPolicyUrl": "https://practiquemos.cl/legal",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       },
