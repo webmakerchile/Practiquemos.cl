@@ -186,3 +186,9 @@ id = "xDt_xTnUNS9BfSavTom4j"
 uri = "file://Documento_Entrega_Practiquemos.md"
 type = "text"
 title = "Documento de Entrega - Practiquemos.cl"
+
+[[outputs]]
+id = "SitOmOHQ8uYxDPRAxTrRt"
+uri = "file://Documento_Entrega_Practiquemos.docx"
+type = "word_document"
+title = "Documento de Entrega - Practiquemos.cl (Word)"
