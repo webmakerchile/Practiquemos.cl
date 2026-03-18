@@ -569,6 +569,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  function getAppUrl() {
+    const domains = process.env.REPLIT_DOMAINS?.split(",") || [];
+    const productionDomain = domains.find(d => d.includes(".replit.app")) || domains[0];
+    if (productionDomain) return `https://${productionDomain}`;
+    if (process.env.REPLIT_DEV_DOMAIN) return `https://${process.env.REPLIT_DEV_DOMAIN}`;
+    return "https://localhost:8081";
+  }
+
   app.get("/api/payments/success", async (req: Request, res: Response) => {
     const paymentId = req.query.payment_id as string;
     const externalRef = req.query.external_reference as string;
@@ -595,18 +603,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     }
 
-    const appUrl = `https://${process.env.REPLIT_DEV_DOMAIN || process.env.REPLIT_DOMAINS?.split(",")[0] || "localhost:8081"}`;
-    res.send(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Pago exitoso</title><style>body{font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#f0fdf4;text-align:center}.card{background:#fff;border-radius:16px;padding:40px;box-shadow:0 4px 12px rgba(0,0,0,0.1);max-width:400px}h1{color:#166534;font-size:24px}p{color:#333;font-size:16px}a{display:inline-block;margin-top:20px;background:#7c3aed;color:#fff;padding:14px 32px;border-radius:12px;text-decoration:none;font-weight:bold}</style></head><body><div class="card"><h1>¡Pago exitoso! ✅</h1><p>Tu plan Premium ha sido activado correctamente.</p><p>Ya puedes disfrutar de todos los contenidos.</p><a href="${appUrl}">Volver a la app</a></div></body></html>`);
+    const appUrl = getAppUrl();
+    res.send(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Pago exitoso</title><meta http-equiv="refresh" content="3;url=${appUrl}"><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Segoe UI',system-ui,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#0c1d4d 0%,#1d4ed8 50%,#2563eb 100%);text-align:center;padding:20px}.card{background:#fff;border-radius:24px;padding:48px 36px;box-shadow:0 20px 60px rgba(0,0,0,0.3);max-width:380px;width:100%}.icon{font-size:64px;margin-bottom:16px}h1{color:#166534;font-size:22px;margin-bottom:12px;font-weight:700}p{color:#555;font-size:15px;line-height:1.5;margin-bottom:8px}.redirect{color:#94a3b8;font-size:13px;margin-top:20px}a{display:inline-block;margin-top:16px;background:linear-gradient(135deg,#1d4ed8,#2563eb);color:#fff;padding:14px 36px;border-radius:14px;text-decoration:none;font-weight:600;font-size:15px;transition:transform 0.2s}a:hover{transform:scale(1.03)}</style></head><body><div class="card"><div class="icon">&#10004;&#65039;</div><h1>¡Pago exitoso!</h1><p>Tu plan Premium ha sido activado correctamente.</p><p>Ya puedes disfrutar de todos los contenidos.</p><a href="${appUrl}">Volver a Practiquemos.cl</a><p class="redirect">Redirigiendo automáticamente...</p></div></body></html>`);
   });
 
   app.get("/api/payments/failure", (_req: Request, res: Response) => {
-    const appUrl = `https://${process.env.REPLIT_DEV_DOMAIN || process.env.REPLIT_DOMAINS?.split(",")[0] || "localhost:8081"}`;
-    res.send(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Pago fallido</title><style>body{font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#fef2f2;text-align:center}.card{background:#fff;border-radius:16px;padding:40px;box-shadow:0 4px 12px rgba(0,0,0,0.1);max-width:400px}h1{color:#991b1b;font-size:24px}p{color:#333;font-size:16px}a{display:inline-block;margin-top:20px;background:#7c3aed;color:#fff;padding:14px 32px;border-radius:12px;text-decoration:none;font-weight:bold}</style></head><body><div class="card"><h1>Pago no completado</h1><p>Hubo un problema con tu pago. Puedes intentarlo nuevamente.</p><a href="${appUrl}">Volver a la app</a></div></body></html>`);
+    const appUrl = getAppUrl();
+    res.send(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Pago no completado</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Segoe UI',system-ui,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#0c1d4d 0%,#1d4ed8 50%,#2563eb 100%);text-align:center;padding:20px}.card{background:#fff;border-radius:24px;padding:48px 36px;box-shadow:0 20px 60px rgba(0,0,0,0.3);max-width:380px;width:100%}.icon{font-size:64px;margin-bottom:16px}h1{color:#c2410c;font-size:22px;margin-bottom:12px;font-weight:700}p{color:#555;font-size:15px;line-height:1.5;margin-bottom:8px}a{display:inline-block;margin-top:20px;background:linear-gradient(135deg,#1d4ed8,#2563eb);color:#fff;padding:14px 36px;border-radius:14px;text-decoration:none;font-weight:600;font-size:15px;transition:transform 0.2s}a:hover{transform:scale(1.03)}</style></head><body><div class="card"><div class="icon">&#128533;</div><h1>Pago no completado</h1><p>Hubo un problema con tu pago. Puedes intentarlo nuevamente desde la app.</p><a href="${appUrl}">Volver a Practiquemos.cl</a></div></body></html>`);
   });
 
   app.get("/api/payments/pending", (_req: Request, res: Response) => {
-    const appUrl = `https://${process.env.REPLIT_DEV_DOMAIN || process.env.REPLIT_DOMAINS?.split(",")[0] || "localhost:8081"}`;
-    res.send(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Pago pendiente</title><style>body{font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#fffbeb;text-align:center}.card{background:#fff;border-radius:16px;padding:40px;box-shadow:0 4px 12px rgba(0,0,0,0.1);max-width:400px}h1{color:#92400e;font-size:24px}p{color:#333;font-size:16px}a{display:inline-block;margin-top:20px;background:#7c3aed;color:#fff;padding:14px 32px;border-radius:12px;text-decoration:none;font-weight:bold}</style></head><body><div class="card"><h1>Pago pendiente ⏳</h1><p>Tu pago está siendo procesado. Te avisaremos cuando se confirme.</p><a href="${appUrl}">Volver a la app</a></div></body></html>`);
+    const appUrl = getAppUrl();
+    res.send(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Pago pendiente</title><meta http-equiv="refresh" content="5;url=${appUrl}"><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Segoe UI',system-ui,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#0c1d4d 0%,#1d4ed8 50%,#2563eb 100%);text-align:center;padding:20px}.card{background:#fff;border-radius:24px;padding:48px 36px;box-shadow:0 20px 60px rgba(0,0,0,0.3);max-width:380px;width:100%}.icon{font-size:64px;margin-bottom:16px}h1{color:#92400e;font-size:22px;margin-bottom:12px;font-weight:700}p{color:#555;font-size:15px;line-height:1.5;margin-bottom:8px}.redirect{color:#94a3b8;font-size:13px;margin-top:20px}a{display:inline-block;margin-top:16px;background:linear-gradient(135deg,#1d4ed8,#2563eb);color:#fff;padding:14px 36px;border-radius:14px;text-decoration:none;font-weight:600;font-size:15px;transition:transform 0.2s}a:hover{transform:scale(1.03)}</style></head><body><div class="card"><div class="icon">&#9203;</div><h1>Pago pendiente</h1><p>Tu pago está siendo procesado. Te avisaremos cuando se confirme.</p><a href="${appUrl}">Volver a Practiquemos.cl</a><p class="redirect">Redirigiendo automáticamente...</p></div></body></html>`);
   });
 
   app.get("/api/payments/status", async (req: Request, res: Response) => {
