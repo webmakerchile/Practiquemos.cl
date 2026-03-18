@@ -1,7 +1,7 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { View, Text, StyleSheet, Image, Platform, Dimensions } from "react-native";
 import { Asset } from "expo-asset";
 import Animated, {
@@ -11,9 +11,9 @@ import Animated, {
   withDelay,
   withSequence,
   withSpring,
-  withRepeat,
   Easing,
   interpolate,
+  cancelAnimation,
 } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -73,66 +73,16 @@ const preloadAssets = [
   require('../assets/images/icon-temario.png'),
 ];
 
-function FloatingOrb({ delay, x, y, size, color }: { delay: number; x: number; y: number; size: number; color: string }) {
-  const progress = useSharedValue(0);
-  const floatY = useSharedValue(0);
-
-  useEffect(() => {
-    progress.value = withDelay(delay, withTiming(1, { duration: 1200, easing: Easing.out(Easing.ease) }));
-    floatY.value = withDelay(delay, withRepeat(
-      withSequence(
-        withTiming(-12, { duration: 2000 + Math.random() * 1000, easing: Easing.inOut(Easing.ease) }),
-        withTiming(12, { duration: 2000 + Math.random() * 1000, easing: Easing.inOut(Easing.ease) })
-      ),
-      -1,
-      true
-    ));
-  }, []);
-
-  const style = useAnimatedStyle(() => ({
-    position: 'absolute' as const,
-    left: x,
-    top: y,
-    width: size,
-    height: size,
-    borderRadius: size / 2,
-    backgroundColor: color,
-    opacity: interpolate(progress.value, [0, 1], [0, 0.4]),
-    transform: [{ translateY: floatY.value }, { scale: interpolate(progress.value, [0, 1], [0.2, 1]) }],
-  }));
-
-  return <Animated.View style={style} />;
-}
-
-function GlowRing() {
-  const pulse = useSharedValue(0);
-
-  useEffect(() => {
-    pulse.value = withDelay(300, withRepeat(
-      withSequence(
-        withTiming(1, { duration: 1500, easing: Easing.inOut(Easing.ease) }),
-        withTiming(0, { duration: 1500, easing: Easing.inOut(Easing.ease) })
-      ),
-      -1,
-      false
-    ));
-  }, []);
-
-  const style = useAnimatedStyle(() => ({
-    position: 'absolute' as const,
-    width: 320,
-    height: 320,
-    borderRadius: 160,
-    borderWidth: 1.5,
-    borderColor: `rgba(251, 191, 36, ${interpolate(pulse.value, [0, 1], [0.05, 0.25])})`,
-    transform: [{ scale: interpolate(pulse.value, [0, 1], [0.9, 1.15]) }],
-  }));
-
-  return <Animated.View style={style} />;
-}
+const ORB_CONFIG = [
+  { x: SCREEN_W * 0.1, y: SCREEN_H * 0.15, size: 80, color: 'rgba(59, 130, 246, 0.3)' },
+  { x: SCREEN_W * 0.7, y: SCREEN_H * 0.1, size: 60, color: 'rgba(251, 191, 36, 0.25)' },
+  { x: SCREEN_W * 0.15, y: SCREEN_H * 0.7, size: 50, color: 'rgba(96, 165, 250, 0.2)' },
+  { x: SCREEN_W * 0.75, y: SCREEN_H * 0.65, size: 70, color: 'rgba(251, 191, 36, 0.2)' },
+  { x: SCREEN_W * 0.4, y: SCREEN_H * 0.85, size: 40, color: 'rgba(147, 197, 253, 0.25)' },
+  { x: SCREEN_W * 0.55, y: SCREEN_H * 0.2, size: 35, color: 'rgba(253, 224, 71, 0.2)' },
+];
 
 function SplashPreload({ onFinish }: { onFinish: () => void }) {
-  const containerOpacity = useSharedValue(1);
   const logoScale = useSharedValue(0.5);
   const logoOpacity = useSharedValue(0);
   const logoY = useSharedValue(30);
@@ -144,7 +94,9 @@ function SplashPreload({ onFinish }: { onFinish: () => void }) {
   const progressOpacity = useSharedValue(0);
   const progressWidth = useSharedValue(0);
   const footerOpacity = useSharedValue(0);
-  const shimmer = useSharedValue(0);
+  const orbsOpacity = useSharedValue(0);
+  const ringScale = useSharedValue(0.85);
+  const ringOpacity = useSharedValue(0);
 
   useEffect(() => {
     logoOpacity.value = withTiming(1, { duration: 500 });
@@ -153,6 +105,11 @@ function SplashPreload({ onFinish }: { onFinish: () => void }) {
       withTiming(1.05, { duration: 500, easing: Easing.out(Easing.back(2)) }),
       withSpring(1, { damping: 12, stiffness: 120 })
     );
+
+    ringOpacity.value = withDelay(200, withTiming(0.2, { duration: 600 }));
+    ringScale.value = withDelay(200, withTiming(1.1, { duration: 1500, easing: Easing.out(Easing.ease) }));
+
+    orbsOpacity.value = withDelay(300, withTiming(1, { duration: 800 }));
 
     badgeOpacity.value = withDelay(350, withTiming(1, { duration: 400 }));
     badgeScale.value = withDelay(350, withSpring(1, { damping: 10, stiffness: 150 }));
@@ -167,24 +124,9 @@ function SplashPreload({ onFinish }: { onFinish: () => void }) {
 
     footerOpacity.value = withDelay(1200, withTiming(1, { duration: 400 }));
 
-    shimmer.value = withDelay(600, withRepeat(
-      withTiming(1, { duration: 2000, easing: Easing.inOut(Easing.ease) }),
-      -1,
-      true
-    ));
-
-    const exitTimer = setTimeout(() => {
-      containerOpacity.value = withTiming(0, { duration: 400 });
-      setTimeout(onFinish, 400);
-    }, 3000);
-
+    const exitTimer = setTimeout(onFinish, 3200);
     return () => clearTimeout(exitTimer);
   }, []);
-
-  const containerStyle = useAnimatedStyle(() => ({
-    flex: 1,
-    opacity: containerOpacity.value,
-  }));
 
   const logoStyle = useAnimatedStyle(() => ({
     opacity: logoOpacity.value,
@@ -213,34 +155,26 @@ function SplashPreload({ onFinish }: { onFinish: () => void }) {
     width: `${progressWidth.value}%` as any,
   }));
 
-  const shimmerStyle = useAnimatedStyle(() => ({
-    position: 'absolute' as const,
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    opacity: interpolate(shimmer.value, [0, 0.5, 1], [0, 0.15, 0]),
-    backgroundColor: '#fff',
-    borderRadius: 4,
-  }));
-
   const footerStyle = useAnimatedStyle(() => ({
     opacity: footerOpacity.value,
   }));
 
-  const orbs = [
-    { delay: 200, x: SCREEN_W * 0.1, y: SCREEN_H * 0.15, size: 80, color: 'rgba(59, 130, 246, 0.5)' },
-    { delay: 400, x: SCREEN_W * 0.7, y: SCREEN_H * 0.1, size: 60, color: 'rgba(251, 191, 36, 0.4)' },
-    { delay: 600, x: SCREEN_W * 0.15, y: SCREEN_H * 0.7, size: 50, color: 'rgba(96, 165, 250, 0.35)' },
-    { delay: 300, x: SCREEN_W * 0.75, y: SCREEN_H * 0.65, size: 70, color: 'rgba(251, 191, 36, 0.3)' },
-    { delay: 500, x: SCREEN_W * 0.4, y: SCREEN_H * 0.85, size: 40, color: 'rgba(147, 197, 253, 0.4)' },
-    { delay: 100, x: SCREEN_W * 0.55, y: SCREEN_H * 0.2, size: 35, color: 'rgba(253, 224, 71, 0.3)' },
-    { delay: 700, x: SCREEN_W * 0.85, y: SCREEN_H * 0.45, size: 45, color: 'rgba(59, 130, 246, 0.25)' },
-    { delay: 350, x: SCREEN_W * 0.05, y: SCREEN_H * 0.45, size: 55, color: 'rgba(96, 165, 250, 0.3)' },
-  ];
+  const orbsStyle = useAnimatedStyle(() => ({
+    opacity: orbsOpacity.value,
+  }));
+
+  const ringStyle = useAnimatedStyle(() => ({
+    position: 'absolute' as const,
+    width: 320,
+    height: 320,
+    borderRadius: 160,
+    borderWidth: 1.5,
+    borderColor: `rgba(251, 191, 36, ${interpolate(ringOpacity.value, [0, 1], [0, 0.25])})`,
+    transform: [{ scale: ringScale.value }],
+  }));
 
   return (
-    <Animated.View style={containerStyle}>
+    <View style={ss.splashContainer}>
       <StatusBar style="light" />
       <LinearGradient
         colors={['#0c1d4d', '#1d4ed8', '#2563eb', '#1e40af']}
@@ -250,14 +184,26 @@ function SplashPreload({ onFinish }: { onFinish: () => void }) {
         style={StyleSheet.absoluteFill}
       />
 
-      {orbs.map((orb, i) => (
-        <FloatingOrb key={i} {...orb} />
-      ))}
+      <Animated.View style={[StyleSheet.absoluteFill, orbsStyle]}>
+        {ORB_CONFIG.map((orb, i) => (
+          <View
+            key={i}
+            style={{
+              position: 'absolute',
+              left: orb.x,
+              top: orb.y,
+              width: orb.size,
+              height: orb.size,
+              borderRadius: orb.size / 2,
+              backgroundColor: orb.color,
+            }}
+          />
+        ))}
+      </Animated.View>
 
       <View style={ss.centered}>
         <View style={ss.logoArea}>
-          <GlowRing />
-
+          <Animated.View style={ringStyle} />
           <Animated.View style={[ss.logoCard, logoStyle]}>
             <Image
               source={splashLogo}
@@ -282,9 +228,7 @@ function SplashPreload({ onFinish }: { onFinish: () => void }) {
 
         <Animated.View style={[ss.progressOuter, progressContainerStyle]}>
           <View style={ss.progressTrack}>
-            <Animated.View style={[ss.progressFill, progressStyle]}>
-              <Animated.View style={shimmerStyle} />
-            </Animated.View>
+            <Animated.View style={[ss.progressFill, progressStyle]} />
           </View>
           <Text style={ss.progressLabel}>Preparando tu experiencia...</Text>
         </Animated.View>
@@ -294,11 +238,14 @@ function SplashPreload({ onFinish }: { onFinish: () => void }) {
         <View style={ss.footerLine} />
         <Text style={ss.footerText}>Desarrollado por WebMakerChile</Text>
       </Animated.View>
-    </Animated.View>
+    </View>
   );
 }
 
 const ss = StyleSheet.create({
+  splashContainer: {
+    flex: 1,
+  },
   centered: {
     flex: 1,
     justifyContent: 'center',
@@ -378,7 +325,6 @@ const ss = StyleSheet.create({
     height: '100%',
     borderRadius: 4,
     backgroundColor: '#f59e0b',
-    overflow: 'hidden',
   },
   progressLabel: {
     fontFamily: 'Nunito_400Regular',
@@ -438,10 +384,14 @@ export default function RootLayout() {
     }
   }, [fontsLoaded, fontError]);
 
+  const handleSplashFinish = useCallback(() => {
+    setShowSplash(false);
+  }, []);
+
   if (!fontsLoaded && !fontError) return null;
 
   if (showSplash) {
-    return <SplashPreload onFinish={() => setShowSplash(false)} />;
+    return <SplashPreload onFinish={handleSplashFinish} />;
   }
 
   return (
