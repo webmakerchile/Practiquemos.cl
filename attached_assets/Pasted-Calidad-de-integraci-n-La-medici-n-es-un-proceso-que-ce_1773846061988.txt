@@ -1,0 +1,174 @@
+Calidad de integración
+La medición es un proceso que certifica el nivel de seguridad y experiencia de una integración. Una calidad ideal asegura una mayor tasa de aprobación de pagos. Saber más
+
+Medir de nuevo
+34
+de 100
+
+Identificamos pendientes en tu integración
+Realice las otras acciones recomendadas y aumente la calidad de su integración.
+Necesitas al menos 73 puntos para aprobar.
+
+Última medición el 18/03/2026 12:00:46 con Payment ID productivo 150153320867.
+Experiencia de compra
+3 acciones pendientes
+
+Acción recomendada
+Cantidad del producto/servicio
+Envíanos el campo items.quatity en el request de la preferencia para mostrar el detalle en el carrito de compra del Checkout Pro.
+
+Acción recomendada
+Precio del item
+Envíanos el campo items.unit_price en el request de la preferencia para mostrar el detalle en el carrito de compra del Checkout Pro.
+
+Acción recomendada
+Back URLs
+Redirecciona al comprador a tu sitio web al finalizar el proceso de pago.
+
+Acción recomendada
+Descripción-Resumen de tarjeta
+Envíanos el campo statement_descriptor en el request de la sección “Preferencias” para disminuir las probabilidades de desconocimientos o contra cargos.
+
+Buenas prácticas
+No impacta en la puntuación
+Respuesta binaria
+Envíanos el campo "binary_mode"=true en el request de la prefrencia, si tu negocio requiere que la aprobación del pago sea instántanea.
+
+Buenas prácticas
+No impacta en la puntuación
+Fecha de vencimiento para pagos en efectivo
+Si admites medios de pago en efectivo, permite a los vendedores configurar la fecha de vencimiento envíando el campo "date_of_expiration" en el request de la preferencia o pago.
+
+Buenas prácticas
+No impacta en la puntuación
+Integración de anuncios
+Integrar Checkout Pro con las plataformas de Facebook Ads y Google Ads.
+
+Buenas prácticas
+No impacta en la puntuación
+Vigencia de la preferencia
+Si requieres habilitar la preferencia durante una ventana de tiempo determinada, establece su vigencia enviando en la preferencia el campo "expires"=true y los parámetros "expiration_date_from" y "expiration_date_to".
+
+Buenas prácticas
+No impacta en la puntuación
+Máximo de cuotas
+Envíanos el valor máximo de cuotas a ofrecer en tu checkout, desde el campo "installments" del request de la preferencia.
+
+Buenas prácticas
+No impacta en la puntuación
+Esquema de apertura modal
+Abre el checkout en tu sitio.
+
+Buenas prácticas
+No impacta en la puntuación
+Logos oficiales de Mercado Pago
+Muestra el Logo de Mercado Pago en tu sitio, para brindar más confianza en el comprador y mejorar la intención de pago online.
+
+Buenas prácticas
+No impacta en la puntuación
+Mensajes de respuesta
+Asegúrate de darle al pagador información clara sobre el resultado del proceso de pago. Esto aumentará la conversión y la satisfacción del usuario
+
+Buenas prácticas
+No impacta en la puntuación
+Exclusión de medios de pago
+Excluye desde tu integración los medios de pago que no deseas ofrecer en tu checkout.
+
+Buenas prácticas
+No impacta en la puntuación
+Exclusión de tipos de medios de pago
+Excluye desde tu integración los tipos de medios de pago que no deseas ofrecer en tu checkout.
+
+Buenas prácticas
+No impacta en la puntuación
+Monto del envío
+Muestra el monto del envío, si ya lo tienes estimado desde tu sitio.
+
+Conciliación financiera
+2 acciones pendientes
+
+Acción obligatoria
+Notificaciones webhooks
+Envíanos el endpoint destinado a recibir las notificaciones webhooks en el campo "notification_url" del request de la preferencia.
+
+Acción obligatoria
+Referencia externa
+Envíanos en el campo "external_reference" del request de la Preferencia, un código único que te permita correlacionar el payment_id de MercadoPago con el id interno de tu sistema.
+
+Buenas prácticas
+No impacta en la puntuación
+Consulta el pago notificado
+Actualiza la información necesaria en tu plataforma, ante los eventos de pagos notificados.
+
+Buenas prácticas
+No impacta en la puntuación
+Contracargos
+Utilizar la API de chargebacks para subir la documentación de disputa
+
+Buenas prácticas
+No impacta en la puntuación
+Cancelaciones
+Cancela un pago, si éste se encuentra en status "pending" o " in process".
+
+Buenas prácticas
+No impacta en la puntuación
+Devoluciones
+Gestiona las devoluciones parciales o totales, usando nuestra API refund.
+
+Buenas prácticas
+No impacta en la puntuación
+Reporte de liquidaciones
+Conoce como está compuesto tu dinero disponible en Mercado Pago.
+
+Buenas prácticas
+No impacta en la puntuación
+Reporte de todas las transacciones
+Conoce las operaciones que afectaron el balance de tu dinero.
+
+Aprobación de pagos
+5 acciones pendientes
+
+Acción recomendada
+Apellido del comprador
+Envíanos el campo payer.last_name en el request de la sección "Preferencias" para mejorar la tasa de aprobación. Esta información nos permite optimizar la validación de seguridad de los pagos y con esto, disminuir las probabilidades de rechazos por parte de nuestro motor de prevención de fraude.
+
+Acción recomendada
+Categoría del item
+Envíanos el items.category_id en el request de la sección "Preferencias" para mejorar la tasa de aprobación. Esta información nos permite optimizar la validación de seguridad de los pagos y con esto, disminuir las probabilidades de rechazos por parte de nuestro motor de prevención de fraude.
+
+Acción recomendada
+Description del item
+Envíanos el campo items.description en el request de la sección "Preferencias" para mejorar la tasa de aprobación. Esta información nos permite optimizar la validación de seguridad de los pagos y con esto, disminuir las probabilidades de rechazos por parte de nuestro motor de prevención de fraude.
+
+Acción recomendada
+Código del item
+Envíanos el campo items.id en el request de la sección "Preferencias" para mejorar la tasa de aprobación. Esta información nos permite optimizar la validación de seguridad de los pagos y con esto, disminuir las probabilidades de rechazos por parte de nuestro motor de prevención de fraude.
+
+Acción recomendada
+Nombre del item
+Envíanos el campo items.tittle en el request de la preferencia para mejorar la tasa de aprobación. Esta información nos permite optimizar la validación de seguridad de los pagos y con esto, disminuir las probabilidades de rechazos por parte de nuestro motor de prevención de fraude.
+
+Acción obligatoria
+Email del comprador
+Envíanos el campo payer.email en el request de la sección "Preferencias" para mejorar la tasa de aprobación. Esta información nos permite optimizar la validación de seguridad de los pagos y con esto, disminuir las probabilidades de rechazos por parte de nuestro motor de prevención de fraude.
+
+Acción recomendada
+Nombre del comprador
+Envíanos el campo payer.first_name en el request de la sección "Preferencias" para mejorar la tasa de aprobación. Esta información nos permite optimizar la validación de seguridad de los pagos y con esto, disminuir las probabilidades de rechazos por parte de nuestro motor de prevención de fraude.
+
+Buenas prácticas
+No impacta en la puntuación
+Dirección del comprador
+Si cuentas con esta información, envíanos el dato en el campo payer.address en el request de la sección "Preferencias" para mejorar la tasa de aprobación. Cuanto más completa sea la información en el objeto "payer" más optima será la validación de seguridad de los pagos y con esto, disminuirán las probabilidades de rechazos por parte de nuestro motor de prevención de fraude.
+
+Buenas prácticas
+No impacta en la puntuación
+Identificación del comprador
+Si cuentas con esta información, envíanos el campo payer.identification del request de la sección "Preferencias". Cuanto más completa sea la información en el objeto "payer" más optima será la validación de seguridad de los pagos y con esto, disminuirán las probabilidades de rechazos por parte de nuestro motor de prevención de fraude.
+
+Buenas prácticas
+No impacta en la puntuación
+Teléfono del comprador
+Si cuentas con esta información, envíanos el dato en el campo payer.phone del request de la sección "Preferencias" Cuanto más completa sea la información en el objeto "payer" más optima será la validación de seguridad de los pagos y con esto, disminuirán las probabilidades de rechazos por parte de nuestro motor de prevención de fraude.
+
+Escalabilidad
