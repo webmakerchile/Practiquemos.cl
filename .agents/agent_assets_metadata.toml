@@ -180,3 +180,9 @@ id = "PJpzDuVw8uLOT-fGpUUc7"
 uri = "file://attached_assets/profesora-paradero.mp3"
 type = "audio"
 title = "4. Profesora - Distancia de paradero de buses"
+
+[[outputs]]
+id = "xDt_xTnUNS9BfSavTom4j"
+uri = "file://Documento_Entrega_Practiquemos.md"
+type = "text"
+title = "Documento de Entrega - Practiquemos.cl"
