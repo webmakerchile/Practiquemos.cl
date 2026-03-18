@@ -447,15 +447,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!accessToken) return res.status(500).json({ message: "Mercado Pago no configurado" });
 
     try {
+      const user = await storage.getUser(session.userId);
       const baseUrl = `https://${process.env.REPLIT_DEV_DOMAIN || process.env.REPLIT_DOMAINS?.split(",")[0] || "localhost:5000"}`;
+
+      const nameParts = (user?.fullName || "").trim().split(" ");
+      const firstName = nameParts[0] || "Usuario";
+      const lastName = nameParts.slice(1).join(" ") || "Practiquemos";
 
       const preference = {
         items: [{
+          id: plan,
           title: config.title,
+          description: `Acceso premium ${config.days} días - Practiquemos.cl - Preparación examen de conducir Chile`,
+          category_id: "services",
           quantity: 1,
           unit_price: config.price,
           currency_id: "CLP",
         }],
+        payer: {
+          email: user?.email || "usuario@practiquemos.cl",
+          first_name: firstName,
+          last_name: lastName,
+        },
         back_urls: {
           success: `${baseUrl}/api/payments/success`,
           failure: `${baseUrl}/api/payments/failure`,
@@ -464,6 +477,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         auto_return: "approved" as const,
         external_reference: `${session.userId}|${plan}`,
         notification_url: `${baseUrl}/api/payments/webhook`,
+        statement_descriptor: "PRACTIQUEMOS.CL",
+        binary_mode: true,
       };
 
       const mpResponse = await fetch("https://api.mercadopago.com/checkout/preferences", {
