@@ -269,10 +269,6 @@ export default function PlansScreen() {
             </View>
             <View style={styles.freeFeatureRow}>
               <Ionicons name="close-circle" size={16} color="#dc2626" />
-              <Text style={styles.freeFeatureText}>Sin explicaciones detalladas</Text>
-            </View>
-            <View style={styles.freeFeatureRow}>
-              <Ionicons name="close-circle" size={16} color="#dc2626" />
               <Text style={styles.freeFeatureText}>Sin test avanzado</Text>
             </View>
             <View style={styles.freeFeatureRow}>
