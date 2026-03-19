@@ -6,10 +6,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import Colors from '@/constants/colors';
 import MascotaCopiloto from '@/components/MascotaCopiloto';
+import { useUser } from '@/lib/UserContext';
 
 export default function ResultsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { isPremium, freeExamsRemaining } = useUser();
   const params = useLocalSearchParams<{
     score: string; correct: string; total: string;
     passed: string; mode: string; timeSpent: string;
@@ -77,6 +79,30 @@ export default function ResultsScreen() {
             </View>
           );
         })}
+
+        {!isPremium && (
+          <View style={styles.premiumUpsell}>
+            <LinearGradient colors={['#7c3aed', '#5b21b6']} style={styles.premiumUpsellGradient}>
+              <Ionicons name="diamond" size={28} color="#fbbf24" />
+              <Text style={styles.premiumUpsellTitle}>Mejora tu preparación</Text>
+              <Text style={styles.premiumUpsellDesc}>
+                Con Premium accedes a explicaciones detalladas, tests avanzados, test por contenidos y exámenes ilimitados.
+              </Text>
+              {freeExamsRemaining > 0 ? (
+                <Text style={styles.premiumUpsellCounter}>
+                  Te quedan {freeExamsRemaining} examen{freeExamsRemaining !== 1 ? 'es' : ''} gratuito{freeExamsRemaining !== 1 ? 's' : ''}
+                </Text>
+              ) : (
+                <Text style={styles.premiumUpsellCounter}>
+                  Has usado todos tus exámenes gratuitos
+                </Text>
+              )}
+              <Pressable onPress={() => router.push('/plans')} style={styles.premiumUpsellBtn}>
+                <Text style={styles.premiumUpsellBtnText}>Ver Planes Premium</Text>
+              </Pressable>
+            </LinearGradient>
+          </View>
+        )}
       </ScrollView>
 
       <View style={[styles.footer, { paddingBottom: Platform.OS === 'web' ? 34 : (insets.bottom || 10) }]}>
@@ -117,4 +143,11 @@ const styles = StyleSheet.create({
   homeBtnText: { color: '#fff', fontSize: 15, fontFamily: 'Nunito_700Bold' },
   retryBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: Colors.surfaceSecondary, paddingVertical: 14, borderRadius: 12, borderWidth: 1, borderColor: Colors.border },
   retryBtnText: { color: Colors.primary, fontSize: 15, fontFamily: 'Nunito_700Bold' },
+  premiumUpsell: { marginTop: 20, borderRadius: 16, overflow: 'hidden' as const },
+  premiumUpsellGradient: { padding: 20, alignItems: 'center' as const },
+  premiumUpsellTitle: { fontSize: 20, fontFamily: 'Nunito_800ExtraBold', color: '#fff', marginTop: 8, marginBottom: 6 },
+  premiumUpsellDesc: { fontSize: 14, fontFamily: 'Nunito_400Regular', color: 'rgba(255,255,255,0.9)', textAlign: 'center' as const, lineHeight: 20, marginBottom: 10 },
+  premiumUpsellCounter: { fontSize: 13, fontFamily: 'Nunito_700Bold', color: '#fbbf24', marginBottom: 14 },
+  premiumUpsellBtn: { backgroundColor: '#fff', paddingVertical: 12, paddingHorizontal: 28, borderRadius: 12 },
+  premiumUpsellBtnText: { color: '#7c3aed', fontSize: 15, fontFamily: 'Nunito_700Bold' },
 });

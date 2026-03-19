@@ -47,7 +47,7 @@ function MenuItem({ icon, title, description, onPress, badge, badgeColor, locked
 export default function HomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { user, isLoggedIn, isPremium, canTakeExam, licenseType, setLicenseType, isAdmin } = useUser();
+  const { user, isLoggedIn, isPremium, canTakeExam, freeExamsRemaining, licenseType, setLicenseType, isAdmin } = useUser();
   const [showLicensePicker, setShowLicensePicker] = useState(false);
   const [showDrawer, setShowDrawer] = useState(false);
 
@@ -128,13 +128,27 @@ export default function HomeScreen() {
           onPress={() => isLoggedIn ? router.push('/mi-curso') : router.push('/login')}
           locked={!isLoggedIn}
         />
+        {!isPremium && (
+          <View style={styles.examCounterBanner}>
+            <Ionicons name="alert-circle" size={18} color="#7c3aed" />
+            <Text style={styles.examCounterText}>
+              {canTakeExam
+                ? `Te quedan ${freeExamsRemaining} examen${freeExamsRemaining !== 1 ? 'es' : ''} gratuito${freeExamsRemaining !== 1 ? 's' : ''}`
+                : 'Has usado todos tus exámenes gratuitos'}
+            </Text>
+            <Pressable onPress={() => router.push('/plans')} style={styles.examCounterBtn}>
+              <Text style={styles.examCounterBtnText}>Premium</Text>
+            </Pressable>
+          </View>
+        )}
+
         <MenuItem
           icon={<View style={[styles.menuIcon, { backgroundColor: '#e0f2fe' }]}><Text style={styles.menuEmoji}>📝</Text></View>}
           title="Practiquemos tu test diario"
           description="Test de conducir generado de forma aleatoria con preguntas del examen oficial y sus explicaciones."
-          onPress={() => startExam('daily')}
-          badge={!isLoggedIn ? 'Sin Registro' : undefined}
-          badgeColor={Colors.success}
+          onPress={() => canTakeExam ? startExam('daily') : router.push('/plans')}
+          badge={!isPremium ? `${freeExamsRemaining} gratis` : undefined}
+          badgeColor={canTakeExam ? Colors.success : '#dc2626'}
         />
         <MenuItem
           icon={<View style={[styles.menuIcon, { backgroundColor: '#fef3c7' }]}><Text style={styles.menuEmoji}>📚</Text></View>}
@@ -148,24 +162,34 @@ export default function HomeScreen() {
           description="Mediante un algoritmo, te mostrará las preguntas más convenientes para agilizar tu aprendizaje."
           onPress={() => isPremium ? startExam('smart') : router.push('/plans')}
           locked={!isPremium}
+          badge={!isPremium ? 'Premium' : undefined}
+          badgeColor="#7c3aed"
         />
         <MenuItem
           icon={<View style={[styles.menuIcon, { backgroundColor: '#d1fae5' }]}><Text style={styles.menuEmoji}>✅</Text></View>}
           title="Practiquemos un test básico"
           description="El test con las preguntas más fáciles del examen."
-          onPress={() => startExam('easy')}
+          onPress={() => canTakeExam ? startExam('easy') : router.push('/plans')}
+          badge={!isPremium ? `${freeExamsRemaining} gratis` : undefined}
+          badgeColor={canTakeExam ? Colors.success : '#dc2626'}
         />
         <MenuItem
           icon={<View style={[styles.menuIcon, { backgroundColor: '#fee2e2' }]}><Text style={styles.menuEmoji}>🔥</Text></View>}
           title="Practiquemos un test avanzado"
-          description="El test con las preguntas más difíciles del examen."
-          onPress={() => startExam('hard')}
+          description="El test con las preguntas más difíciles del examen. Prepárate para lo más retador."
+          onPress={() => isPremium ? startExam('hard') : router.push('/plans')}
+          locked={!isPremium}
+          badge={!isPremium ? 'Premium' : undefined}
+          badgeColor="#7c3aed"
         />
         <MenuItem
           icon={<View style={[styles.menuIcon, { backgroundColor: '#e0e7ff' }]}><Text style={styles.menuEmoji}>📂</Text></View>}
           title="Practiquemos test por contenidos"
-          description="Practica preguntas organizadas por tema: Ley de Tránsito, Señalización, Mecánica y más."
-          onPress={() => startExam('category')}
+          description="Practica por tema: Ley de Tránsito, Señalización, Mecánica y más."
+          onPress={() => isPremium ? startExam('category') : router.push('/plans')}
+          locked={!isPremium}
+          badge={!isPremium ? 'Premium' : undefined}
+          badgeColor="#7c3aed"
         />
         <MenuItem
           icon={<View style={[styles.menuIcon, { backgroundColor: '#fef9c3' }]}><Text style={styles.menuEmoji}>⭐</Text></View>}
@@ -343,4 +367,8 @@ const styles = StyleSheet.create({
   drawerDivider: { height: 1, backgroundColor: Colors.border, marginBottom: 12 },
   drawerItem: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 14 },
   drawerItemText: { fontSize: 16, fontFamily: 'Nunito_600SemiBold', color: Colors.text },
+  examCounterBanner: { flexDirection: 'row', alignItems: 'center', marginHorizontal: 12, marginVertical: 6, backgroundColor: '#f3f0ff', borderRadius: 12, padding: 12, gap: 8, borderWidth: 1, borderColor: '#e0d4ff' },
+  examCounterText: { flex: 1, fontSize: 13, fontFamily: 'Nunito_600SemiBold', color: '#5b21b6' },
+  examCounterBtn: { backgroundColor: '#7c3aed', paddingHorizontal: 14, paddingVertical: 6, borderRadius: 10 },
+  examCounterBtnText: { color: '#fff', fontSize: 12, fontFamily: 'Nunito_700Bold' },
 });

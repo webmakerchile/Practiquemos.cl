@@ -2,7 +2,7 @@
 
 ## Overview
 
-Practiquemos.cl is a mobile-first exam preparation platform for the Chilean driver's license test. It provides practice exams, study materials (temario), progress tracking, and a gamified learning experience with a mascot "copiloto" companion. The app follows a freemium model with free limited exams and premium plans (10-day and 30-day access).
+Practiquemos.cl is a mobile-first exam preparation platform for the Chilean driver's license test. It provides practice exams, study materials (temario), progress tracking, and a gamified learning experience with a mascot "copiloto" companion. The app follows an aggressive freemium model designed to drive premium conversions: free users get only 3 total exams (Test Diario + Test Básico only), no explanations, and no access to advanced/category/smart tests. Premium plans (10-day and 30-day access) unlock everything.
 
 The project is built as an Expo React Native application that runs on web, iOS, and Android, with a Node.js/Express backend API and PostgreSQL database. The frontend uses expo-router for file-based routing, and the backend serves the API plus static assets in production.
 

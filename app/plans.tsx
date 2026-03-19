@@ -47,12 +47,13 @@ export default function PlansScreen() {
   }, [useRevenueCat, user]);
 
   const features = [
-    { icon: 'infinite-outline' as const, text: 'Examenes ilimitados' },
-    { icon: 'book-outline' as const, text: 'Explicaciones detalladas' },
-    { icon: 'analytics-outline' as const, text: 'Estadisticas avanzadas' },
+    { icon: 'infinite-outline' as const, text: 'Exámenes ilimitados sin restricción' },
+    { icon: 'book-outline' as const, text: 'Explicaciones detalladas de cada respuesta' },
+    { icon: 'flame-outline' as const, text: 'Test avanzado con preguntas difíciles' },
+    { icon: 'layers-outline' as const, text: 'Test por contenidos y categorías' },
     { icon: 'bulb-outline' as const, text: 'Test Inteligente con IA' },
+    { icon: 'analytics-outline' as const, text: 'Estadísticas avanzadas de progreso' },
     { icon: 'star-outline' as const, text: 'Favoritos ilimitados' },
-    { icon: 'layers-outline' as const, text: 'Todas las categorias' },
   ];
 
   const handleiOSPurchase = async (plan: string) => {
@@ -198,7 +199,7 @@ export default function PlansScreen() {
           </View>
         )}
 
-        <Text style={styles.subtitle}>Acceso completo a todos los recursos</Text>
+        <Text style={styles.subtitle}>Prepárate al 100% para tu examen</Text>
 
         <View style={styles.featuresList}>
           {features.map((f, i) => (
@@ -259,7 +260,29 @@ export default function PlansScreen() {
         <View style={styles.freeCard}>
           <Text style={styles.planName}>Plan Gratuito</Text>
           <Text style={styles.planPrice}>Gratis</Text>
-          <Text style={styles.planPeriod}>1 test diario gratuito</Text>
+          <Text style={styles.planPeriod}>Acceso muy limitado</Text>
+          <View style={styles.freeFeatures}>
+            <View style={styles.freeFeatureRow}>
+              <Ionicons name="close-circle" size={16} color="#dc2626" />
+              <Text style={styles.freeFeatureText}>Solo 3 exámenes en total</Text>
+            </View>
+            <View style={styles.freeFeatureRow}>
+              <Ionicons name="close-circle" size={16} color="#dc2626" />
+              <Text style={styles.freeFeatureText}>Sin explicaciones detalladas</Text>
+            </View>
+            <View style={styles.freeFeatureRow}>
+              <Ionicons name="close-circle" size={16} color="#dc2626" />
+              <Text style={styles.freeFeatureText}>Sin test avanzado</Text>
+            </View>
+            <View style={styles.freeFeatureRow}>
+              <Ionicons name="close-circle" size={16} color="#dc2626" />
+              <Text style={styles.freeFeatureText}>Sin test por contenidos</Text>
+            </View>
+            <View style={styles.freeFeatureRow}>
+              <Ionicons name="close-circle" size={16} color="#dc2626" />
+              <Text style={styles.freeFeatureText}>Sin test inteligente</Text>
+            </View>
+          </View>
         </View>
 
         {useRevenueCat && (
@@ -314,7 +337,10 @@ const styles = StyleSheet.create({
   planCardAlt: { backgroundColor: Colors.surface, borderRadius: 16, padding: 20, marginBottom: 12, alignItems: 'center', borderWidth: 1, borderColor: Colors.border },
   planBtnAlt: { backgroundColor: Colors.surfaceSecondary, paddingVertical: 14, paddingHorizontal: 40, borderRadius: 14, width: '100%', alignItems: 'center', borderWidth: 1, borderColor: Colors.border, minHeight: 48, justifyContent: 'center' },
   planBtnAltText: { color: Colors.text, fontSize: 16, fontFamily: 'Nunito_700Bold' },
-  freeCard: { backgroundColor: Colors.surfaceSecondary, borderRadius: 16, padding: 20, alignItems: 'center' },
+  freeCard: { backgroundColor: Colors.surfaceSecondary, borderRadius: 16, padding: 20, alignItems: 'center' as const, borderWidth: 1, borderColor: '#e2e8f0' },
+  freeFeatures: { marginTop: 12, width: '100%' as any, gap: 6 },
+  freeFeatureRow: { flexDirection: 'row' as const, alignItems: 'center' as const, gap: 8 },
+  freeFeatureText: { fontSize: 13, fontFamily: 'Nunito_400Regular', color: '#64748b' },
   mpBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 10 },
   mpBadgeText: { fontSize: 12, fontFamily: 'Nunito_600SemiBold', color: '#009ee3' },
   iosSection: { marginTop: 16, gap: 12 },

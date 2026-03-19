@@ -44,7 +44,7 @@ export default function ExamScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ mode: string; licenseType: string; category?: string }>();
   const insets = useSafeAreaInsets();
-  const { isLoggedIn, incrementFreeExams, licenseType: userLicense } = useUser();
+  const { isLoggedIn, isPremium, incrementFreeExams, licenseType: userLicense } = useUser();
   const mode = params.mode || 'daily';
   const lt = params.licenseType || userLicense || 'clase_b';
   const webTopInset = Platform.OS === 'web' ? 67 : 0;
@@ -281,7 +281,8 @@ export default function ExamScreen() {
         totalQuestions: questions.length, correctAnswers: correct,
         score, passed, timeSpent, categoryBreakdown,
       }).catch(() => {});
-    } else {
+    }
+    if (!isPremium) {
       incrementFreeExams();
     }
 
@@ -519,27 +520,47 @@ export default function ExamScreen() {
 
         {showExplanation && learningMode && (
           <Animated.View entering={FadeIn.duration(250)} style={styles.explanationBox}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                <Ionicons name="information-circle" size={18} color={Colors.primary} />
-                <Text style={styles.explanationTitle}>Explicación</Text>
-              </View>
-              <Pressable
-                onPress={handleSpeakExplanation}
-                hitSlop={10}
-                style={[styles.explanationSpeakBtn, isSpeaking && styles.explanationSpeakBtnActive]}
-              >
-                <Ionicons
-                  name={isSpeaking ? 'volume-high' : 'volume-medium-outline'}
-                  size={16}
-                  color={isSpeaking ? '#fff' : Colors.primary}
-                />
-                <Text style={[styles.explanationSpeakText, isSpeaking && { color: '#fff' }]}>
-                  {isSpeaking ? 'Detener' : 'Escuchar'}
+            {isPremium ? (
+              <>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Ionicons name="information-circle" size={18} color={Colors.primary} />
+                    <Text style={styles.explanationTitle}>Explicación</Text>
+                  </View>
+                  <Pressable
+                    onPress={handleSpeakExplanation}
+                    hitSlop={10}
+                    style={[styles.explanationSpeakBtn, isSpeaking && styles.explanationSpeakBtnActive]}
+                  >
+                    <Ionicons
+                      name={isSpeaking ? 'volume-high' : 'volume-medium-outline'}
+                      size={16}
+                      color={isSpeaking ? '#fff' : Colors.primary}
+                    />
+                    <Text style={[styles.explanationSpeakText, isSpeaking && { color: '#fff' }]}>
+                      {isSpeaking ? 'Detener' : 'Escuchar'}
+                    </Text>
+                  </Pressable>
+                </View>
+                <Text style={styles.explanationText}>{currentQuestion.explicacionTexto}</Text>
+              </>
+            ) : (
+              <View>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+                  <Ionicons name="lock-closed" size={18} color="#7c3aed" />
+                  <Text style={styles.explanationTitle}>Explicación</Text>
+                </View>
+                <Text style={{ fontSize: 14, fontFamily: 'Nunito_400Regular', color: Colors.textSecondary, marginBottom: 12 }}>
+                  Las explicaciones detalladas están disponibles en el plan Premium. Entiende el porqué de cada respuesta.
                 </Text>
-              </Pressable>
-            </View>
-            <Text style={styles.explanationText}>{currentQuestion.explicacionTexto}</Text>
+                <Pressable
+                  onPress={() => router.push('/plans')}
+                  style={{ backgroundColor: '#7c3aed', paddingVertical: 10, paddingHorizontal: 20, borderRadius: 10, alignSelf: 'center' }}
+                >
+                  <Text style={{ color: '#fff', fontSize: 14, fontFamily: 'Nunito_700Bold' }}>Desbloquear Explicaciones</Text>
+                </Pressable>
+              </View>
+            )}
           </Animated.View>
         )}
       </ScrollView>

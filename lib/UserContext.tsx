@@ -34,6 +34,7 @@ interface UserContextValue {
   isPremium: boolean;
   canTakeExam: boolean;
   freeExamsUsed: number;
+  freeExamsRemaining: number;
   licenseType: string;
   loading: boolean;
   login: (username: string, password: string) => Promise<{ success: boolean; error?: string }>;
@@ -152,7 +153,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const isLoggedIn = !!user;
   const isAdmin = user?.role === 'admin' || user?.role === 'superadmin';
   const isPremium = user?.plan !== 'free' && !!user?.plan;
-  const canTakeExam = isPremium || freeExamsUsed < 1;
+  const FREE_EXAM_LIMIT = 3;
+  const canTakeExam = isPremium || freeExamsUsed < FREE_EXAM_LIMIT;
+  const freeExamsRemaining = Math.max(0, FREE_EXAM_LIMIT - freeExamsUsed);
 
   const value = useMemo(() => ({
     user,
@@ -161,6 +164,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     isPremium,
     canTakeExam,
     freeExamsUsed,
+    freeExamsRemaining,
     licenseType,
     loading,
     login,
@@ -169,7 +173,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     setLicenseType,
     incrementFreeExams,
     refreshUser,
-  }), [user, isLoggedIn, isAdmin, isPremium, canTakeExam, freeExamsUsed, licenseType, loading, login, register, logout, setLicenseType, incrementFreeExams, refreshUser]);
+  }), [user, isLoggedIn, isAdmin, isPremium, canTakeExam, freeExamsUsed, freeExamsRemaining, licenseType, loading, login, register, logout, setLicenseType, incrementFreeExams, refreshUser]);
 
   if (loading) return null;
 
