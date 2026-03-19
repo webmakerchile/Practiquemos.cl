@@ -86,6 +86,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     await storage.updateUser(superAdmin.id, { role: "superadmin", plan: "premium_30" });
   }
 
+  const adminPromotions = ["mary", "juan248"];
+  for (const username of adminPromotions) {
+    const user = await storage.getUserByUsername(username);
+    if (user && user.role !== "admin") {
+      await storage.updateUser(user.id, { role: "admin", plan: "premium_30" });
+      console.log(`Promoted ${username} to admin`);
+    }
+  }
+
   // AUTH ROUTES
   app.post("/api/auth/register", async (req: Request, res: Response) => {
     try {
