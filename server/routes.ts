@@ -90,7 +90,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   for (const username of adminPromotions) {
     const user = await storage.getUserByUsername(username);
     if (user && user.role !== "admin") {
-      await storage.updateUser(user.id, { role: "admin", plan: "premium_30" });
+      await storage.updateUser(user.id, { role: "admin" });
       console.log(`Promoted ${username} to admin`);
     }
   }
