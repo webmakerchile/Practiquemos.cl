@@ -1,0 +1,142 @@
+
+Apps
+Tendencias
+Informes
+Negocio
+Usuarios y acceso
+Lucas Olivares Ramírez
+Diseno Web OlivaresArancibia Limitada
+Practiquemos.cl
+DistribuciónAnálisisTestFlightXcode Cloud
+App para iOS
+1.0 En preparación para el envío
+Añadir plataforma
+Información general
+Información de la app
+Revisión de apps
+Historial
+App Store
+Confianza y seguridad
+Privacidad de la app
+Accesibilidad de la app
+Valoraciones y reseñas
+Crecimiento y marketing
+Eventos dentro de la app
+Páginas del producto personalizadas
+Optimización de la página del producto
+Códigos promocionales
+Game Center
+Monetización
+Precio y disponibilidad
+Compras dentro de la app
+Suscripciones
+Destacado
+Nominaciones
+App para iOS Versión 1.0
+Guardar
+Añadir a revisión
+Los componentes y metadatos siguientes aparecerán en la página de producto de tu app cuando los usuarios la instalen, y se utilizarán para los resultados de motores de búsqueda cuando tu app sea publicada.
+
+Inglés (EE. UU.)
+?
+Vistas previas y capturas de pantalla
+?
+Añadir capturas de pantalla precisas de tu app en los dispositivos más recientes puede ayudarte a representar la experiencia de usuario de la app. Ten en cuenta que utilizaremos estas capturas de pantalla para todos los tamaños de pantalla e idiomas. Las capturas de pantalla solo son necesarias para las apps de iOS y solo se utilizarán las 3 primeras en las hojas de instalación de la app.
+
+iPhone
+iPad
+Apple Watch
+Ver todos los tamaños en “Gestor de recursos multimedia”
+
+iPhone
+Pantalla de 6,5"
+Arrastra aquí hasta 3 vistas previas de la app y hasta 10 capturas de pantalla.
+
+(1242 × 2688px, 2688 × 1242px, 1284 × 2778px o 2778 × 1284px)
+
+0 de 3 vistas previas de la app
+
+0 de 10 capturas de pantalla
+
+Seleccionar archivo
+
+Eliminar todo
+
+Texto promocional
+?
+170
+
+Descripción
+?
+4000
+
+Palabras clave
+?
+100
+
+URL de soporte
+?
+URL de marketing
+?
+Versión
+?
+1.0
+Copyright
+?
+200
+
+Archivo de cobertura de la app de encaminamiento
+?
+Ningún archivo seleccionado
+Seleccionar archivo
+
+Clip de app
+
+App para iMessage
+?
+Compilación
+
+Carga tus compilaciones con una de las distintas herramientas. Ver herramientas de carga
+
+Añadir compilación
+Game Center
+Información para el equipo de revisión de apps
+Información de inicio de sesión
+?
+Indica un nombre de usuario y una contraseña para que podamos iniciar sesión en tu app. Necesitaremos estos datos para poder completar la revisión de tu app.
+
+
+Es necesario iniciar sesión
+Nombre de usuario
+Contraseña
+Datos de contacto
+?
+Nombre
+Apellidos
+Número de teléfono
+Correo electrónico
+Notas
+?
+4000
+
+Archivo adjunto
+?
+Ningún archivo seleccionado
+Seleccionar archivo (opcional)
+Publicación de la versión en App Store
+Para ofrecer tu app en App Store puedes publicarla automáticamente una vez que haya sido aprobada por el equipo de revisión de apps. También puedes publicarla manualmente más tarde en App Store.
+
+
+Publicar esta versión manualmente
+
+Publicar esta versión automáticamente
+
+Publicar esta versión automáticamente después de que el equipo de revisión de apps la haya revisado, no antes del
+Tu fecha y hora locales
+
+31 Mar. 2026 4:00 AM
+App Store Connect
+Copyright © 2026 Apple Inc. Todos los derechos reservados.
+Términos y condiciones
+Política de privacidad
+Contacta con nosotros

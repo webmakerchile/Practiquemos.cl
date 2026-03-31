@@ -95,6 +95,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }
 
+  const reviewerAccount = await storage.getUserByUsername("reviewer");
+  if (!reviewerAccount) {
+    await storage.createUser({
+      username: "reviewer",
+      password: await hashPassword("Review2025!"),
+      fullName: "App Reviewer",
+      email: "review@practiquemos.cl",
+      role: "user",
+      plan: "premium_30",
+    });
+    console.log("Reviewer account created");
+  } else if (reviewerAccount.plan !== "premium_30") {
+    await storage.updateUser(reviewerAccount.id, { plan: "premium_30" });
+  }
+
   // AUTH ROUTES
   app.post("/api/auth/register", async (req: Request, res: Response) => {
     try {
