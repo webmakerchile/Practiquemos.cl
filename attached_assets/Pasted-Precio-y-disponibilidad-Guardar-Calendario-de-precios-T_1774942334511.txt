@@ -1,0 +1,50 @@
+Precio y disponibilidad
+Guardar
+Calendario de precios
+Todos los precios y monedas
+
+Define un precio inicial. El precio determina el precio en App Store y tus ganancias. Para vender la app, necesitas un acuerdo para apps de pago. Más información
+
+Añadir precios
+Disponibilidad de la app
+Determina dónde se podrá comprar o descargar tu app. También puedes ofrecer la app como reserva en determinados países o regiones. Más información
+
+Configurar disponibilidad
+Categoría fiscalEditar
+Categoría:Software de App Store
+Apps para iPhone y iPad en Macs con Apple silicon
+A partir de macOS Big Sur, las apps para el iPhone y el iPad que sean compatibles se podrán ofrecer en el Mac con procesador Apple silicon. Las apps funcionarán de forma nativa y utilizarán los mismos frameworks, recursos y entornos de tiempo de ejecución que en iOS y iPadOS. Más información
+
+Disponibilidad en el Mac con Apple silicon
+Selecciona la casilla de verificación a continuación si quieres que esta app esté disponible en Mac App Store. Apple seleccionará automáticamente la versión mínima de macOS necesaria para la compatibilidad, pero puedes elegir otra diferente. Más información
+
+
+Ofrecer esta app
+
+Automático (macOS 11.0)
+Apps para iPhone y iPad en el Apple Vision Pro
+Las apps compatibles para el iPhone y el iPad podrán estar disponibles para el Apple Vision Pro. Las apps se ejecutarán de forma nativa y utilizarán los mismos frameworks, recursos y entorno de ejecución que en iOS. Más información
+
+Disponibilidad en el Apple Vision Pro
+
+Hacer que esta app esté disponible en el Apple Vision Pro
+Compatibilidad
+La versión 1.0 no es compatible y no está disponible en App Store para el Apple Vision Pro
+Métodos de distribución de la app
+Elige cómo quieres que se distribuya tu app a los usuarios. Una vez que se aprueba una app, el método de distribución no puede modificarse. Más información
+
+
+Pública: todo el mundo puede encontrar la app en App Store (opción predeterminada)
+?
+
+Ofrecer un precio reducido en Apple School Manager para compras por volumen
+?
+
+Privada: la app está disponible como app personalizada en Apple Business Manager o Apple School Manager
+?
+Retirar la app de la venta
+App Store Connect
+Copyright © 2026 Apple Inc. Todos los derechos reservados.
+Términos y condiciones
+Política de privacidad
+Contacta con nosotros
