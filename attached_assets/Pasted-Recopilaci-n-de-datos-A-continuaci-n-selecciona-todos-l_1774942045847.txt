@@ -1,0 +1,220 @@
+Recopilación de datos
+A continuación, selecciona todos los tipos de datos que tú o tus socios externos recopiláis de esta app. Si tu app está disponible en App Store en este momento, asegúrate de que tus respuestas reflejen los datos recopilados solo de esa versión de la app.
+
+
+Divulgación opcional
+No es obligatorio divulgar los tipos de datos que cumplan todos estos requisitos:
+
+Los datos no se utilizan para fines de seguimiento (lo que significa que los datos no se vinculan con otros datos de terceros sobre el usuario o dispositivo para publicidad o para medir el efecto de la publicidad, ni se comparten con un broker de datos). Para obtener más información, consulta Información sobre la privacidad de las apps en App Store.
+Los datos no se utilizan para publicidad de terceros, tu propia publicidad o marketing, ni para otros fines, tal y como se especifica en Información sobre la privacidad de las apps en App Store.
+Los datos solo se recopilan raras veces, en flujos que no forman parte de la funcionalidad principal de tu app y que son optativos para el usuario.
+Dentro de la interfaz de tu app donde el usuario proporciona los datos que se recopilarán, dichos datos deben ser transparentes para el usuario en el momento de la recopilación, el nombre del usuario o el nombre de la cuenta deben mostrarse de manera destacada en el formulario de envío junto con los demás datos que se envían, y el usuario debe dar su consentimiento cada vez que proporcione los datos que se van a recopilar.
+Si el tipo de datos que tu app recopila cumple con algunos de los requisitos anteriores, pero no con todos, debe divulgarse en la sección de privacidad.
+
+Algunos ejemplos de datos que podría no ser necesario divulgar incluyen los datos recopilados en formularios de comentarios opcionales o en solicitudes de servicio al cliente que no estén relacionados con el propósito principal de la app y que cumplan con los demás requisitos mencionados anteriormente.
+
+Con fines de transparencia, los datos que se recopilen de forma continua después de una solicitud de permiso inicial, se deben divulgar.
+
+
+Divulgación sobre servicios financieros regulados
+No es obligatorio divulgar los tipos de datos que se recopilan mediante una app que facilita servicios financieros regulados, cuando los datos recopilados cumplan todos estos requisitos:
+
+La recopilación de los datos regulados se realiza de conformidad con un aviso de privacidad obligatorio y de acuerdo con las leyes o normativas sobre protección de datos o servicios financieros aplicables (p. ej., RGPD o GLBA).
+Los datos se recopilan en flujos que no forman parte de la funcionalidad principal de tu app y que son optativos para el usuario.
+El aviso de privacidad establece que los datos no se comparten con terceros no afiliados con el fin de vender otros productos y servicios.
+Esos datos no están vinculados a datos de terceros con fines publicitarios, ni se comparten con un broker de datos, excepto con fines de detección o prevención de fraude, o seguridad, o cuando se trata de una agencia de información sobre consumidores con fines de información crediticia.
+Si el tipo de datos que tu app recopila cumple con algunos de los requisitos anteriores, pero no con todos, debe divulgarse en la sección de privacidad.
+
+
+Divulgación sobre investigaciones en materia de salud
+No es obligatorio divulgar los tipos de datos que se recopilan como parte de un estudio de investigación en materia de salud, cuando los datos recopilados cumplan todos estos requisitos:
+
+La entidad que recopila los datos lo hace sujeta a un formulario de consentimiento informado, como parte de un estudio de investigación en materia de salud que ha sido revisado y aprobado por un consejo de revisión institucional o un consejo de revisión ética.
+La recopilación de los datos deberá cumplir con las “Directrices de App Store” y los datos no se podrán utilizar con fines de seguimiento, tal y como se establece en Información sobre la privacidad de las apps en App Store.
+Si el tipo de datos que tu app recopila cumple con algunos de los requisitos anteriores, pero no con todos, debe divulgarse en la sección de privacidad.
+
+
+Datos de contacto
+
+Nombre
+
+Incluye nombre o apellidos
+
+
+Dirección de correo electrónico
+
+Incluye, pero no se limita a, una dirección de correo electrónico con hash
+
+
+Número de teléfono
+
+Incluye, pero no se limita a, un número de teléfono con hash
+
+
+Dirección física
+
+Por ejemplo, domicilio, dirección física o dirección postal
+
+
+Otros datos de contacto del usuario
+
+Cualquier otra información que pueda servir para contactar con el usuario fuera de la app
+
+Salud y forma física
+
+Salud
+
+Datos de salud y médicos, como por ejemplo, los de la API de historiales clínicos, la API HealthKit o las API de trastornos del movimiento, de investigación en seres humanos relacionada con la salud, o cualquier otro dato de salud o médico proporcionado por el usuario.
+
+
+Forma física
+
+Datos de ejercicio y forma física, como la API de actividad y forma física
+
+Información financiera
+
+Información de pago
+
+Por ejemplo, forma de pago, número de tarjeta de pago o número de cuenta bancaria. Si tu app utiliza un servicio de pago, la información de pago se introduce fuera de la app, y tú como desarrollador nunca tienes acceso a ella, los datos no se consideran recopilados y esta información no debe incluirse en las respuestas.
+
+
+Información sobre crédito
+
+Por ejemplo, calificación de crédito
+
+
+Otra información financiera
+
+Por ejemplo, sueldo, ingresos, activos, deudas y demás información financiera
+
+Ubicación
+
+Ubicación exacta
+
+Información que describe la ubicación de un usuario o dispositivo con una resolución igual o superior a la latitud y longitud con tres o más decimales.
+
+
+Ubicación aproximada
+
+Información que describe la ubicación de un usuario o dispositivo con resolución inferior a la latitud y longitud con tres o más decimales, por ejemplo, servicios de ubicación aproximada.
+
+
+Datos sensibles
+
+Por ejemplo, datos étnicos o raciales, orientación sexual, información sobre embarazos o partos, discapacidades, creencias religiosas o filosóficas, afiliación a sindicatos, opinión política, información genética o datos biométricos.
+
+
+Contactos
+
+Por ejemplo, una lista de contactos del teléfono del usuario, agenda o gráfico de red social
+
+Contenido del usuario
+
+Correos electrónicos o mensajes de texto
+
+Por ejemplo línea de asunto, remitente, destinatarios y contenido del correo electrónico o del mensaje
+
+
+Fotos o vídeos
+
+Fotos o vídeos del usuario
+
+
+Datos de audio
+
+Grabaciones de voz o sonido del usuario
+
+
+Actividad en juegos
+
+Por ejemplo, contenido generado por el usuario durante el juego
+
+
+Atención al cliente
+
+Datos generados por el usuario durante una solicitud al servicio de atención al cliente
+
+
+Otro contenido del usuario
+
+Otro contenido generado por el usuario
+
+
+Historial de navegación
+
+Información sobre el contenido que ha visto el usuario que no forma parte de la app, como por ejemplo sitios web.
+
+
+Historial de búsqueda
+
+Información sobre búsquedas realizadas en la app
+
+Identificadores
+
+ID de usuario
+
+Por ejemplo, nombre en pantalla, handle, ID de cuenta, ID de usuario asignado, número de cliente, identificador probabilístico, u otro ID a nivel de cuenta o de usuario que pueda servir para identificar a una cuenta o un usuario determinados.
+
+
+ID del dispositivo
+
+Por ejemplo, identificador de publicidad del dispositivo u otro ID a nivel de dispositivo
+
+
+Compras
+
+Compras o tendencias de compra de una cuenta o persona
+
+Datos de uso
+
+Interacción con el producto
+
+Por ejemplo, lanzamientos de la app, toques, clics, información de desplazamiento, datos de escucha de música, visualizaciones de vídeo, lugar guardado en un juego, vídeo o canción, u otra información sobre la interacción del usuario con la app.
+
+
+Datos de publicidad
+
+Por ejemplo, información sobre los anuncios que ha visto el usuario
+
+
+Otros datos de uso
+
+Otros datos sobre la actividad del usuario en la app
+
+Diagnósticos
+
+Datos de errores
+
+Por ejemplo, registros de errores
+
+
+Datos de rendimiento
+
+Por ejemplo, tiempo de lanzamiento, tasa de bloqueo o consumo de energía
+
+
+Otros datos de diagnóstico
+
+Otros datos recopilados para obtener diagnósticos técnicos relacionados con la app
+
+Entorno
+
+Escaneo ambiental
+
+Por ejemplo, mallas, planos, clasificación de escenas o detección de imágenes del entorno del usuario
+
+Cuerpo
+
+Manos
+
+La estructura y los movimientos de las manos del usuario
+
+
+Cabeza
+
+Los movimientos de la cabeza del usuario
+
+
+Otros datos
+
+Cualquier otro tipo de datos no mencionado
