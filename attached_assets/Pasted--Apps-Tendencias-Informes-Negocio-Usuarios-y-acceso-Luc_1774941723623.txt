@@ -1,0 +1,231 @@
+
+Apps
+Tendencias
+Informes
+Negocio
+Usuarios y acceso
+Lucas Olivares Ramírez
+Diseno Web OlivaresArancibia Limitada
+Practiquemos.cl
+DistribuciónAnálisisTestFlightXcode Cloud
+App para iOS
+1.0 En preparación para el envío
+Añadir plataforma
+Información general
+Información de la app
+Revisión de apps
+Historial
+App Store
+Confianza y seguridad
+Privacidad de la app
+Accesibilidad de la app
+Valoraciones y reseñas
+Crecimiento y marketing
+Eventos dentro de la app
+Páginas del producto personalizadas
+Optimización de la página del producto
+Códigos promocionales
+Game Center
+Monetización
+Precio y disponibilidad
+Compras dentro de la app
+Suscripciones
+Destacado
+Nominaciones
+App para iOS Versión 1.0
+Guardar
+Añadir a revisión
+Los componentes y metadatos siguientes aparecerán en la página de producto de tu app cuando los usuarios la instalen, y se utilizarán para los resultados de motores de búsqueda cuando tu app sea publicada.
+
+Inglés (EE. UU.)
+?
+Vistas previas y capturas de pantalla
+?
+Añadir capturas de pantalla precisas de tu app en los dispositivos más recientes puede ayudarte a representar la experiencia de usuario de la app. Ten en cuenta que utilizaremos estas capturas de pantalla para todos los tamaños de pantalla e idiomas. Las capturas de pantalla solo son necesarias para las apps de iOS y solo se utilizarán las 3 primeras en las hojas de instalación de la app.
+
+iPhone
+iPad
+Apple Watch
+Ver todos los tamaños en “Gestor de recursos multimedia”
+
+iPhone
+Pantalla de 6,5"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+0 de 3 vistas previas de la app
+
+10 de 10 capturas de pantalla
+
+Seleccionar archivo
+
+Eliminar todo
+
+Texto promocional
+?
+Prepárate para tu examen de conducir en Chile. Practica con más de 1.500 preguntas oficiales, explicaciones y audio. ¡Aprueba a la primera!
+170
+
+Descripción
+?
+Practiquemos.cl es la app más completa para preparar tu examen teórico de conducir en Chile. Diseñada para todas las clases de licencia: Clase B, A2, A4, C, D y E.
+
+¿QUÉ INCLUYE?
+
+- Más de 1.500 preguntas actualizadas, incluyendo preguntas oficiales de CONASET
+- 6 tipos de licencia: Clase B (vehículos livianos), A2 (transporte de pasajeros), A4 (transporte de carga), C (motocicletas), D (maquinaria pesada) y E (tracción animal)
+- Explicaciones detalladas de cada respuesta para que entiendas el porqué
+- Audio profesional que lee las preguntas y explicaciones en voz alta
+- Manual de estudio completo basado en el Libro de la Conducción en Chile
+- Seguimiento de progreso por categoría para saber cuándo estás listo
+
+MODOS DE EXAMEN
+
+- Test Diario: examen aleatorio con preguntas oficiales
+- Test Básico: las preguntas más fáciles para empezar con confianza
+- Test Avanzado: las preguntas más difíciles para prepararte al máximo
+- Test por Contenidos: practica por tema (Ley de Tránsito, Señalización, Mecánica y más)
+- Test Inteligente: un algoritmo selecciona las preguntas que más necesitas repasar
+
+EXPERIENCIA DE APRENDIZAJE
+
+- Modo aprendizaje que muestra la respuesta correcta al instante
+- Copiloto virtual que te acompaña y motiva durante el estudio
+- Rachas de respuestas correctas con animaciones
+- Historial completo de tus exámenes anteriores
+- Guarda tus preguntas favoritas para repasarlas después
+
+PLANES
+
+- Plan Gratuito: 3 exámenes completos con explicaciones y audio para que vivas la experiencia
+- Plan Premium 10 días: acceso ilimitado a todos los modos de examen y el manual completo
+- Plan Premium 30 días: la mejor opción para prepararte con calma y aprobar seguro
+
+Practiquemos.cl fue creada por un equipo chileno comprometido con ayudar a todas las personas a obtener su licencia de conducir. Practica donde quieras, cuando quieras.
+
+¡Descárgala y empieza a practicar hoy!
+4000
+
+Palabras clave
+?
+licencia,conducir,chile,examen,teórico,conaset,practica,test,clase b,manejo
+100
+
+URL de soporte
+?
+https://practiquemos-cl.replit.app
+URL de marketing
+?
+https://practiquemos.cl
+Versión
+?
+1.0
+Copyright
+?
+2026 Practiquemos.cl
+200
+
+Archivo de cobertura de la app de encaminamiento
+?
+Ningún archivo seleccionado
+Seleccionar archivo
+
+Clip de app
+Para proporcionar metadatos para tu clip de app, primero debes cargar una compilación en App Store Connect que contenga un clip.
+
+
+App para iMessage
+?
+Solo se requieren capturas de pantalla para las apps que utilizan el framework de Mensajes. Más información.
+
+Ver todos los tamaños en “Gestor de recursos multimedia”
+
+
+iPhone
+Pantalla de 6,5"
+
+iPad
+Pantalla de 13"
+Arrastra aquí hasta 10 capturas de pantalla.
+
+(1242 × 2688px, 2688 × 1242px, 1284 × 2778px o 2778 × 1284px)
+
+0 de 10 capturas de pantalla
+
+Seleccionar archivo
+
+Eliminar todo
+
+Compilación
+Carga tus compilaciones con una de las distintas herramientas. Ver herramientas de carga
+
+Game Center
+Información para el equipo de revisión de apps
+Información de inicio de sesión
+?
+Indica un nombre de usuario y una contraseña para que podamos iniciar sesión en tu app. Necesitaremos estos datos para poder completar la revisión de tu app.
+
+
+Es necesario iniciar sesión
+reviewer
+Review2025!
+Datos de contacto
+?
+Lucas
+Olivares Ramírez
++56 9 6251 1821
+webmakerchile@gmail.com
+Notas
+?
+Practiquemos.cl es una app de preparación para el examen teórico de conducir en Chile.
+
+Para probar la app:
+1. Inicia sesión con las credenciales proporcionadas (usuario: reviewer, contraseña: Review2025!)
+2. La cuenta tiene plan Premium activo para acceso completo
+3. Selecciona cualquier tipo de licencia en el menú principal
+4. Prueba los distintos modos de examen (Test Diario, Test Básico, Test Avanzado, etc.)
+5. Activa el "Modo Aprendizaje" dentro del examen para ver explicaciones después de cada respuesta
+6. Revisa el Temario (manual de estudio) con contenido educativo completo
+7. La app requiere conexión a internet para funcionar
+
+La app ofrece un plan gratuito limitado (3 exámenes completos con explicaciones y audio) y planes premium de 10 y 30 días con acceso ilimitado. Los pagos en iOS se procesan mediante compras dentro de la app.
+3149
+
+Archivo adjunto
+?
+Ningún archivo seleccionado
+Seleccionar archivo (opcional)
+Publicación de la versión en App Store
+Para ofrecer tu app en App Store puedes publicarla automáticamente una vez que haya sido aprobada por el equipo de revisión de apps. También puedes publicarla manualmente más tarde en App Store.
+
+
+Publicar esta versión manualmente
+
+Publicar esta versión automáticamente
+
+Publicar esta versión automáticamente después de que el equipo de revisión de apps la haya revisado, no antes del
+Tu fecha y hora locales
+
+31 Mar. 2026 4:00 AM
+App Store Connect
+Copyright © 2026 Apple Inc. Todos los derechos reservados.
+Términos y condiciones
+Política de privacidad
+Contacta con nosotros
