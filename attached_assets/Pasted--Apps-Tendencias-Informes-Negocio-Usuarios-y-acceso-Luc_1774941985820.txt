@@ -1,0 +1,144 @@
+
+Apps
+Tendencias
+Informes
+Negocio
+Usuarios y acceso
+Lucas Olivares Ramírez
+Diseno Web OlivaresArancibia Limitada
+Practiquemos.cl
+DistribuciónAnálisisTestFlightXcode Cloud
+App para iOS
+1.0 En preparación para el envío
+Añadir plataforma
+Información general
+Información de la app
+Revisión de apps
+Historial
+App Store
+Confianza y seguridad
+Privacidad de la app
+Accesibilidad de la app
+Valoraciones y reseñas
+Crecimiento y marketing
+Eventos dentro de la app
+Páginas del producto personalizadas
+Optimización de la página del producto
+Códigos promocionales
+Game Center
+Monetización
+Precio y disponibilidad
+Compras dentro de la app
+Suscripciones
+Destacado
+Nominaciones
+Información de la app
+Esta información se usará para todas las plataformas de esta app. Todos los cambios se incorporarán en la nueva versión de la app.
+
+Guardar
+Información que se puede traducir
+Inglés (EE. UU.)
+?
+Nombre
+Practiquemos.cl
+15
+Subtítulo
+Examen de conducir Chile
+6
+Información general
+ID de pack
+practiquemos.cl
+
+SKU
+EX1774937783034
+
+ID de Apple
+6761405357
+
+Derechos sobre el contenido
+Configurar la información de derechos sobre el contenido
+Contrato de licencia
+Editar
+Contrato de licencia estándar de Apple
+
+Idioma principal
+Inglés (EE. UU.)
+
+Categoría
+
+Educación
+
+Productividad
+Clasificación por edades
+Clasificación por edades de la app
+
+Editar
+Ver los detalles
+Los usuarios solo verán la clasificación por edades que se aplica en su país o región en App Store.
+
+4+
+173 países o regiones
+
+Brasil
+
+All
+República de Corea
+
+URL de edades idóneas
+?
+–
+
+Sistemas operativos anteriores a la versión 26
+
+Clasificación global de 4+ con excepciones regionales
+
+Ver los detalles
+Documentación sobre encriptación de la app
+
+Especifica tu uso de la encriptación en Xcode añadiendo la clave “La app usa encriptación no exenta” al archivo Info.plist de tu app, con un valor booleano que indique si utiliza encriptación. Más información
+
+Deberás presentar documentación si tu app contiene alguno de los siguientes elementos:
+
+Algoritmos de encriptación propietarios o no aceptados como estándar por los organismos internacionales de normalización (IEEE, IETF, ITU, etc.).
+Algoritmos de encriptación estándar en lugar de, o además de, utilizar o acceder a la encriptación del sistema operativo de Apple.
+Puedes proporcionar la documentación antes de enviar una compilación.
+
+Cargar
+Permisos y reglamentos de App Store
+Reglamento de Servicios Digitales
+Este desarrollador se ha identificado como comerciante para esta app. Editar
+
+Añadir etiquetas y marcados
+Licencia de juego para Vietnam
+Si tu juego está disponible en App Store de Vietnam, puedes añadir una licencia de juego, tal y como exige la normativa vietnamita. Más información
+
+Añadir
+Dispositivos médicos regulados
+Si tu app está en las categorías Medicina o “Salud y forma física”, o si seleccionaste “frecuente” para “Información médica o de tratamiento” en el cuestionario de clasificación por edades de App Store Connect, debes indicar si funciona como un dispositivo médico regulado para poder seguir distribuyéndola en App Store en determinadas regiones. Más información
+
+Declarar dispositivo médico regulado
+
+Notificaciones del servidor de App Store
+Las notificaciones del servidor de App Store proporcionan información sobre eventos clave relacionados con tus compras dentro de la app. Para hacer pruebas de las notificaciones antes de implementarlas en producción, puedes configurar una URL del servidor de sandbox independiente. Más información
+
+URL del servidor de producción
+Configurar URL
+URL del servidor de sandbox
+Configurar URL
+Secreto compartido específico de la app
+El secreto compartido específico de la app es un código único para obtener los recibos de las suscripciones con renovación automática solamente de esa app. Puede que te interese usar un secreto compartido específico de la app si vas a transferir dicha app a otro desarrollador o si quieres mantener privado tu secreto compartido principal.
+
+Gestionar
+
+Información adicional
+Ver en App Store
+
+Editar acceso de usuarios
+
+Eliminar app
+
+App Store Connect
+Copyright © 2026 Apple Inc. Todos los derechos reservados.
+Términos y condiciones
+Política de privacidad
+Contacta con nosotros
