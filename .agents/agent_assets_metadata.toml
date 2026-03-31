@@ -240,3 +240,9 @@ id = "pBb7C5jlxd8OCYkCjNyag"
 uri = "file://screenshots/10_perfil.png"
 type = "image"
 title = "8. Mi Perfil"
+
+[[outputs]]
+id = "xc7mUgFPyXDGt5-7L_6HD"
+uri = "file://practiquemos_screenshots_appstore.zip"
+type = "unspecified"
+title = "Screenshots App Store - Practiquemos.cl (10 capturas 1284x2778px)"
