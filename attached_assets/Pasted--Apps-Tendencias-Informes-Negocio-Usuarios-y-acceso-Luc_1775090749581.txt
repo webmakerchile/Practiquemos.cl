@@ -1,0 +1,105 @@
+
+Apps
+Tendencias
+Informes
+Negocio
+Usuarios y acceso
+Lucas Olivares Ramírez
+Diseno Web OlivaresArancibia Limitada
+Practiquemos.cl
+DistribuciónAnálisisTestFlightXcode Cloud
+Compras dentro de la app
+Premium 10 Días
+Guardar
+Tu primera compra dentro de la app debe enviarse con una versión nueva de la app. Crea la compra dentro de la app y, a continuación, selecciónala en la sección “Compras dentro de la app y suscripciones” de la página de la versión, antes de enviar la versión al equipo de revisión de apps.
+
+Cuando el binario se haya cargado y hayas enviado la primera compra dentro de la app a revisión, podrás enviar otras compras dentro de la app desde la sección “Compras dentro de la app”. Más información
+
+Estado
+Lista para enviar
+
+ID del producto?
+premium_10_days
+
+Nombre de referencia?
+Premium 10 Días
+49
+
+ID de Apple?
+6761503393
+
+En familia?
+Permite que los miembros de una familia compartan esta compra dentro de la app sin tener que usar la cuenta de los demás.
+
+Activar
+
+Disponibilidad
+
+Todos los países o regiones seleccionadosEditar
+
+
+Retirar de la venta
+
+Calendario de precios
+Todos los precios y monedas
+
+A continuación tienes un resumen de tus precios actuales y de los próximos cambios.
+
+
+Precios de las compras dentro de la app
+País o región base
+Apple puede ajustar automáticamente los precios en todos los países o regiones de vez en cuando, excepto en tu país o región base, para tomar en cuenta las variaciones en los tipos impositivos o de cambio.
+
+Chile (CLP)Editar
+Precios
+Descargar
+Fechas
+Países o regiones
+Ajuste de precio
+Precio actual
+175 países o regiones
+Puede ajustarse automáticamente
+Códigos de oferta
+Puedes crear códigos de oferta para distribuir ofertas gratuitas o con descuento para las compras dentro de la app en tus apps para iOS, macOS y visionOS. Puedes generar y descargar códigos de un solo uso en App Store Connect, o definir tus propios códigos personalizados fáciles de recordar que varios clientes pueden canjear. También hay códigos de Sandbox de un solo uso disponibles para realizar pruebas. Los clientes pueden canjear los códigos a través de un enlace, en App Store o dentro de tu app si has implementado la API de StoreKit necesaria. Puedes crear códigos de oferta para un máximo de 10 ofertas activas a la vez. Más información
+
+Crear oferta
+Idiomas de App Store
+
+El nombre en pantalla en otros idiomas de tu compra dentro de la app aparecerá en App Store. La descripción en otros idiomas aparecerá en App Store si haces que tu compra dentro de la app se pueda promocionar. Más información
+
+Idiomas
+Nombre en pantalla
+Descripción
+Estado
+?
+Español (México)
+Premium 10 Días
+Acceso completo a todos los modos de examen por 10 días
+En preparación para el envío
+
+Imagen (opcional)
+Añade una imagen de 1024 x 1024 píxeles que represente mejor esta compra dentro de la app. Aparecerá en los canjes de códigos de oferta o en la página del producto de tu app si activas las promociones en App Store para esta compra dentro de la app. Más información
+
+Ningún archivo seleccionado
+Seleccionar archivo
+Categoría fiscal?Editar
+Eres responsable de seleccionar y mantener categorías fiscales precisas y todos los atributos aplicables. Esta compra dentro de la app utilizará la categoría fiscal de la app a menos que elijas otra distinta. Cambiar la categoría fiscal de esta compra dentro de la app no afectará a la categoría fiscal de la app ni de cualquier otra compra dentro de la app o suscripción. Los cambios solo afectarán a las ventas futuras. Más información
+
+Categoría
+Hacer coincidir con la app primaria
+
+Información para la revisión
+Captura de pantalla?
+Ningún archivo seleccionado
+SOURCE
+
+Notas de revisión (opcional)?
+4000
+
+Eliminar esta compra dentro de la app
+
+App Store Connect
+Copyright © 2026 Apple Inc. Todos los derechos reservados.
+Términos y condiciones
+Política de privacidad
+Contacta con nosotros
