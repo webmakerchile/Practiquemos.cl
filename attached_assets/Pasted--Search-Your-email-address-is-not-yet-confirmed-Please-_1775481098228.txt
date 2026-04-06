@@ -1,0 +1,86 @@
+​
+Search…
+
+Your email address is not yet confirmed. Please click the link in the confirmation email. 
+Practiquemos․cl
+Apps & providers
+Practiquemos․cl (App Store)
+Practiquemos․cl (App Store)
+App name
+Required
+Practiquemos․cl (App Store)
+
+App Bundle ID
+Required
+practiquemos.cl
+
+This is specified in your Xcode project
+In-app purchase key configuration
+Required
+
+Required for the most accurate pricing and country-specific data for your App Store transactions. After uploading this key, you may see updates to your historical data. When using Purchases v5.x+ (i.e., StoreKit 2), transactions will fail to be recorded without this key being set. This can result in users not accessing the purchases they are entitled to. Learn more.
+
+P8 key file from App Store Connect
+7499KBZDS6.p8
+Valid credentials
+
+Key ID
+Required
+7499KBZDS6
+
+Issuer ID
+Required
+c46e6a00-dfe0-49b3-ae90-311a98f92222
+
+App Store Connect API
+An App Store Connect API key is required if you want to import products into RevenueCat, have product price changes automatically applied, and more. Learn more.
+
+P8 key file from App Store Connect
+Required
+Drop a file here, or click to select
+File name format should follow AuthKey_XXXXXXXXXX.p8
+
+
+Apple Server to Server notification settings
+Apple Server Notification URL
+No notifications received
+https://api.revenuecat.com/v1/incoming-webhooks/apple-server-to-server-notification/eNzAMvbkftnAAKlaVkWVycysLTFDAxtd
+
+Optionally send Apple server notifications directly to RevenueCat. More information
+
+Apple Server Notification Forwarding URL
+https://yourserver.com/revenuecat/apple-server-notifications
+
+Optionally forward Apple server notifications to your server. More information
+Track new purchases from server-to-server notifications
+Allow RevenueCat to process new purchases from server-to-server notifications that are not yet in our system. This ensures all purchases are tracked, even in the case of network issues between your app and RevenueCat’s backend or if your customer was using a version of the app without the RevenueCat SDK. Learn more.
+
+
+Refund request handling
+
+
+Apple Retention Messaging API settings (Preview)
+
+
+StoreKit Subscription Offer key
+
+
+StoreKit testing framework
+
+
+Apple Small Business Program
+
+
+App-specific shared secret (Legacy)
+
+
+Public API Key
+
+REST API Identifier
+
+app22de1a3d4f
+
+Delete app
+
+Deleting this app will remove its data and access for all collaborators. This action can’t be undone.
+
