@@ -81,4 +81,4 @@ timeoutMs = 120000
 [userenv]
 
 [userenv.shared]
-EXPO_PUBLIC_RC_IOS_API_KEY = "test_LUJdtGmJbhUPMZvurSwXbopAMLx"
+EXPO_PUBLIC_RC_IOS_API_KEY = "appl_PakZWPtUfUvJWWhLAuajTEFcBVY"
