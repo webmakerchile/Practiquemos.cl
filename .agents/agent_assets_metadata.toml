@@ -257,3 +257,9 @@ id = "-jfAz2T1EGQL4mhHfhoqj"
 uri = "file://attached_assets/portada_practiquemos.png"
 type = "image"
 title = "Portada Practiquemos.cl - Presentación 1920x1080"
+
+[[outputs]]
+id = "RzsTF9nQ48pkh87BJq5sL"
+uri = "file://attached_assets/presupuesto_plataforma_autoescuelas.md"
+type = "text"
+title = "Propuesta Comercial - Plataforma de Gestión para Autoescuelas"
